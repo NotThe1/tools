@@ -3,7 +3,6 @@
 package devlopment;
 
 import java.awt.Color;
-//import java.awt.Container;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -13,11 +12,9 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-//import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,8 +24,9 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 import javax.swing.text.JTextComponent;
+import java.awt.event.MouseAdapter;
 
-public class TestRegex implements ActionListener, MouseListener {
+public class TestRegex implements ActionListener {
 
 	private JFrame frmTestRegex;
 	private JTextField txtResult;
@@ -70,16 +68,6 @@ public class TestRegex implements ActionListener, MouseListener {
 	}// Constructor
 
 	@Override
-	public void mouseClicked(MouseEvent me) {
-		int a = 0;
-		if (me.getClickCount() >= 2) {
-			if (me.getComponent().getName() == "txtLog") {
-				((JTextComponent) me.getComponent()).setText("");
-			}// inner if
-		}// outer if
-	}// mouseClicked
-
-	@Override
 	public void actionPerformed(ActionEvent ae) {
 		String actionCommand = ae.getActionCommand();
 		switch (actionCommand) {
@@ -102,7 +90,7 @@ public class TestRegex implements ActionListener, MouseListener {
 			doReplace();
 			break;
 		default:
-			// TODO btnLookingAt
+			System.err.printf("Unknown Action Command %s.%n",actionCommand);
 			break;
 		}// switch
 	}// actionPerformed
@@ -114,9 +102,7 @@ public class TestRegex implements ActionListener, MouseListener {
 		String original = txtSource.getText();
 		String replacement = txtReplacement.getText();
 		String newString = original.replaceAll(codeString, replacement);
-		txtResult.setText(newString);
-		
-		
+		txtResult.setText(newString);		
 	}
 
 	private void saveLog() {
@@ -126,10 +112,9 @@ public class TestRegex implements ActionListener, MouseListener {
 			fw.write(txtLog.getText());
 			fw.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.err.printf("unable to save the Log %s.%n");
 			e.printStackTrace();
 		}
-
 	}// saveLog
 
 	private void divideByFour() {
@@ -162,22 +147,15 @@ public class TestRegex implements ActionListener, MouseListener {
 	}// divideByFour
 	
 
-	private boolean isItMutiple(String source, int divisor) {
-		String numbers = source.substring(1, source.indexOf("]") - 1);
-		return ((Integer.getInteger(numbers) % divisor) == 0) ? true : false;
-	}
-
 	private void doFind() {
 		String logMessage0 = "Not Found";
 		txtResult.setForeground(Color.black);
 		txtResult.setText("");
 		String sourceText = txtSource.getText();
-		String patternString = txtCode.getText();
+		
 		try {
 			p = Pattern.compile(txtCode.getText());
 			m = p.matcher(txtSource.getText());
-			// p = Pattern.compile(patternString);
-			// m = p.matcher(sourceText);
 			if (m.find()) {
 				logMessage0 = foundIt("Find");
 				txtLog.append(String.format("end = %d, start = %s%n", m.end(), m.start()));
@@ -191,7 +169,6 @@ public class TestRegex implements ActionListener, MouseListener {
 			txtLog.append(errMessage);
 		}
 		postLogMessage(logMessage0);
-
 	}// doFind
 
 	private void doLookingAt() {
@@ -282,7 +259,6 @@ public class TestRegex implements ActionListener, MouseListener {
 
 		txtCode = new JTextField();
 		txtCode.setHorizontalAlignment(SwingConstants.RIGHT);
-		//txtCode.setText("\\\\[[\\\\-|\\\\+]*\\\\d+\\\\]");
 		txtCode.setFont(new Font("Courier New", Font.PLAIN, 17));
 		txtCode.setBounds(120, 67, 350, 20);
 		frmTestRegex.getContentPane().add(txtCode);
@@ -307,7 +283,6 @@ public class TestRegex implements ActionListener, MouseListener {
 		frmTestRegex.getContentPane().add(lblSourceString);
 
 		txtResult = new JTextField();
-		// txtResult.setText("123");
 		txtResult.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtResult.setFont(new Font("Courier New", Font.PLAIN, 17));
 		txtResult.setColumns(10);
@@ -324,8 +299,18 @@ public class TestRegex implements ActionListener, MouseListener {
 		frmTestRegex.getContentPane().add(scrollPane);
 
 		txtLog = new JTextArea();
+		txtLog.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent me) {
+				if (me.getClickCount() >= 2) {
+					if (me.getComponent().getName() == "txtLog") {
+						((JTextComponent) me.getComponent()).setText("");
+					}// inner if
+				}// outer if
+			}
+		});
 		txtLog.setName("txtLog");
-		txtLog.addMouseListener(this);
+		//txtLog.addMouseListener(this);
 		// txtLog.setText("Log");
 		scrollPane.setViewportView(txtLog);
 
@@ -335,7 +320,7 @@ public class TestRegex implements ActionListener, MouseListener {
 		btnMatches.setBounds(170, 250, 89, 23);
 		frmTestRegex.getContentPane().add(btnMatches);
 
-		JButton btnFind = new JButton("Find");
+		btnFind = new JButton("Find");
 		btnFind.setActionCommand("btnFind");
 		btnFind.addActionListener(this);
 		btnFind.setBounds(170, 284, 89, 23);
@@ -380,27 +365,5 @@ public class TestRegex implements ActionListener, MouseListener {
 		initApp();
 	}// initialize
 
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
+	
 }// class TestRegex
