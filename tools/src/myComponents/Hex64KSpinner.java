@@ -57,5 +57,4 @@ public class Hex64KSpinner extends JSpinner{
 		}//getDefaultFormatter
 	}//class MyFormatterFactory
 	// ----------------------------------------------------------------------------------------------------------
-
 }//class Hex64KSpinner

@@ -75,5 +75,4 @@ public class Hex64KSpinner16 extends JSpinner implements PropertyChangeListener 
 	}// class MyFormatterFactory
 
 	// ----------------------------------------------------------------------------------------------------------
-
 }// class Hex64KSpinner
