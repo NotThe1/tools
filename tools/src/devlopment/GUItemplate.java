@@ -196,9 +196,21 @@ public class GUItemplate {
 		
 		JPanel panelLeft = new JPanel();
 		splitPane1.setLeftComponent(panelLeft);
+		GridBagLayout gbl_panelLeft = new GridBagLayout();
+		gbl_panelLeft.columnWidths = new int[]{0};
+		gbl_panelLeft.rowHeights = new int[]{0};
+		gbl_panelLeft.columnWeights = new double[]{Double.MIN_VALUE};
+		gbl_panelLeft.rowWeights = new double[]{Double.MIN_VALUE};
+		panelLeft.setLayout(gbl_panelLeft);
 		
 		JPanel panelRight = new JPanel();
 		splitPane1.setRightComponent(panelRight);
+		GridBagLayout gbl_panelRight = new GridBagLayout();
+		gbl_panelRight.columnWidths = new int[]{0};
+		gbl_panelRight.rowHeights = new int[]{0};
+		gbl_panelRight.columnWeights = new double[]{Double.MIN_VALUE};
+		gbl_panelRight.rowWeights = new double[]{Double.MIN_VALUE};
+		panelRight.setLayout(gbl_panelRight);
 		splitPane1.setDividerLocation(250);
 		
 		JPanel panelStatus = new JPanel();
