@@ -2,23 +2,26 @@ package devlopment;
 
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.prefs.Preferences;
-import javax.swing.JFrame;
-import java.awt.GridBagLayout;
-import javax.swing.JMenuBar;
-import javax.swing.JToolBar;
-import java.awt.GridBagConstraints;
-import javax.swing.JPanel;
-import java.awt.Insets;
+
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JSeparator;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import javax.swing.JSplitPane;
+import javax.swing.JToolBar;
+import javax.swing.border.BevelBorder;
 
 public class GUItemplate {
 
@@ -27,6 +30,7 @@ public class GUItemplate {
 	private JButton btnTwo;
 	private JButton btnThree;
 	private JButton btnFour;
+	private JSplitPane splitPane1;
 
 	/**
 	 * Launch the application.
@@ -45,6 +49,24 @@ public class GUItemplate {
 	}// main
 
 	/* Standard Stuff */
+	
+	private void doBtnOne(){
+		
+	}//doBtnOne
+	
+	private void doBtnTwo(){
+		
+	}//doBtnTwo
+	
+	private void doBtnThree(){
+		
+	}//doBtnThree
+	
+	private void doBtnFour(){
+		
+	}//doBtnFour
+	
+	//---------------------------------------------------------
 	
 	private void doFileNew(){
 		
@@ -83,6 +105,7 @@ public class GUItemplate {
 		Point point = frmTemplate.getLocation();
 		myPrefs.putInt("LocX", point.x);
 		myPrefs.putInt("LocY", point.y);
+		myPrefs.putInt("Divider", splitPane1.getDividerLocation());
 		myPrefs = null;
 	}//appClose
 
@@ -90,6 +113,7 @@ public class GUItemplate {
 		Preferences myPrefs = Preferences.userNodeForPackage(GUItemplate.class);
 		frmTemplate.setSize(myPrefs.getInt("Width", 500), myPrefs.getInt("Height", 500));
 		frmTemplate.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
+		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
 		myPrefs = null;
 	}// appInit
 
@@ -108,7 +132,7 @@ public class GUItemplate {
 		frmTemplate.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 25, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		frmTemplate.getContentPane().setLayout(gridBagLayout);
@@ -123,24 +147,67 @@ public class GUItemplate {
 		frmTemplate.getContentPane().add(toolBar, gbc_toolBar);
 		
 		btnOne = new JButton("1");
-		btnOne.setMaximumSize(new Dimension(30, 20));
-		btnOne.setPreferredSize(new Dimension(30, 20));
+		btnOne.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				doBtnOne();
+			}
+		});
+		btnOne.setMaximumSize(new Dimension(70, 20));
+		btnOne.setPreferredSize(new Dimension(50, 20));
 		toolBar.add(btnOne);
 		
 		btnTwo = new JButton("2");
+		btnTwo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				doBtnTwo();
+			}
+		});
 		btnTwo.setPreferredSize(new Dimension(30, 20));
-		btnTwo.setMaximumSize(new Dimension(30, 20));
+		btnTwo.setMaximumSize(new Dimension(70, 20));
 		toolBar.add(btnTwo);
 		
 		btnThree = new JButton("3");
+		btnThree.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				doBtnThree();
+			}
+		});
 		btnThree.setPreferredSize(new Dimension(30, 20));
-		btnThree.setMaximumSize(new Dimension(30, 20));
+		btnThree.setMaximumSize(new Dimension(70, 20));
 		toolBar.add(btnThree);
 		
 		btnFour = new JButton("4");
+		btnFour.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				doBtnFour();
+			}
+		});
 		btnFour.setPreferredSize(new Dimension(30, 20));
-		btnFour.setMaximumSize(new Dimension(30, 20));
+		btnFour.setMaximumSize(new Dimension(70, 20));
 		toolBar.add(btnFour);
+		
+		splitPane1 = new JSplitPane();
+		GridBagConstraints gbc_splitPane1 = new GridBagConstraints();
+		gbc_splitPane1.insets = new Insets(0, 0, 5, 0);
+		gbc_splitPane1.fill = GridBagConstraints.BOTH;
+		gbc_splitPane1.gridx = 0;
+		gbc_splitPane1.gridy = 1;
+		frmTemplate.getContentPane().add(splitPane1, gbc_splitPane1);
+		
+		JPanel panelLeft = new JPanel();
+		splitPane1.setLeftComponent(panelLeft);
+		
+		JPanel panelRight = new JPanel();
+		splitPane1.setRightComponent(panelRight);
+		splitPane1.setDividerLocation(250);
+		
+		JPanel panelStatus = new JPanel();
+		panelStatus.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		GridBagConstraints gbc_panelStatus = new GridBagConstraints();
+		gbc_panelStatus.fill = GridBagConstraints.BOTH;
+		gbc_panelStatus.gridx = 0;
+		gbc_panelStatus.gridy = 2;
+		frmTemplate.getContentPane().add(panelStatus, gbc_panelStatus);
 
 		JMenuBar menuBar = new JMenuBar();
 		frmTemplate.setJMenuBar(menuBar);
