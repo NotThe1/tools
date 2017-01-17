@@ -4,13 +4,10 @@ package devlopment;
 
 import java.awt.Color;
 import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JTextField;
-
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
@@ -18,13 +15,14 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.SwingConstants;
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.text.JTextComponent;
-import java.awt.event.MouseAdapter;
 
 public class TestRegex implements ActionListener {
 
@@ -253,14 +251,14 @@ public class TestRegex implements ActionListener {
 	private void initialize() {
 		frmTestRegex = new JFrame();
 		frmTestRegex.setTitle("Test Regex");
-		frmTestRegex.setBounds(100, 100, 905, 659);
+		frmTestRegex.setBounds(100, 100, 1325, 659);
 		frmTestRegex.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmTestRegex.getContentPane().setLayout(null);
 
 		txtCode = new JTextField();
 		txtCode.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtCode.setFont(new Font("Courier New", Font.PLAIN, 17));
-		txtCode.setBounds(120, 67, 350, 20);
+		txtCode.setBounds(120, 67, 656, 20);
 		frmTestRegex.getContentPane().add(txtCode);
 		txtCode.setColumns(10);
 
@@ -269,7 +267,7 @@ public class TestRegex implements ActionListener {
 		txtSource.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtSource.setFont(new Font("Courier New", Font.PLAIN, 17));
 		txtSource.setColumns(10);
-		txtSource.setBounds(120, 100, 350, 20);
+		txtSource.setBounds(120, 100, 656, 20);
 		frmTestRegex.getContentPane().add(txtSource);
 
 		JLabel lblRegexCode = new JLabel("Regex Code");
@@ -286,7 +284,7 @@ public class TestRegex implements ActionListener {
 		txtResult.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtResult.setFont(new Font("Courier New", Font.PLAIN, 17));
 		txtResult.setColumns(10);
-		txtResult.setBounds(120, 203, 350, 20);
+		txtResult.setBounds(120, 203, 656, 20);
 		frmTestRegex.getContentPane().add(txtResult);
 
 		JLabel lblResult = new JLabel("Result");
@@ -295,7 +293,7 @@ public class TestRegex implements ActionListener {
 		frmTestRegex.getContentPane().add(lblResult);
 
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(480, 54, 398, 518);
+		scrollPane.setBounds(851, 65, 398, 518);
 		frmTestRegex.getContentPane().add(scrollPane);
 
 		txtLog = new JTextArea();
@@ -360,7 +358,7 @@ public class TestRegex implements ActionListener {
 		txtReplacement.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtReplacement.setFont(new Font("Courier New", Font.PLAIN, 17));
 		txtReplacement.setColumns(10);
-		txtReplacement.setBounds(120, 141, 350, 20);
+		txtReplacement.setBounds(120, 141, 656, 20);
 		frmTestRegex.getContentPane().add(txtReplacement);
 		initApp();
 	}// initialize
