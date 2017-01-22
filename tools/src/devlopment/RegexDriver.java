@@ -58,6 +58,8 @@ public class RegexDriver {
 	private DefaultComboBoxModel regexCodeModel = new DefaultComboBoxModel();
 	private DefaultComboBoxModel sourceStringModel = new DefaultComboBoxModel();
 
+	private Pattern patternForFind;
+	private Matcher matcherForFind;
 
 	/**
 	 * Launch the application.
@@ -118,15 +120,15 @@ public class RegexDriver {
 		String logMessage0 = "Not Found";
 		String sourceText = (String) cbSourceString.getSelectedItem();
 
+		patternForFind = Pattern.compile((String) cbRegexCode.getSelectedItem());
+		matcherForFind = patternForFind.matcher((CharSequence) cbSourceString.getSelectedItem());
 		try {
-			Pattern pattern = Pattern.compile((String) cbRegexCode.getSelectedItem());
-			Matcher matcher = pattern.matcher((CharSequence) cbSourceString.getSelectedItem());
-			if (matcher.find()) {
+			if (matcherForFind.find()) {
 				logMessage0 = foundIt("Find");
-				txtLog.append(String.format("end = %d, start = %s%n", matcher.end(), matcher.start()));
-				txtLog.append(String.format("group = |%s|%n", matcher.group()));
-				txtLog.append(String.format("Before group = |%s|%n", sourceText.substring(0, matcher.start())));
-				showGroup(matcher);
+				txtLog.append(String.format("end = %d, start = %s%n", matcherForFind.end(), matcherForFind.start()));
+				txtLog.append(String.format("group = |%s|%n", matcherForFind.group()));
+				txtLog.append(String.format("Before group = |%s|%n", sourceText.substring(0, matcherForFind.start())));
+				showGroup(matcherForFind);
 			} else {
 				noChange("<< FIND - nothing found >>");
 			} // if
@@ -192,18 +194,18 @@ public class RegexDriver {
 	}// doReplace
 
 	private void doRemoveFromList(ActionEvent actionEvent) {
-		
+
 		String source = actionEvent.getActionCommand();
 		DefaultComboBoxModel<String> model;
 		int index;
-		if (source.equals(MNU_POP_REMOVE_REGEX)){
+		if (source.equals(MNU_POP_REMOVE_REGEX)) {
 			model = (DefaultComboBoxModel<String>) cbRegexCode.getModel();
 			index = cbRegexCode.getSelectedIndex();
-		}else{
+		} else {
 			model = (DefaultComboBoxModel<String>) cbSourceString.getModel();
 			index = cbSourceString.getSelectedIndex();
-		}//if
-		
+		} // if
+
 		model.removeElementAt(index);
 	}// doRemoveFromList
 
@@ -285,38 +287,38 @@ public class RegexDriver {
 		myPrefs.putInt("LocY", point.y);
 		myPrefs.putInt("Divider", splitPane1.getDividerLocation());
 		myPrefs.put("Replacement", txtReplacement.getText());
-		
-		int regexCount =  regexCodeModel.getSize();
+
+		int regexCount = regexCodeModel.getSize();
 		myPrefs.putInt("regexCount", regexCount);
-		for (int i = 0; i < regexCount; i++){
+		for (int i = 0; i < regexCount; i++) {
 			myPrefs.put("regexCode_" + i, (String) regexCodeModel.getElementAt(i));
-		}//for
-		
-		int sourceCount =  sourceStringModel.getSize();
+		} // for
+
+		int sourceCount = sourceStringModel.getSize();
 		myPrefs.putInt("sourceCount", sourceCount);
-		for (int i = 0; i < sourceCount; i++){
+		for (int i = 0; i < sourceCount; i++) {
 			myPrefs.put("sourceString_" + i, (String) sourceStringModel.getElementAt(i));
-		}//for
-		
+		} // for
+
 		myPrefs.put("RegexCode", (String) cbRegexCode.getSelectedItem());
 		myPrefs = null;
 	}// appClose
-	
-	private void setupPopupMenus(){
+
+	private void setupPopupMenus() {
 		JPopupMenu popupMenu1 = new JPopupMenu();
 		JMenuItem removeItem1 = new JMenuItem("Remove item");
 		removeItem1.setActionCommand(MNU_POP_REMOVE_REGEX);
 		removeItem1.addActionListener(adapterForRegexDriver);
 		popupMenu1.add(removeItem1);
 		cbRegexCode.setComponentPopupMenu(popupMenu1);
-		
+
 		JPopupMenu popupMenu2 = new JPopupMenu();
 		JMenuItem removeItem2 = new JMenuItem("Remove item");
 		removeItem2.setActionCommand(MNU_POP_REMOVE_SOURCE);
 		removeItem2.addActionListener(adapterForRegexDriver);
 		popupMenu2.add(removeItem2);
-		cbSourceString.setComponentPopupMenu(popupMenu2);		
-	}//setupPopupMenus
+		cbSourceString.setComponentPopupMenu(popupMenu2);
+	}// setupPopupMenus
 
 	private void appInit() {
 		Preferences myPrefs = Preferences.userNodeForPackage(RegexDriver.class);
@@ -324,16 +326,16 @@ public class RegexDriver {
 		frmRegexDriver.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
 		txtReplacement.setText(myPrefs.get("Replacement", "<nothing>"));
-		
+
 		int regexCount = myPrefs.getInt("regexCount", 0);
-		for ( int i = 0; i < regexCount; i++){
-			 regexCodeModel.addElement(myPrefs.get("regexCode_" + i, "<<exception>>"));	 
-		}//for
-		
+		for (int i = 0; i < regexCount; i++) {
+			regexCodeModel.addElement(myPrefs.get("regexCode_" + i, "<<exception>>"));
+		} // for
+
 		int sourceCount = myPrefs.getInt("sourceCount", 0);
-		for ( int i = 0; i < sourceCount; i++){
-			sourceStringModel.addElement(myPrefs.get("sourceString_" + i, "<<exception>>"));	 
-		}//for
+		for (int i = 0; i < sourceCount; i++) {
+			sourceStringModel.addElement(myPrefs.get("sourceString_" + i, "<<exception>>"));
+		} // for
 		myPrefs = null;
 
 		doc = tpResult.getStyledDocument();
@@ -341,7 +343,7 @@ public class RegexDriver {
 
 		cbRegexCode.setModel(regexCodeModel);
 		cbSourceString.setModel(sourceStringModel);
-		
+
 		setupPopupMenus();
 	}// appInit
 
