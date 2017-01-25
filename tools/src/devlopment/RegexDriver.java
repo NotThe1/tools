@@ -117,27 +117,53 @@ public class RegexDriver {
 
 	private void doFind() {
 		cleanOutput();
-		String logMessage0 = "Not Found";
+		String logMessage = "Not Found";
 		String sourceText = (String) cbSourceString.getSelectedItem();
-
+		btnFindNext.setEnabled(false);
 		patternForFind = Pattern.compile((String) cbRegexCode.getSelectedItem());
 		matcherForFind = patternForFind.matcher((CharSequence) cbSourceString.getSelectedItem());
 		try {
 			if (matcherForFind.find()) {
-				logMessage0 = foundIt("Find");
+				logMessage = foundIt("Find");
 				txtLog.append(String.format("end = %d, start = %s%n", matcherForFind.end(), matcherForFind.start()));
 				txtLog.append(String.format("group = |%s|%n", matcherForFind.group()));
 				txtLog.append(String.format("Before group = |%s|%n", sourceText.substring(0, matcherForFind.start())));
 				showGroup(matcherForFind);
+				btnFindNext.setEnabled(true);
 			} else {
 				noChange("<< FIND - nothing found >>");
+
 			} // if
 		} catch (Exception e) {
 			String errMessage = String.format("%s - %s%n%n", "In Catch", e.getMessage());
 			txtLog.append(errMessage);
 		}
-		postLogMessage(logMessage0);
+		postLogMessage(logMessage);
 	}// doFind
+
+	private void doFindNext() {
+		String logMessage;
+		if (matcherForFind.hitEnd()) {
+			postLogMessage("Matcher has hit end");
+			noChange("<< FIND_NEXT - nothing to search >>");
+		} else {
+			int newStart = matcherForFind.end();
+			if (matcherForFind.find(newStart)) {
+				String sourceText = (String) cbSourceString.getSelectedItem();
+				logMessage = foundIt("Find");
+				txtLog.append(String.format("end = %d, start = %s%n", matcherForFind.end(), matcherForFind.start()));
+				txtLog.append(String.format("group = |%s|%n", matcherForFind.group()));
+				txtLog.append(String.format("Before group = |%s|%n", sourceText.substring(0, matcherForFind.start())));
+				showGroup(matcherForFind);
+				btnFindNext.setEnabled(true);
+			} else {
+				noChange("<< FIND - nothing found >>");
+				btnFindNext.setEnabled(false);
+			} // inner if - else
+		} // outer if - else
+			// int newStart = matcherForFind.end();
+
+	}// doFindNext
 
 	private void doLookingAt() {
 		cleanOutput();
@@ -237,10 +263,11 @@ public class RegexDriver {
 		} // try
 	}// foundItNot
 
-	private void postLogMessage(String logMessage0) {
-		String logMessage = String.format("%s \t%s - \t%s%n", logMessage0, cbSourceString.getSelectedItem(),
-				cbRegexCode.getSelectedItem());
-		txtLog.append(logMessage);
+	private void postLogMessage(String logMessage) {
+		// String msg = String.format("%s \t%s - \t%s%n", logMessage, cbSourceString.getSelectedItem(),
+		// cbRegexCode.getSelectedItem());
+		String msg = String.format("%s%n", logMessage);
+		txtLog.append(msg);
 	}// postLogMessage
 
 	private void cleanOutput() {
@@ -249,6 +276,12 @@ public class RegexDriver {
 	}// cleanOutput
 
 	private void showGroup(Matcher matcher) {
+		
+		int groupCount = matcher.groupCount();
+		postLogMessage(String.format("matcher.groupCount() = %d%n", matcher.groupCount()));
+		for (int i = 1; i <= groupCount;i++){
+			postLogMessage(String.format("group %d = \"%s\"", i,matcher.group(i)));
+		}//for
 
 		lblGroupBoundary.setText(String.format("%d - %d", matcher.start(), matcher.end()));
 		String originalString = (String) cbSourceString.getSelectedItem();
@@ -259,6 +292,7 @@ public class RegexDriver {
 		// System.out.printf("[showGroup] group: %s%n", group);
 		// System.out.printf("[showGroup] afterGroup: %s%n", afterGroup);
 		try {
+			doc.remove(0, doc.getLength());
 			doc.insertString(doc.getLength(), beforeGroup, attrBlack);
 			doc.insertString(doc.getLength(), group, attrBlue);
 			doc.insertString(doc.getLength(), afterGroup, attrBlack);
@@ -471,42 +505,54 @@ public class RegexDriver {
 		gbc_panel.gridy = 7;
 		panelLeft.add(panel, gbc_panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[] { 0, 25, 0, 25, 0, 0 };
+		gbl_panel.columnWidths = new int[] { 0, 25, 0, 0, 0, 25, 0, 0 };
 		gbl_panel.rowHeights = new int[] { 0, 0 };
-		gbl_panel.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_panel.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
 
 		JButton btnMatches = new JButton("Matches");
 		btnMatches.setToolTipText("Attempts to match the entire region against the pattern.");
 		btnMatches.addActionListener(adapterForRegexDriver);
+		btnMatches.setActionCommand(BTN_MATCHES);
+		GridBagConstraints gbc_btnMatches = new GridBagConstraints();
+		gbc_btnMatches.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnMatches.insets = new Insets(0, 0, 0, 5);
+		gbc_btnMatches.gridx = 4;
+		gbc_btnMatches.gridy = 0;
+		panel.add(btnMatches, gbc_btnMatches);
 
 		JButton btnFind = new JButton("Find");
 		btnFind.setToolTipText("Attempts to find the next subsequence of the input sequence that matches the pattern.");
 		btnFind.addActionListener(adapterForRegexDriver);
-		btnFind.setActionCommand("btnFind");
+		btnFind.setActionCommand(BTN_FIND);
 		GridBagConstraints gbc_btnFind = new GridBagConstraints();
 		gbc_btnFind.insets = new Insets(0, 0, 0, 5);
 		gbc_btnFind.fill = GridBagConstraints.BOTH;
 		gbc_btnFind.gridx = 0;
 		gbc_btnFind.gridy = 0;
 		panel.add(btnFind, gbc_btnFind);
-		btnMatches.setActionCommand("btnMatches");
-		GridBagConstraints gbc_btnMatches = new GridBagConstraints();
-		gbc_btnMatches.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnMatches.insets = new Insets(0, 0, 0, 5);
-		gbc_btnMatches.gridx = 2;
-		gbc_btnMatches.gridy = 0;
-		panel.add(btnMatches, gbc_btnMatches);
+
+		btnFindNext = new JButton("FindNext");
+		btnFindNext.setEnabled(false);
+		btnFindNext.setToolTipText(
+				"Attempts to find the next subsequence of the input sequence that matches the pattern.");
+		btnFindNext.addActionListener(adapterForRegexDriver);
+		btnFindNext.setActionCommand(BTN_FIND_NEXT);
+		GridBagConstraints gbc_btnFindNext = new GridBagConstraints();
+		gbc_btnFindNext.insets = new Insets(0, 0, 0, 5);
+		gbc_btnFindNext.gridx = 2;
+		gbc_btnFindNext.gridy = 0;
+		panel.add(btnFindNext, gbc_btnFindNext);
 
 		JButton btnLookingAt = new JButton("Looking At");
 		btnLookingAt.setToolTipText(
 				"Attempts to match the input sequence, starting at the beginning of the region, against the pattern.");
 		btnLookingAt.addActionListener(adapterForRegexDriver);
-		btnLookingAt.setActionCommand("btnLookingAt");
+		btnLookingAt.setActionCommand(BTN_LOOKING_AT);
 		GridBagConstraints gbc_btnLookingAt = new GridBagConstraints();
 		gbc_btnLookingAt.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnLookingAt.gridx = 4;
+		gbc_btnLookingAt.gridx = 6;
 		gbc_btnLookingAt.gridy = 0;
 		panel.add(btnLookingAt, gbc_btnLookingAt);
 
@@ -670,6 +716,9 @@ public class RegexDriver {
 			case BTN_FIND:
 				doFind();
 				break;
+			case BTN_FIND_NEXT:
+				doFindNext();
+				break;
 			case BTN_LOOKING_AT:
 				doLookingAt();
 				break;
@@ -719,6 +768,7 @@ public class RegexDriver {
 
 	private static final String BTN_MATCHES = "btnMatches";
 	private static final String BTN_FIND = "btnFind";
+	private static final String BTN_FIND_NEXT = "btnFindNext";
 	private static final String BTN_LOOKING_AT = "btnLookingAt";
 	private static final String BTN_SAVE_LOG = "btnSaveLog";
 	private static final String BTN_ACT_ON_RESULT = "btnActOnResult";
@@ -728,5 +778,6 @@ public class RegexDriver {
 	private static final String EMPTY_STRING = "";
 	private JTextPane tpResult;
 	private JLabel lblGroupBoundary;
+	private JButton btnFindNext;
 
 }// class GUItemplate
