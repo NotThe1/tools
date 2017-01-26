@@ -80,7 +80,29 @@ public class RegexDriver {
 	// +++++++++++++++++++++++++++++++++++++++++++++++++
 	/* placeholder for trying things out */
 	private void actOnResult() {
-
+		// private String findComment1(String workingLine){
+		String netLine = (String) cbSourceString.getSelectedItem();
+		if (!netLine.contains(";")) {
+			postLogMessage("NO COMMENTs");
+			return;
+		} // if
+		String comment = null;
+		Pattern patternForComment = Pattern.compile("('[^']*')|(;)");
+		Matcher matcherForComment = patternForComment.matcher(netLine);
+		int startCommentLoc = 0;
+		int startFindLoc = 0;
+		while (!matcherForComment.hitEnd()) {
+			if (matcherForComment.find(startFindLoc)) {
+				if ((matcherForComment.group(1) == null) && (matcherForComment.group(2) != null)) {
+					comment = netLine.substring(matcherForComment.end(2) - 1);
+					netLine = netLine.substring(0, matcherForComment.end(2) - 1);
+					break; // found the comment
+				} // if this is it
+				 startFindLoc= Math.max(matcherForComment.end(1),matcherForComment.end(2));
+			} // if any match
+		} // while
+					postLogMessage("COMMENT: <" + comment + ">");
+					postLogMessage("netLine: <" + netLine + ">");
 	}// actOnResult
 		// ---------------------------------------------------------
 
@@ -276,12 +298,12 @@ public class RegexDriver {
 	}// cleanOutput
 
 	private void showGroup(Matcher matcher) {
-		
+
 		int groupCount = matcher.groupCount();
 		postLogMessage(String.format("matcher.groupCount() = %d%n", matcher.groupCount()));
-		for (int i = 1; i <= groupCount;i++){
-			postLogMessage(String.format("group %d = \"%s\"", i,matcher.group(i)));
-		}//for
+		for (int i = 1; i <= groupCount; i++) {
+			postLogMessage(String.format("group %d = \"%s\"", i, matcher.group(i)));
+		} // for
 
 		lblGroupBoundary.setText(String.format("%d - %d", matcher.start(), matcher.end()));
 		String originalString = (String) cbSourceString.getSelectedItem();
