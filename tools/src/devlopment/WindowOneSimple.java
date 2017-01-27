@@ -72,7 +72,7 @@ public class WindowOneSimple implements ActionListener, MouseListener {
 		// ------------------------------------------------------------------------
 
 	private void appClose() {
-		Preferences myPrefs = Preferences.userNodeForPackage(RegexDriver.class);
+		Preferences myPrefs = Preferences.userNodeForPackage(WindowOneSimple.class);
 		Dimension dim = frmWindowOneSimple.getSize();
 		myPrefs.putInt("Height", dim.height);
 		myPrefs.putInt("Width", dim.width);
