@@ -130,6 +130,12 @@ public class GUItemplate {
 		frmTemplate.setTitle("GUItemplate");
 		frmTemplate.setBounds(100, 100, 450, 300);
 		frmTemplate.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmTemplate.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				appClose();
+			}
+		});
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 25, 0 };
@@ -313,12 +319,7 @@ public class GUItemplate {
 		mnuEdit.add(mnuEditPaste);
 
 		
-		frmTemplate.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				appClose();
-			}
-		});
+
 	}// initialize
 
 }// class GUItemplate
