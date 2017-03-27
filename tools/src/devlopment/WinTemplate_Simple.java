@@ -1,5 +1,6 @@
 package devlopment;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
@@ -20,10 +21,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
-import javax.swing.JToolBar;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.SoftBevelBorder;
 
-public class GUItemplate {
+public class WinTemplate_Simple {
 
 	private JFrame frmTemplate;
 	private JButton btnOne;
@@ -39,7 +40,7 @@ public class GUItemplate {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GUItemplate window = new GUItemplate();
+					WinTemplate_Simple window = new WinTemplate_Simple();
 					window.frmTemplate.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -87,18 +88,10 @@ public class GUItemplate {
 		appClose();
 		System.exit(0);
 	}//doFileExit
-	private void doEditCut(){
-		
-	}//doEditCut
-	private void doEditCopy(){
-		
-	}//doEditCopy
-	private void doEditPaste(){
-		
-	}//doEditPaste
+
 
 	private void appClose() {
-		Preferences myPrefs =  Preferences.userNodeForPackage(GUItemplate.class).node(this.getClass().getSimpleName());
+		Preferences myPrefs =  Preferences.userNodeForPackage(WinTemplate_Simple.class).node(this.getClass().getSimpleName());
 		Dimension dim = frmTemplate.getSize();
 		myPrefs.putInt("Height", dim.height);
 		myPrefs.putInt("Width", dim.width);
@@ -110,14 +103,14 @@ public class GUItemplate {
 	}//appClose
 
 	private void appInit() {
-		Preferences myPrefs =  Preferences.userNodeForPackage(GUItemplate.class).node(this.getClass().getSimpleName());
-		frmTemplate.setSize(myPrefs.getInt("Width", 500), myPrefs.getInt("Height", 500));
+		Preferences myPrefs =  Preferences.userNodeForPackage(WinTemplate_Simple.class).node(this.getClass().getSimpleName());
+		frmTemplate.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
 		frmTemplate.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
 		myPrefs = null;
 	}// appInit
 
-	public GUItemplate() {
+	public WinTemplate_Simple() {
 		initialize();
 		appInit();
 	}// Constructor
@@ -127,7 +120,7 @@ public class GUItemplate {
 	 */
 	private void initialize() {
 		frmTemplate = new JFrame();
-		frmTemplate.setTitle("GUItemplate");
+		frmTemplate.setTitle("WinTemplate_Simple");
 		frmTemplate.setBounds(100, 100, 450, 300);
 		frmTemplate.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmTemplate.addWindowListener(new WindowAdapter() {
@@ -143,54 +136,84 @@ public class GUItemplate {
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		frmTemplate.getContentPane().setLayout(gridBagLayout);
 		
-		JToolBar toolBar = new JToolBar();
-		toolBar.setFloatable(false);
-		GridBagConstraints gbc_toolBar = new GridBagConstraints();
-		gbc_toolBar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_toolBar.insets = new Insets(0, 0, 5, 0);
-		gbc_toolBar.gridx = 0;
-		gbc_toolBar.gridy = 0;
-		frmTemplate.getContentPane().add(toolBar, gbc_toolBar);
+		JPanel panelForButtons = new JPanel();
+		GridBagConstraints gbc_panelForButtons = new GridBagConstraints();
+		gbc_panelForButtons.anchor = GridBagConstraints.NORTH;
+		gbc_panelForButtons.insets = new Insets(0, 0, 5, 0);
+		gbc_panelForButtons.fill = GridBagConstraints.HORIZONTAL;
+		gbc_panelForButtons.gridx = 0;
+		gbc_panelForButtons.gridy = 0;
+		frmTemplate.getContentPane().add(panelForButtons, gbc_panelForButtons);
+		GridBagLayout gbl_panelForButtons = new GridBagLayout();
+		gbl_panelForButtons.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_panelForButtons.rowHeights = new int[]{0, 0};
+		gbl_panelForButtons.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panelForButtons.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		panelForButtons.setLayout(gbl_panelForButtons);
 		
-		btnOne = new JButton("1");
+		btnOne = new JButton("Button 1");
+		btnOne.setMinimumSize(new Dimension(100, 20));
+		GridBagConstraints gbc_btnOne = new GridBagConstraints();
+		gbc_btnOne.insets = new Insets(0, 0, 0, 5);
+		gbc_btnOne.gridx = 0;
+		gbc_btnOne.gridy = 0;
+		panelForButtons.add(btnOne, gbc_btnOne);
+		btnOne.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		btnOne.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		btnOne.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				doBtnOne();
 			}
 		});
-		btnOne.setMaximumSize(new Dimension(70, 20));
-		btnOne.setPreferredSize(new Dimension(50, 20));
-		toolBar.add(btnOne);
+		btnOne.setMaximumSize(new Dimension(0, 0));
+		btnOne.setPreferredSize(new Dimension(100, 20));
 		
-		btnTwo = new JButton("2");
+		btnTwo = new JButton("Button 2");
+		btnTwo.setMinimumSize(new Dimension(100, 20));
+		GridBagConstraints gbc_btnTwo = new GridBagConstraints();
+		gbc_btnTwo.insets = new Insets(0, 0, 0, 5);
+		gbc_btnTwo.gridx = 1;
+		gbc_btnTwo.gridy = 0;
+		panelForButtons.add(btnTwo, gbc_btnTwo);
+		btnTwo.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		btnTwo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				doBtnTwo();
 			}
 		});
-		btnTwo.setPreferredSize(new Dimension(30, 20));
-		btnTwo.setMaximumSize(new Dimension(70, 20));
-		toolBar.add(btnTwo);
+		btnTwo.setPreferredSize(new Dimension(100, 20));
+		btnTwo.setMaximumSize(new Dimension(0, 0));
 		
-		btnThree = new JButton("3");
+		btnThree = new JButton("Button 3");
+		btnThree.setMinimumSize(new Dimension(100, 20));
+		GridBagConstraints gbc_btnThree = new GridBagConstraints();
+		gbc_btnThree.insets = new Insets(0, 0, 0, 5);
+		gbc_btnThree.gridx = 3;
+		gbc_btnThree.gridy = 0;
+		panelForButtons.add(btnThree, gbc_btnThree);
+		btnThree.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		btnThree.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				doBtnThree();
 			}
 		});
-		btnThree.setPreferredSize(new Dimension(30, 20));
-		btnThree.setMaximumSize(new Dimension(70, 20));
-		toolBar.add(btnThree);
+		btnThree.setPreferredSize(new Dimension(100, 20));
+		btnThree.setMaximumSize(new Dimension(0, 0));
 		
-		btnFour = new JButton("4");
+		btnFour = new JButton("Button 4");
+		btnFour.setMinimumSize(new Dimension(100, 20));
+		GridBagConstraints gbc_btnFour = new GridBagConstraints();
+		gbc_btnFour.gridx = 4;
+		gbc_btnFour.gridy = 0;
+		panelForButtons.add(btnFour, gbc_btnFour);
+		btnFour.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		btnFour.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				doBtnFour();
 			}
 		});
-		btnFour.setPreferredSize(new Dimension(30, 20));
-		btnFour.setMaximumSize(new Dimension(70, 20));
-		toolBar.add(btnFour);
+		btnFour.setPreferredSize(new Dimension(100, 20));
+		btnFour.setMaximumSize(new Dimension(0, 0));
 		
 		splitPane1 = new JSplitPane();
 		GridBagConstraints gbc_splitPane1 = new GridBagConstraints();
@@ -290,33 +313,6 @@ public class GUItemplate {
 			}
 		});
 		mnuFile.add(mnuFileExit);
-		
-		JMenu mnuEdit = new JMenu("Edit");
-		menuBar.add(mnuEdit);
-		
-		JMenuItem mnuEditCut = new JMenuItem("Cut");
-		mnuEditCut.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				doEditCut();
-			}
-		});
-		mnuEdit.add(mnuEditCut);
-		
-		JMenuItem mnuEditCopy = new JMenuItem("Copy");
-		mnuEditCopy.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				doEditCopy();
-			}
-		});
-		mnuEdit.add(mnuEditCopy);
-		
-		JMenuItem mnuEditPaste = new JMenuItem("Paste");
-		mnuEditPaste.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				doEditPaste();
-			}
-		});
-		mnuEdit.add(mnuEditPaste);
 
 		
 

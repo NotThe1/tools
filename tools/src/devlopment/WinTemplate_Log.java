@@ -8,22 +8,28 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
-import javax.swing.JToolBar;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
+import javax.swing.text.JTextComponent;
 
-public class GUItemplate {
+public class WinTemplate_Log {
 
 	private JFrame frmTemplate;
 	private JButton btnOne;
@@ -31,6 +37,8 @@ public class GUItemplate {
 	private JButton btnThree;
 	private JButton btnFour;
 	private JSplitPane splitPane1;
+	private JTextArea txtLog;
+	private JLabel lblLog;
 
 	/**
 	 * Launch the application.
@@ -39,7 +47,7 @@ public class GUItemplate {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GUItemplate window = new GUItemplate();
+					WinTemplate_Log window = new WinTemplate_Log();
 					window.frmTemplate.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -87,18 +95,10 @@ public class GUItemplate {
 		appClose();
 		System.exit(0);
 	}//doFileExit
-	private void doEditCut(){
-		
-	}//doEditCut
-	private void doEditCopy(){
-		
-	}//doEditCopy
-	private void doEditPaste(){
-		
-	}//doEditPaste
+
 
 	private void appClose() {
-		Preferences myPrefs =  Preferences.userNodeForPackage(GUItemplate.class).node(this.getClass().getSimpleName());
+		Preferences myPrefs =  Preferences.userNodeForPackage(WinTemplate_Log.class).node(this.getClass().getSimpleName());
 		Dimension dim = frmTemplate.getSize();
 		myPrefs.putInt("Height", dim.height);
 		myPrefs.putInt("Width", dim.width);
@@ -107,17 +107,20 @@ public class GUItemplate {
 		myPrefs.putInt("LocY", point.y);
 		myPrefs.putInt("Divider", splitPane1.getDividerLocation());
 		myPrefs = null;
+		
 	}//appClose
 
 	private void appInit() {
-		Preferences myPrefs =  Preferences.userNodeForPackage(GUItemplate.class).node(this.getClass().getSimpleName());
-		frmTemplate.setSize(myPrefs.getInt("Width", 500), myPrefs.getInt("Height", 500));
+		Preferences myPrefs =  Preferences.userNodeForPackage(WinTemplate_Log.class).node(this.getClass().getSimpleName());
+		frmTemplate.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
 		frmTemplate.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
+		txtLog.append(String.format("myPrefs.absolutePath() - %s%n",myPrefs.absolutePath()));
 		myPrefs = null;
+
 	}// appInit
 
-	public GUItemplate() {
+	public WinTemplate_Log() {
 		initialize();
 		appInit();
 	}// Constructor
@@ -127,7 +130,7 @@ public class GUItemplate {
 	 */
 	private void initialize() {
 		frmTemplate = new JFrame();
-		frmTemplate.setTitle("GUItemplate");
+		frmTemplate.setTitle("WinTemplate_Log");
 		frmTemplate.setBounds(100, 100, 450, 300);
 		frmTemplate.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmTemplate.addWindowListener(new WindowAdapter() {
@@ -143,54 +146,79 @@ public class GUItemplate {
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		frmTemplate.getContentPane().setLayout(gridBagLayout);
 		
-		JToolBar toolBar = new JToolBar();
-		toolBar.setFloatable(false);
-		GridBagConstraints gbc_toolBar = new GridBagConstraints();
-		gbc_toolBar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_toolBar.insets = new Insets(0, 0, 5, 0);
-		gbc_toolBar.gridx = 0;
-		gbc_toolBar.gridy = 0;
-		frmTemplate.getContentPane().add(toolBar, gbc_toolBar);
+		JPanel panel = new JPanel();
+		GridBagConstraints gbc_panel = new GridBagConstraints();
+		gbc_panel.insets = new Insets(0, 0, 5, 0);
+		gbc_panel.fill = GridBagConstraints.BOTH;
+		gbc_panel.gridx = 0;
+		gbc_panel.gridy = 0;
+		frmTemplate.getContentPane().add(panel, gbc_panel);
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[]{0, 0, 0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0};
+		gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		panel.setLayout(gbl_panel);
 		
-		btnOne = new JButton("1");
+		btnOne = new JButton("Button 1");
+		btnOne.setMinimumSize(new Dimension(100, 20));
+		GridBagConstraints gbc_btnOne = new GridBagConstraints();
+		gbc_btnOne.insets = new Insets(0, 0, 0, 5);
+		gbc_btnOne.gridx = 0;
+		gbc_btnOne.gridy = 0;
+		panel.add(btnOne, gbc_btnOne);
 		btnOne.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				doBtnOne();
 			}
 		});
-		btnOne.setMaximumSize(new Dimension(70, 20));
-		btnOne.setPreferredSize(new Dimension(50, 20));
-		toolBar.add(btnOne);
+		btnOne.setMaximumSize(new Dimension(0, 0));
+		btnOne.setPreferredSize(new Dimension(100, 20));
 		
-		btnTwo = new JButton("2");
+		btnTwo = new JButton("Button 2");
+		btnTwo.setMinimumSize(new Dimension(100, 20));
+		GridBagConstraints gbc_btnTwo = new GridBagConstraints();
+		gbc_btnTwo.insets = new Insets(0, 0, 0, 5);
+		gbc_btnTwo.gridx = 1;
+		gbc_btnTwo.gridy = 0;
+		panel.add(btnTwo, gbc_btnTwo);
 		btnTwo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				doBtnTwo();
 			}
 		});
-		btnTwo.setPreferredSize(new Dimension(30, 20));
-		btnTwo.setMaximumSize(new Dimension(70, 20));
-		toolBar.add(btnTwo);
+		btnTwo.setPreferredSize(new Dimension(100, 20));
+		btnTwo.setMaximumSize(new Dimension(0, 0));
 		
-		btnThree = new JButton("3");
+		btnThree = new JButton("Button 3");
+		btnThree.setMinimumSize(new Dimension(100, 20));
+		GridBagConstraints gbc_btnThree = new GridBagConstraints();
+		gbc_btnThree.insets = new Insets(0, 0, 0, 5);
+		gbc_btnThree.gridx = 2;
+		gbc_btnThree.gridy = 0;
+		panel.add(btnThree, gbc_btnThree);
 		btnThree.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				doBtnThree();
 			}
 		});
-		btnThree.setPreferredSize(new Dimension(30, 20));
-		btnThree.setMaximumSize(new Dimension(70, 20));
-		toolBar.add(btnThree);
+		btnThree.setPreferredSize(new Dimension(100, 20));
+		btnThree.setMaximumSize(new Dimension(0, 0));
 		
-		btnFour = new JButton("4");
+		btnFour = new JButton("Button 4");
+		btnFour.setMinimumSize(new Dimension(100, 20));
+		GridBagConstraints gbc_btnFour = new GridBagConstraints();
+		gbc_btnFour.anchor = GridBagConstraints.NORTH;
+		gbc_btnFour.gridx = 3;
+		gbc_btnFour.gridy = 0;
+		panel.add(btnFour, gbc_btnFour);
 		btnFour.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				doBtnFour();
 			}
 		});
-		btnFour.setPreferredSize(new Dimension(30, 20));
-		btnFour.setMaximumSize(new Dimension(70, 20));
-		toolBar.add(btnFour);
+		btnFour.setPreferredSize(new Dimension(100, 20));
+		btnFour.setMaximumSize(new Dimension(0, 0));
 		
 		splitPane1 = new JSplitPane();
 		GridBagConstraints gbc_splitPane1 = new GridBagConstraints();
@@ -212,11 +240,34 @@ public class GUItemplate {
 		JPanel panelRight = new JPanel();
 		splitPane1.setRightComponent(panelRight);
 		GridBagLayout gbl_panelRight = new GridBagLayout();
-		gbl_panelRight.columnWidths = new int[]{0};
-		gbl_panelRight.rowHeights = new int[]{0};
-		gbl_panelRight.columnWeights = new double[]{Double.MIN_VALUE};
-		gbl_panelRight.rowWeights = new double[]{Double.MIN_VALUE};
+		gbl_panelRight.columnWidths = new int[]{0, 0};
+		gbl_panelRight.rowHeights = new int[]{0, 0};
+		gbl_panelRight.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_panelRight.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		panelRight.setLayout(gbl_panelRight);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane.gridx = 0;
+		gbc_scrollPane.gridy = 0;
+		panelRight.add(scrollPane, gbc_scrollPane);
+		
+		txtLog = new JTextArea();
+		txtLog.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if (arg0.getClickCount()>1){
+					((JTextComponent) arg0.getComponent()).setText("");
+					txtLog.setText("");
+				}//if
+			}//mouseClicked
+		});
+		scrollPane.setViewportView(txtLog);
+		
+		lblLog = new JLabel("New label");
+		lblLog.setHorizontalAlignment(SwingConstants.CENTER);
+		scrollPane.setColumnHeaderView(lblLog);
 		splitPane1.setDividerLocation(250);
 		
 		JPanel panelStatus = new JPanel();
@@ -290,33 +341,6 @@ public class GUItemplate {
 			}
 		});
 		mnuFile.add(mnuFileExit);
-		
-		JMenu mnuEdit = new JMenu("Edit");
-		menuBar.add(mnuEdit);
-		
-		JMenuItem mnuEditCut = new JMenuItem("Cut");
-		mnuEditCut.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				doEditCut();
-			}
-		});
-		mnuEdit.add(mnuEditCut);
-		
-		JMenuItem mnuEditCopy = new JMenuItem("Copy");
-		mnuEditCopy.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				doEditCopy();
-			}
-		});
-		mnuEdit.add(mnuEditCopy);
-		
-		JMenuItem mnuEditPaste = new JMenuItem("Paste");
-		mnuEditPaste.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				doEditPaste();
-			}
-		});
-		mnuEdit.add(mnuEditPaste);
 
 		
 

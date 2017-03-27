@@ -334,7 +334,7 @@ public class RegexDriver {
 
 	// ........................................................................
 	private void appClose() {
-		Preferences myPrefs = Preferences.userNodeForPackage(RegexDriver.class);
+		Preferences myPrefs =  Preferences.userNodeForPackage(RegexDriver.class).node(this.getClass().getSimpleName());
 		Dimension dim = frmRegexDriver.getSize();
 		myPrefs.putInt("Height", dim.height);
 		myPrefs.putInt("Width", dim.width);
@@ -377,7 +377,7 @@ public class RegexDriver {
 	}// setupPopupMenus
 
 	private void appInit() {
-		Preferences myPrefs = Preferences.userNodeForPackage(RegexDriver.class);
+		Preferences myPrefs =  Preferences.userNodeForPackage(RegexDriver.class).node(this.getClass().getSimpleName());
 		frmRegexDriver.setSize(1203, 724);
 		frmRegexDriver.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
