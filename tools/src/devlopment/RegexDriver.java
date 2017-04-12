@@ -55,8 +55,8 @@ public class RegexDriver {
 	private SimpleAttributeSet attrRed = new SimpleAttributeSet();
 	private SimpleAttributeSet attrBlue = new SimpleAttributeSet();
 
-	private DefaultComboBoxModel regexCodeModel = new DefaultComboBoxModel();
-	private DefaultComboBoxModel sourceStringModel = new DefaultComboBoxModel();
+	private DefaultComboBoxModel<String> regexCodeModel = new DefaultComboBoxModel<String>();
+	private DefaultComboBoxModel<String> sourceStringModel = new DefaultComboBoxModel<String>();
 
 	private Pattern patternForFind;
 	private Matcher matcherForFind;
@@ -89,7 +89,7 @@ public class RegexDriver {
 		String comment = null;
 		Pattern patternForComment = Pattern.compile("('[^']*')|(;)");
 		Matcher matcherForComment = patternForComment.matcher(netLine);
-		int startCommentLoc = 0;
+		// int startCommentLoc = 0;
 		int startFindLoc = 0;
 		while (!matcherForComment.hitEnd()) {
 			if (matcherForComment.find(startFindLoc)) {
@@ -98,11 +98,11 @@ public class RegexDriver {
 					netLine = netLine.substring(0, matcherForComment.end(2) - 1);
 					break; // found the comment
 				} // if this is it
-				 startFindLoc= Math.max(matcherForComment.end(1),matcherForComment.end(2));
+				startFindLoc = Math.max(matcherForComment.end(1), matcherForComment.end(2));
 			} // if any match
 		} // while
-					postLogMessage("COMMENT: <" + comment + ">");
-					postLogMessage("netLine: <" + netLine + ">");
+		postLogMessage("COMMENT: <" + comment + ">");
+		postLogMessage("netLine: <" + netLine + ">");
 	}// actOnResult
 		// ---------------------------------------------------------
 
@@ -164,7 +164,7 @@ public class RegexDriver {
 	}// doFind
 
 	private void doFindNext() {
-		String logMessage;
+		// String logMessage;
 		if (matcherForFind.hitEnd()) {
 			postLogMessage("Matcher has hit end");
 			noChange("<< FIND_NEXT - nothing to search >>");
@@ -172,7 +172,7 @@ public class RegexDriver {
 			int newStart = matcherForFind.end();
 			if (matcherForFind.find(newStart)) {
 				String sourceText = (String) cbSourceString.getSelectedItem();
-				logMessage = foundIt("Find");
+				// String logMessage = foundIt("Find");
 				txtLog.append(String.format("end = %d, start = %s%n", matcherForFind.end(), matcherForFind.start()));
 				txtLog.append(String.format("group = |%s|%n", matcherForFind.group()));
 				txtLog.append(String.format("Before group = |%s|%n", sourceText.substring(0, matcherForFind.start())));
@@ -235,7 +235,6 @@ public class RegexDriver {
 		try {
 			doc.insertString(doc.getLength(), msg, attributeColor);
 		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} // try
 
@@ -280,7 +279,6 @@ public class RegexDriver {
 			doc.remove(0, doc.getLength());
 			doc.insertString(0, message, attrRed);
 		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} // try
 	}// foundItNot
@@ -319,7 +317,6 @@ public class RegexDriver {
 			doc.insertString(doc.getLength(), group, attrBlue);
 			doc.insertString(doc.getLength(), afterGroup, attrBlack);
 		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -334,7 +331,7 @@ public class RegexDriver {
 
 	// ........................................................................
 	private void appClose() {
-		Preferences myPrefs =  Preferences.userNodeForPackage(RegexDriver.class).node(this.getClass().getSimpleName());
+		Preferences myPrefs = Preferences.userNodeForPackage(RegexDriver.class).node(this.getClass().getSimpleName());
 		Dimension dim = frmRegexDriver.getSize();
 		myPrefs.putInt("Height", dim.height);
 		myPrefs.putInt("Width", dim.width);
@@ -377,7 +374,7 @@ public class RegexDriver {
 	}// setupPopupMenus
 
 	private void appInit() {
-		Preferences myPrefs =  Preferences.userNodeForPackage(RegexDriver.class).node(this.getClass().getSimpleName());
+		Preferences myPrefs = Preferences.userNodeForPackage(RegexDriver.class).node(this.getClass().getSimpleName());
 		frmRegexDriver.setSize(1203, 724);
 		frmRegexDriver.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
@@ -401,6 +398,9 @@ public class RegexDriver {
 		cbSourceString.setModel(sourceStringModel);
 
 		setupPopupMenus();
+		String instructions = String.format(
+				"Double click on this log pane to clear contents.%n Right Click on either Regex Code or Source String to bring up option to delete the currently displayed value%n");
+		txtLog.setText(instructions);
 	}// appInit
 
 	public RegexDriver() {
@@ -447,7 +447,7 @@ public class RegexDriver {
 		gbc_lblRegexCode.gridy = 1;
 		panelLeft.add(lblRegexCode, gbc_lblRegexCode);
 
-		cbRegexCode = new JComboBox();
+		cbRegexCode = new JComboBox<String>();
 		cbRegexCode.addItemListener(adapterForRegexDriver);
 		cbRegexCode.setName(CB_REGEX_CODE);
 		cbRegexCode.setEditable(true);
@@ -467,7 +467,7 @@ public class RegexDriver {
 		gbc_lblSourceString.gridy = 3;
 		panelLeft.add(lblSourceString, gbc_lblSourceString);
 
-		cbSourceString = new JComboBox();
+		cbSourceString = new JComboBox<String>();
 		cbSourceString.addItemListener(adapterForRegexDriver);
 		cbSourceString.setName(CB_SOURCE_STRING);
 		cbSourceString.setEditable(true);
@@ -721,8 +721,8 @@ public class RegexDriver {
 	private JFrame frmRegexDriver;
 	private JSplitPane splitPane1;
 	private JTextArea txtLog;
-	private JComboBox cbRegexCode;
-	private JComboBox cbSourceString;
+	private JComboBox<String> cbRegexCode;
+	private JComboBox<String> cbSourceString;
 	private JTextField txtReplacement;
 
 	public class AdapterForRegexDriver implements ActionListener, ItemListener {
@@ -771,6 +771,7 @@ public class RegexDriver {
 
 		@Override
 		public void itemStateChanged(ItemEvent itemEvent) {
+			@SuppressWarnings("unchecked")
 			JComboBox<String> source = (JComboBox<String>) itemEvent.getSource();
 			DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) source.getModel();
 			Object object = itemEvent.getItem();
@@ -797,7 +798,7 @@ public class RegexDriver {
 	private static final String BTN_REPLACE_FIRST = "btnReplaceFirst";
 	private static final String BTN_REPLACE_ALL = "btnReplaceAll";
 
-	private static final String EMPTY_STRING = "";
+	// private static final String EMPTY_STRING = "";
 	private JTextPane tpResult;
 	private JLabel lblGroupBoundary;
 	private JButton btnFindNext;
