@@ -330,6 +330,24 @@ public class RegexDriver {
 	}// setAttributes
 
 	// ........................................................................
+
+
+	private void setupPopupMenus() {
+		JPopupMenu popupMenu1 = new JPopupMenu();
+		JMenuItem removeItem1 = new JMenuItem("Remove item");
+		removeItem1.setActionCommand(MNU_POP_REMOVE_REGEX);
+		removeItem1.addActionListener(adapterForRegexDriver);
+		popupMenu1.add(removeItem1);
+		cbRegexCode.setComponentPopupMenu(popupMenu1);
+
+		JPopupMenu popupMenu2 = new JPopupMenu();
+		JMenuItem removeItem2 = new JMenuItem("Remove item");
+		removeItem2.setActionCommand(MNU_POP_REMOVE_SOURCE);
+		removeItem2.addActionListener(adapterForRegexDriver);
+		popupMenu2.add(removeItem2);
+		cbSourceString.setComponentPopupMenu(popupMenu2);
+	}// setupPopupMenus
+	
 	private void appClose() {
 		Preferences myPrefs = Preferences.userNodeForPackage(RegexDriver.class).node(this.getClass().getSimpleName());
 		Dimension dim = frmRegexDriver.getSize();
@@ -353,25 +371,10 @@ public class RegexDriver {
 			myPrefs.put("sourceString_" + i, (String) sourceStringModel.getElementAt(i));
 		} // for
 
-		myPrefs.put("RegexCode", (String) cbRegexCode.getSelectedItem());
+//		myPrefs.put("RegexCode", (String) cbRegexCode.getSelectedItem());
 		myPrefs = null;
+		System.exit(0);
 	}// appClose
-
-	private void setupPopupMenus() {
-		JPopupMenu popupMenu1 = new JPopupMenu();
-		JMenuItem removeItem1 = new JMenuItem("Remove item");
-		removeItem1.setActionCommand(MNU_POP_REMOVE_REGEX);
-		removeItem1.addActionListener(adapterForRegexDriver);
-		popupMenu1.add(removeItem1);
-		cbRegexCode.setComponentPopupMenu(popupMenu1);
-
-		JPopupMenu popupMenu2 = new JPopupMenu();
-		JMenuItem removeItem2 = new JMenuItem("Remove item");
-		removeItem2.setActionCommand(MNU_POP_REMOVE_SOURCE);
-		removeItem2.addActionListener(adapterForRegexDriver);
-		popupMenu2.add(removeItem2);
-		cbSourceString.setComponentPopupMenu(popupMenu2);
-	}// setupPopupMenus
 
 	private void appInit() {
 		Preferences myPrefs = Preferences.userNodeForPackage(RegexDriver.class).node(this.getClass().getSimpleName());
