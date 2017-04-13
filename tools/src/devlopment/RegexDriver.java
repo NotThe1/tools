@@ -378,7 +378,10 @@ public class RegexDriver {
 
 	private void appInit() {
 		Preferences myPrefs = Preferences.userNodeForPackage(RegexDriver.class).node(this.getClass().getSimpleName());
-		frmRegexDriver.setSize(1203, 724);
+		//frmRegexDriver.setSize(myPrefs.getInt("Width", 1203), myPrefs.getInt("Height", 724));
+		frmRegexDriver.setSize(myPrefs.getInt("Width", 800), myPrefs.getInt("Height", 700));
+
+		
 		frmRegexDriver.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
 		txtReplacement.setText(myPrefs.get("Replacement", "<nothing>"));
@@ -403,7 +406,7 @@ public class RegexDriver {
 		setupPopupMenus();
 		String instructions = String.format(
 				"Double click on this log pane to clear contents.%n Right Click on either Regex Code or Source String to bring up option to delete the currently displayed value%n");
-		txtLog.setText(instructions);
+		txtLog.setText("Double click on this log pane to clear contents.\r\n\r\nRight Click on either Regex Code\r\nor Source String to bring up option \r\nto delete the currently displayed value\r\n");
 	}// appInit
 
 	public RegexDriver() {
@@ -416,8 +419,10 @@ public class RegexDriver {
 	 */
 	private void initialize() {
 		frmRegexDriver = new JFrame();
+		//frmRegexDriver.setIconImage(Toolkit.getDefaultToolkit().getImage(RegexDriver.class.getResource("/Regex.jpg")));
+
 		frmRegexDriver.setTitle("Regex Driver");
-		frmRegexDriver.setBounds(100, 100, 450, 300);
+		//frmRegexDriver.setBounds(100, 100, 450, 300);
 		frmRegexDriver.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0 };
@@ -456,9 +461,9 @@ public class RegexDriver {
 		cbRegexCode.setEditable(true);
 		cbRegexCode.setFont(new Font("Courier New", Font.PLAIN, 18));
 		GridBagConstraints gbc_cbRegexCode = new GridBagConstraints();
+		gbc_cbRegexCode.fill = GridBagConstraints.HORIZONTAL;
 		gbc_cbRegexCode.anchor = GridBagConstraints.NORTH;
 		gbc_cbRegexCode.insets = new Insets(0, 0, 5, 0);
-		gbc_cbRegexCode.fill = GridBagConstraints.HORIZONTAL;
 		gbc_cbRegexCode.gridx = 1;
 		gbc_cbRegexCode.gridy = 1;
 		panelLeft.add(cbRegexCode, gbc_cbRegexCode);
@@ -476,8 +481,8 @@ public class RegexDriver {
 		cbSourceString.setEditable(true);
 		cbSourceString.setFont(new Font("Courier New", Font.PLAIN, 18));
 		GridBagConstraints gbc_cbSourceString = new GridBagConstraints();
-		gbc_cbSourceString.insets = new Insets(0, 0, 5, 0);
 		gbc_cbSourceString.fill = GridBagConstraints.HORIZONTAL;
+		gbc_cbSourceString.insets = new Insets(0, 0, 5, 0);
 		gbc_cbSourceString.gridx = 1;
 		gbc_cbSourceString.gridy = 3;
 		panelLeft.add(cbSourceString, gbc_cbSourceString);
@@ -637,9 +642,8 @@ public class RegexDriver {
 
 		JPanel panel_1 = new JPanel();
 		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.anchor = GridBagConstraints.NORTH;
+		gbc_panel_1.anchor = GridBagConstraints.NORTHWEST;
 		gbc_panel_1.insets = new Insets(0, 0, 5, 0);
-		gbc_panel_1.fill = GridBagConstraints.HORIZONTAL;
 		gbc_panel_1.gridx = 1;
 		gbc_panel_1.gridy = 12;
 		panelLeft.add(panel_1, gbc_panel_1);
@@ -700,7 +704,7 @@ public class RegexDriver {
 		});
 		txtLog.setName("txtLog");
 		scrollPane.setViewportView(txtLog);
-		splitPane1.setDividerLocation(250);
+		splitPane1.setDividerLocation(150);
 
 		JPanel panelStatus = new JPanel();
 		panelStatus.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
