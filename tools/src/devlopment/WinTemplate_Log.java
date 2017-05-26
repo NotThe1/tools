@@ -31,15 +31,6 @@ import javax.swing.text.JTextComponent;
 
 public class WinTemplate_Log {
 
-	private JFrame frmTemplate;
-	private JButton btnOne;
-	private JButton btnTwo;
-	private JButton btnThree;
-	private JButton btnFour;
-	private JSplitPane splitPane1;
-	private JTextArea txtLog;
-	private JLabel lblLog;
-
 	/**
 	 * Launch the application.
 	 */
@@ -345,5 +336,16 @@ public class WinTemplate_Log {
 		
 
 	}// initialize
+	
+	private JFrame frmTemplate;
+	private JButton btnOne;
+	private JButton btnTwo;
+	private JButton btnThree;
+	private JButton btnFour;
+	private JSplitPane splitPane1;
+	private JTextArea txtLog;
+	private JLabel lblLog;
+
+
 
 }// class GUItemplate
