@@ -77,10 +77,9 @@ public class AppLogger {
 		addMeta(attrSilver,LocalDateTime.now().toString());
 	}//addTimeStamp
 	
-	public void addTimeStamp(String... message){
-		addMeta(attrSilver,message);
-		addMeta(attrSilver,LocalDateTime.now().toString());
-	}//addTimeStamp
+	public void addTimeStamp(String message) {
+		insertListing(message + " " + LocalDateTime.now().toString() + System.lineSeparator(), attrSilver);
+	}// addTimeStamp
 
 	
 	private void insertListing(String str, SimpleAttributeSet attr) {
