@@ -8,8 +8,6 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.prefs.Preferences;
@@ -24,13 +22,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
-import javax.swing.text.JTextComponent;
+
+import myComponents.AppLogger;
 
 public class WinTemplate_Log {
-
+AppLogger log = AppLogger.getInstance();
 	/**
 	 * Launch the application.
 	 */
@@ -106,9 +105,8 @@ public class WinTemplate_Log {
 		frmTemplate.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
 		frmTemplate.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
-		txtLog.append(String.format("myPrefs.absolutePath() - %s%n",myPrefs.absolutePath()));
 		myPrefs = null;
-
+		log.setDoc(tpLog.getStyledDocument());
 	}// appInit
 
 	public WinTemplate_Log() {
@@ -244,17 +242,8 @@ public class WinTemplate_Log {
 		gbc_scrollPane.gridy = 0;
 		panelRight.add(scrollPane, gbc_scrollPane);
 		
-		txtLog = new JTextArea();
-		txtLog.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if (arg0.getClickCount()>1){
-					((JTextComponent) arg0.getComponent()).setText("");
-					txtLog.setText("");
-				}//if
-			}//mouseClicked
-		});
-		scrollPane.setViewportView(txtLog);
+		tpLog = new JTextPane();
+		scrollPane.setViewportView(tpLog);
 		
 		lblLog = new JLabel("New label");
 		lblLog.setHorizontalAlignment(SwingConstants.CENTER);
@@ -343,7 +332,7 @@ public class WinTemplate_Log {
 	private JButton btnThree;
 	private JButton btnFour;
 	private JSplitPane splitPane1;
-	private JTextArea txtLog;
+	private JTextPane tpLog;
 	private JLabel lblLog;
 
 
