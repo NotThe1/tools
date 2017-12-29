@@ -52,6 +52,7 @@ public class MenuUtility {
 	public static final String RECENT_FILES_END = "recentFilesEnd";
 	private static final String NUMBER_DELIM = ":";
 	private static final String EMPTY_STRING = "";
+	
 
 	// private static final String NUMBER_DELIM_REDEX = "\\"
 
@@ -70,8 +71,8 @@ public class MenuUtility {
 	 * @return - The new JMenuItem ( so it can be manipulated by the calling class)
 	 */
 
-	public static JMenuItem addItemToList(JMenu menu, File file) {
-		return addItemToList(menu, file, new JMenuItem());
+	public static JMenuItem addFileItem(JMenu menu, File file) {
+		return addFileItem(menu, file, new JMenuItem());
 	}// addItemToList - default to JMenuItem
 
 	/**
@@ -84,7 +85,7 @@ public class MenuUtility {
 	 *            - the type of menu item (JMenuItem/JCheckBoxMenuItem) that will be created
 	 * @return
 	 */
-	public static JMenuItem addItemToList(JMenu menu, File file, JMenuItem newMenu) {
+	public static JMenuItem addFileItem(JMenu menu, File file, JMenuItem newMenu) {
 		int menuCount = menu.getItemCount();
 		int filesMenuStart = 0;
 		int filesMenuEnd = 0;
@@ -137,6 +138,71 @@ public class MenuUtility {
 		newMenu.setText(menuText);
 		newMenu.setActionCommand(filePath);
 		newMenu.setToolTipText(toolTip);
+		menu.insert(newMenu, filesMenuStart);
+
+		return newMenu;
+
+	}// addFileItem
+
+	/**
+	 * Adds a JMenuItem to the menu's recent Files list with the file's absolute path for the text. Returns the new menu
+	 * item so that an action listener can be added by the calling class
+	 * 
+	 * @param menu
+	 *            - JMenu to have the JMenuItem added to ( usually "File"
+	 * @param file
+	 *            - File to be added to the menu's Recent Files List
+	 * @return - The new JMenuItem ( so it can be manipulated by the calling class)
+	 */
+
+	public static JMenuItem addStringItem(JMenu menu, String name) {
+		return addStringItem(menu, name, new JMenuItem());
+	}// addItemToList - default to JMenuItem
+
+	/**
+	 * 
+	 * @param menu
+	 *            menu that will have new JMenuItem(JCheckBoxMenuItem) added
+	 * @param file
+	 *            - the file whose info will be put on the menu
+	 * @param newMenu
+	 *            - the type of menu item (JMenuItem/JCheckBoxMenuItem/JRadioButtonMenuItem) that will be created
+	 *            - for JRadioButtonMenuItems manage the ButtonGroup in the callining class.
+	 * @return		he new JMenuItem ( so it can be manipulated by the calling class)
+	 */
+	public static JMenuItem addStringItem(JMenu menu, String name, JMenuItem newMenu) {
+		int menuCount = menu.getItemCount();
+		int filesMenuStart = 0;
+		int filesMenuEnd = 0;
+		for (int i = 0; i < menuCount; i++) {
+			if (menu.getMenuComponent(i).getName() == RECENT_FILES_START) {
+				menu.getMenuComponent(i).setVisible(true); // Separator start
+				menu.getMenuComponent(i + 1).setVisible(true);// Separator end
+				menu.getMenuComponent(i + 2).setVisible(true);// menu Empty
+				filesMenuStart = i + 1;
+			} // if
+			if (menu.getMenuComponent(i).getName() == RECENT_FILES_END) {
+				filesMenuEnd = i;
+				break;
+			} // if
+		} // for
+
+		Integer removeIndex = null;
+		String menuActionCommand;
+		for (int j = filesMenuStart; j < filesMenuEnd; j++) {
+			menuActionCommand = ((AbstractButton) menu.getMenuComponent(j)).getActionCommand();
+			if (menuActionCommand.equals(name)) {
+				removeIndex = j; // remember for later
+				break;
+			} // if - not new
+		} // for
+
+		if (removeIndex != null) {
+			menu.remove(removeIndex);
+		} // if remove
+
+		newMenu.setText(name);
+		newMenu.setActionCommand(name);
 		menu.insert(newMenu, filesMenuStart);
 
 		return newMenu;
@@ -297,7 +363,7 @@ public class MenuUtility {
 
 		for (int i = 0; i < fileCount; i++) {
 			key = String.format("RecentFile_%02d", i);
-			addItemToList(menu, new File(myPrefs.get(key, "NO FILE")));
+			addFileItem(menu, new File(myPrefs.get(key, "NO FILE")));
 		} // for each path
 
 	}// loadRecentFileList
