@@ -14,7 +14,6 @@ public class ListSystemProperties {
 			value = properties.getProperty(property);
 			System.out.printf("%-20s   %s%n", property,value);
 		}//while
-
 	}//main
 
 }//class ListSystemProperties
