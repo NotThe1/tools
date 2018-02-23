@@ -106,6 +106,11 @@ public class MyTableModel extends AbstractTableModel {
 
 //	@Override
 //	public Class<?> getColumnClass(int columnIndex) {
+//		if (columnIndex > this.getColumnCount() - 1) {
+//			String msg = String.format("[getColumnClass] Invalid column. columnIndex = %d, max Column = %d",
+//					columnIndex, this.getColumnCount());
+//			throw new IllegalArgumentException(msg);
+//		} // if
 //		Class<?> ans = String.class;
 //		switch (columnIndex) {
 //		case 0:
