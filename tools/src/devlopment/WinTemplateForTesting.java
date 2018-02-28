@@ -1,30 +1,44 @@
 package devlopment;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.print.PrinterException;
+import java.text.MessageFormat;
+import java.util.Date;
 import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
+import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 
-public class WinTemplate_Simple {
+import myComponents.AppLogger;
+
+public class WinTemplateForTesting {
 
 	private JFrame frmTemplate;
 	private JButton btnOne;
@@ -33,6 +47,12 @@ public class WinTemplate_Simple {
 	private JButton btnFour;
 	private JSplitPane splitPane1;
 
+	private AppLogger log = AppLogger.getInstance();
+	private JTextPane txtLog;
+	private JPopupMenu popupLog; 
+	private AdapterLog logAdaper = new AdapterLog();
+
+
 	/**
 	 * Launch the application.
 	 */
@@ -40,7 +60,7 @@ public class WinTemplate_Simple {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					WinTemplate_Simple window = new WinTemplate_Simple();
+					WinTemplateForTesting window = new WinTemplateForTesting();
 					window.frmTemplate.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -91,7 +111,7 @@ public class WinTemplate_Simple {
 
 
 	private void appClose() {
-		Preferences myPrefs =  Preferences.userNodeForPackage(WinTemplate_Simple.class).node(this.getClass().getSimpleName());
+		Preferences myPrefs =  Preferences.userNodeForPackage(WinTemplateForTesting.class).node(this.getClass().getSimpleName());
 		Dimension dim = frmTemplate.getSize();
 		myPrefs.putInt("Height", dim.height);
 		myPrefs.putInt("Width", dim.width);
@@ -103,24 +123,53 @@ public class WinTemplate_Simple {
 	}//appClose
 
 	private void appInit() {
-		Preferences myPrefs =  Preferences.userNodeForPackage(WinTemplate_Simple.class).node(this.getClass().getSimpleName());
+		Preferences myPrefs =  Preferences.userNodeForPackage(WinTemplateForTesting.class).node(this.getClass().getSimpleName());
 		frmTemplate.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
 		frmTemplate.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
 		myPrefs = null;
+		
+		txtLog.setText(EMPTY_STRING);
+
+		log.setDoc(txtLog.getStyledDocument());
+		log.addInfo("Starting....");
+
 	}// appInit
 
-	public WinTemplate_Simple() {
+	public WinTemplateForTesting() {
 		initialize();
 		appInit();
 	}// Constructor
+	
+	private void doLogClear() {
+		log.clear();
+	}// doLogClear
+
+	private void doLogPrint() {
+
+		Font originalFont = txtLog.getFont();
+		try {
+			// textPane.setFont(new Font("Courier New", Font.PLAIN, 8));
+			txtLog.setFont(originalFont.deriveFont(8.0f));
+			MessageFormat header = new MessageFormat("Identic Log");
+			MessageFormat footer = new MessageFormat(new Date().toString() + "           Page - {0}");
+			txtLog.print(header, footer);
+			// textPane.setFont(new Font("Courier New", Font.PLAIN, 14));
+			txtLog.setFont(originalFont);
+		} catch (PrinterException e) {
+			e.printStackTrace();
+		} // try
+
+	}// doLogPrint
+
+
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
 		frmTemplate = new JFrame();
-		frmTemplate.setTitle("WinTemplate_Simple");
+		frmTemplate.setTitle("WinTemplateForTesting    0.0");
 		frmTemplate.setBounds(100, 100, 450, 300);
 		frmTemplate.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmTemplate.addWindowListener(new WindowAdapter() {
@@ -232,14 +281,48 @@ public class WinTemplate_Simple {
 		gbl_panelLeft.rowWeights = new double[]{Double.MIN_VALUE};
 		panelLeft.setLayout(gbl_panelLeft);
 		
-		JPanel panelRight = new JPanel();
-		splitPane1.setRightComponent(panelRight);
-		GridBagLayout gbl_panelRight = new GridBagLayout();
-		gbl_panelRight.columnWidths = new int[]{0};
-		gbl_panelRight.rowHeights = new int[]{0};
-		gbl_panelRight.columnWeights = new double[]{Double.MIN_VALUE};
-		gbl_panelRight.rowWeights = new double[]{Double.MIN_VALUE};
-		panelRight.setLayout(gbl_panelRight);
+		JPanel panelForLog = new JPanel();
+		splitPane1.setRightComponent(panelForLog);
+		GridBagLayout gbl_panelForLog = new GridBagLayout();
+		gbl_panelForLog.columnWidths = new int[]{0, 0};
+		gbl_panelForLog.rowHeights = new int[]{0, 0};
+		gbl_panelForLog.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_panelForLog.rowWeights = new double[]{1.0, Double.MIN_VALUE};
+		panelForLog.setLayout(gbl_panelForLog);
+		
+		JScrollPane scrollPaneForLog = new JScrollPane();
+		GridBagConstraints gbc_scrollPaneForLog = new GridBagConstraints();
+		gbc_scrollPaneForLog.fill = GridBagConstraints.BOTH;
+		gbc_scrollPaneForLog.gridx = 0;
+		gbc_scrollPaneForLog.gridy = 0;
+		panelForLog.add(scrollPaneForLog, gbc_scrollPaneForLog);
+		
+		txtLog = new JTextPane();
+		scrollPaneForLog.setViewportView(txtLog);
+		
+		 popupLog = new JPopupMenu();
+		addPopup(txtLog, popupLog);
+
+		JMenuItem popupLogClear = new JMenuItem("Clear Log");
+		popupLogClear.setName(PUM_LOG_CLEAR);
+		popupLogClear.addActionListener(logAdaper);
+		popupLog.add(popupLogClear);
+
+		JSeparator separator = new JSeparator();
+		popupLog.add(separator);
+
+		JMenuItem popupLogPrint = new JMenuItem("Print Log");
+		popupLogPrint.setName(PUM_LOG_PRINT);
+		popupLogPrint.addActionListener(logAdaper);
+		popupLog.add(popupLogPrint);
+
+
+		
+		JLabel lblNewLabel = new JLabel("Application Log");
+		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel.setForeground(new Color(0, 128, 0));
+		lblNewLabel.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 14));
+		scrollPaneForLog.setColumnHeaderView(lblNewLabel);
 		splitPane1.setDividerLocation(250);
 		
 		JPanel panelStatus = new JPanel();
@@ -272,8 +355,8 @@ public class WinTemplate_Simple {
 		});
 		mnuFile.add(mnuFileOpen);
 		
-		JSeparator separator = new JSeparator();
-		mnuFile.add(separator);
+		JSeparator separator99 = new JSeparator();
+		mnuFile.add(separator99);
 		
 		JMenuItem mnuFileSave = new JMenuItem("Save...");
 		mnuFileSave.addActionListener(new ActionListener() {
@@ -317,5 +400,46 @@ public class WinTemplate_Simple {
 		
 
 	}// initialize
+	private static final String PUM_LOG_PRINT = "popupLogPrint";
+	private static final String PUM_LOG_CLEAR = "popupLogClear";
+
+	static final String EMPTY_STRING = "";
+	
+	//////////////////////////////////////////////////////////////////////////
+	
+	class AdapterLog implements ActionListener {// , ListSelectionListener
+		@Override
+		public void actionPerformed(ActionEvent actionEvent) {
+			String name = ((Component) actionEvent.getSource()).getName();
+			switch (name) {
+			case PUM_LOG_PRINT:
+				doLogPrint();
+				break;
+			case PUM_LOG_CLEAR:
+				doLogClear();
+				break;
+			}// switch
+		}// actionPerformed
+	}// class AdapterAction
+
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				} // if popup Trigger
+			}
+
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+	}// addPopup
 
 }// class GUItemplate
