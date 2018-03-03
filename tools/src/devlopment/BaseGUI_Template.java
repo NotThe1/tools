@@ -129,13 +129,13 @@ public class BaseGUI_Template {
 		gbl_topPanel.rowWeights = new double[]{Double.MIN_VALUE};
 		topPanel.setLayout(gbl_topPanel);
 		
-		splitPane1 = new JPanel();
-		GridBagConstraints gbc_splitPane1 = new GridBagConstraints();
-		gbc_splitPane1.insets = new Insets(0, 0, 5, 0);
-		gbc_splitPane1.fill = GridBagConstraints.BOTH;
-		gbc_splitPane1.gridx = 0;
-		gbc_splitPane1.gridy = 1;
-		frameBase.getContentPane().add(splitPane1, gbc_splitPane1);
+		mainPanel = new JPanel();
+		GridBagConstraints gbc_mainPanel = new GridBagConstraints();
+		gbc_mainPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_mainPanel.fill = GridBagConstraints.BOTH;
+		gbc_mainPanel.gridx = 0;
+		gbc_mainPanel.gridy = 1;
+		frameBase.getContentPane().add(mainPanel, gbc_mainPanel);
 		
 		JPanel panelStatus = new JPanel();
 		panelStatus.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
@@ -198,7 +198,7 @@ public class BaseGUI_Template {
 	
 	//////////////////////////////////////////////////////////////////////////
 	private JFrame frameBase;
-	private JPanel splitPane1;
+	private JPanel mainPanel;
 
 	//////////////////////////////////////////////////////////////////////////
 	private static final String MNU_FILE_NEW = "mnuFileNew";
