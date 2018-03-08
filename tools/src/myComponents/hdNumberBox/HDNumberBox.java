@@ -84,6 +84,10 @@ public class HDNumberBox extends JPanel {
 		numberModel.setMaximum(newMaxValue);
 	}// setMaxValue
 
+	public void setMinValue(int newMinValue) {
+		numberModel.setMinimum(newMinValue);
+	}// setMinValue
+
 	public void setDecimalDisplay() {
 		setDecimalDisplay(true);
 	}// setDecimalDisplay
