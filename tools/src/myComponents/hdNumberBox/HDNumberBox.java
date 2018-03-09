@@ -1,4 +1,4 @@
-package utilities.hdNumberBox;
+package myComponents.hdNumberBox;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -79,6 +79,14 @@ public class HDNumberBox extends JPanel {
 		setNewValue(newValue);
 		return;
 	}// setValue
+	
+	public void setValueQuiet(int newValue) {
+		muteNumberChangeEvent = true;
+		setNewValue(newValue);
+		muteNumberChangeEvent = false;
+	}//setValueQuiet
+
+
 
 	public void setMaxValue(int newMaxValue) {
 		numberModel.setMaximum(newMaxValue);
@@ -114,7 +122,7 @@ public class HDNumberBox extends JPanel {
 		return showDecimal;
 	}// isDecimalDisplay
 
-	public void mute(boolean state) {
+	private void mute(boolean state) {
 		muteNumberChangeEvent = state;
 	}// mute
 
