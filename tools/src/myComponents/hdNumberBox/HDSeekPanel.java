@@ -18,6 +18,7 @@ import javax.swing.UIManager;
 
 public class HDSeekPanel extends HDNumberBox {
 
+	private static final long serialVersionUID = 1L;
 	private void stepValue(int direction) {
 		int changeAmount = (int) numberModel.getStepSize() * direction;
 

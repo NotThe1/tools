@@ -404,8 +404,6 @@ public class RegexDriver {
 		cbSourceString.setModel(sourceStringModel);
 
 		setupPopupMenus();
-		String instructions = String.format(
-				"Double click on this log pane to clear contents.%n Right Click on either Regex Code or Source String to bring up option to delete the currently displayed value%n");
 		txtLog.setText("Double click on this log pane to clear contents.\r\n\r\nRight Click on either Regex Code\r\nor Source String to bring up option \r\nto delete the currently displayed value\r\n");
 	}// appInit
 

@@ -122,9 +122,9 @@ public class HDNumberBox extends JPanel {
 		return showDecimal;
 	}// isDecimalDisplay
 
-	private void mute(boolean state) {
-		muteNumberChangeEvent = state;
-	}// mute
+//	private void mute(boolean state) {
+//		muteNumberChangeEvent = state;
+//	}// mute
 
 	// ---------------------------------------
 
