@@ -1,4 +1,4 @@
-package myComponents.hdNumberBox;
+package myComponents.hdnComponents;
 
 import java.util.EventObject;
 
