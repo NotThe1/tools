@@ -2,8 +2,7 @@ package myComponents.hdnComponents;
 
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
@@ -53,32 +52,9 @@ public class HDNumberBox extends JPanel {
 	SeekDocument displayDoc;
 	boolean muteNumberChangeEvent;
 
-	// public void setNumberModel(SpinnerNumberModel numberModel) {
-	// this.numberModel = numberModel;
-	// int newValue = (int) numberModel.getValue();
-	// priorValue = newValue;
-	// currentValue = newValue;
-	// setNewValue(newValue);
-	// }// setNumberModel
-
-	// public SpinnerNumberModel getNumberModel() {
-	// return this.numberModel;
-	// }// getNumberModel
-
 	public int getValue() {
 		return currentValue;
 	}// getValue
-
-	// public String getStringValue() {
-	// String displayFormat = showDecimal ? decimalDisplayFormat : hexDisplayFormat;
-	// currentValue = (int) numberModel.getValue();
-	// return String.format(displayFormat, currentValue);
-	//
-	// }// getStringValue
-
-	// private int getPriorValue() {
-	// return (int) numberModel.getPreviousValue();
-	// }// getPriorValue
 
 	public void setValue(int newValue) {
 		setNewValue(newValue);
@@ -152,51 +128,10 @@ public class HDNumberBox extends JPanel {
 		} // if
 	}// newValue
 
-	// void setNewValue(int newValue) {
-	// newValue = Math.min(newValue, (int) numberModel.getMaximum()); // upper
-	// newValue = Math.max(newValue, (int) numberModel.getMinimum()); // lower
-	//
-	// priorValue = (int) numberModel.getValue();
-	// currentValue = (newValue);
-	// numberModel.setValue(newValue);
-	// displayValue();
-	// if (muteNumberChangeEvent) {
-	// return;
-	// } // if
-	// if (priorValue != currentValue) {
-	// fireSeekValueChanged();
-	// } // if
-	// }// newValue
 
 	// -------------------------------------------------------
 
-	// public HDNumberBox() {
-	// this(new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1), true);
-	//
-	// }// Constructor
 
-	// public HDNumberBox(boolean decimalDisplay) {
-	// this(new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1), decimalDisplay);
-	// }// Constructor
-
-	// public HDNumberBox(SpinnerNumberModel numberModel) {
-	// this(numberModel, true);
-	// }// Constructor
-	//
-	// public HDNumberBox(SpinnerNumberModel numberModel, boolean decimalDisplay) {
-	// this.numberModel = numberModel;
-	//
-	// appInit0();
-	// Initialize();
-	// appInit();
-	//
-	// if (decimalDisplay) {
-	// setDecimalDisplay();
-	// } else {
-	// setHexDisplay();
-	// } // if
-	// }// Constructor
-	//
 	/* <><><><> */
 
 	public HDNumberBox() {
@@ -239,16 +174,11 @@ public class HDNumberBox extends JPanel {
 
 	private void Initialize() {
 		setPreferredSize(new Dimension(286, 35));
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 100, 0 };
-		gridBagLayout.rowHeights = new int[] { 23, 0 };
-		gridBagLayout.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
-		setLayout(gridBagLayout);
 
 		setBorder(UIManager.getBorder("TextField.border"));
 
 		txtValueDisplay = new JFormattedTextField();
+		txtValueDisplay.setMaximumSize(new Dimension(0, 0));
 		txtValueDisplay.setMinimumSize(new Dimension(75, 20));
 		txtValueDisplay.setBackground(UIManager.getColor("TextArea.background"));
 		txtValueDisplay.setFont(new Font("Courier New", Font.PLAIN, 13));
@@ -266,14 +196,11 @@ public class HDNumberBox extends JPanel {
 				} // try
 			}// focusLost
 		});
+		setLayout(new GridLayout(0, 1, 0, 0));
 
 		txtValueDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtValueDisplay.setPreferredSize(new Dimension(100, 23));
-		GridBagConstraints gbc_txtValueDisplay = new GridBagConstraints();
-		gbc_txtValueDisplay.fill = GridBagConstraints.BOTH;
-		gbc_txtValueDisplay.gridx = 0;
-		gbc_txtValueDisplay.gridy = 0;
-		add(txtValueDisplay, gbc_txtValueDisplay);
+		add(txtValueDisplay);
 	}// Constructor
 
 	// ---------------------------

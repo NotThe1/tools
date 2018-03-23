@@ -1,9 +1,7 @@
 package myComponents.hdnComponents;
 
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -70,13 +68,6 @@ public class HDSeekPanel extends HDNumberBox {
 
 	///////////////////////////////////////////////////////////////////////////
 	
-//	public void close() {
-//		
-//	}
-	
-	private void appClose() {
-		
-	}//appClose
 	
 	private void appInit() {
 		this.addMouseListener(adapterForPanel);
@@ -85,83 +76,33 @@ public class HDSeekPanel extends HDNumberBox {
 
 	public void initialize() {
 
-		setPreferredSize(new Dimension(390, 30));
-
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 65, 65, 100, 65, 65, 0 };
-		gridBagLayout.rowHeights = new int[] { 23, 0 };
-		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
-		setLayout(gridBagLayout);
+		setPreferredSize(new Dimension(385, 30));
 
 		JButton btnFirst = new JButton("<<");
+		btnFirst.setMaximumSize(new Dimension(0, 0));
 		btnFirst.setName(FIRST);
 		btnFirst.addActionListener(adapterForPanel);
-		GridBagConstraints gbc_btnFirst = new GridBagConstraints();
-		gbc_btnFirst.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnFirst.insets = new Insets(5, 1, 5, 5);
-		gbc_btnFirst.gridx = 0;
-		gbc_btnFirst.gridy = 0;
-		add(btnFirst, gbc_btnFirst);
+		setLayout(new GridLayout(0, 5, 0, 0));
+		add(btnFirst);
 
 		JButton btnPrior = new JButton("<");
 		btnPrior.setName(PREVIOUS);
 		btnPrior.addActionListener(adapterForPanel);
-//		btnPrior.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent arg0) {
-//				stepValue(DOWN);
-//			}
-//		});
-		GridBagConstraints gbc_btnPrior = new GridBagConstraints();
-		gbc_btnPrior.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnPrior.insets = new Insets(5, 0, 5, 0);
-		gbc_btnPrior.gridx = 1;
-		gbc_btnPrior.gridy = 0;
-		add(btnPrior, gbc_btnPrior);
+		add(btnPrior);
 
-//		txtValueDisplay.setFont(new Font("Courier New", Font.PLAIN, 13));
-//		txtValueDisplay.addFocusListener(new FocusAdapter() {
-//			@Override
-//			public void focusLost(FocusEvent arg0) {
-//				if (txtValueDisplay.getText().equals("")) {
-//					return;
-//				} // if null
-//				int radix = showDecimal ? 10 : 16;
-//				setNewValue(Integer.valueOf(txtValueDisplay.getText(), radix));
-//			}
-//		});
-		GridBagConstraints gbc_txtValueDisplay = new GridBagConstraints();
-		gbc_txtValueDisplay.anchor = GridBagConstraints.CENTER;
-		gbc_txtValueDisplay.insets = new Insets(5, 2, 5, 2);
-		gbc_txtValueDisplay.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtValueDisplay.gridx = 2;
-		gbc_txtValueDisplay.gridy = 0;
-		add(txtValueDisplay, gbc_txtValueDisplay);
 
+		add(txtValueDisplay);
+		
 		JButton btnNext = new JButton(">");
 		btnNext.setName(NEXT);
 		btnNext.addActionListener(adapterForPanel);
-//		btnNext.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				stepValue(UP);
-//			}
-//		});
-		GridBagConstraints gbc_btnNext = new GridBagConstraints();
-		gbc_btnNext.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnNext.insets = new Insets(5, 0, 5, 0);
-		gbc_btnNext.gridx = 3;
-		gbc_btnNext.gridy = 0;
-		add(btnNext, gbc_btnNext);
+		
+		add(btnNext);
 
 		JButton btnLast = new JButton(">>");
 		btnLast.setName(LAST);
 		btnLast.addActionListener(adapterForPanel);
-		GridBagConstraints gbc_btnLast = new GridBagConstraints();
-		gbc_btnLast.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnLast.insets = new Insets(5, 5, 5, 2);
-		gbc_btnLast.gridx = 4;
-		gbc_btnLast.gridy = 0;
-		add(btnLast, gbc_btnLast);
+		add(btnLast);
 
 		setBorder(UIManager.getBorder("Spinner.border"));
 	}// Constructor
@@ -213,8 +154,7 @@ public class HDSeekPanel extends HDNumberBox {
 
 		@Override
 		public void mousePressed(MouseEvent mouseEvent) {
-			// TODO Auto-generated method stub
-
+			/* Not Used */
 		}// mousePressed
 
 		@Override
