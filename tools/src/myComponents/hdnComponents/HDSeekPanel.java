@@ -1,34 +1,35 @@
 package myComponents.hdnComponents;
 
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JButton;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.JComponent;
 import javax.swing.UIManager;
 
 public class HDSeekPanel extends HDNumberBox {
 
 	private static final long serialVersionUID = 1L;
+
+	private int stepValue;
+	private AdapterForPanel adapterForPanel = new AdapterForPanel();
+
 	private void stepValue(int direction) {
-		int changeAmount = (int) numberModel.getStepSize() * direction;
+		int changeAmount = stepValue * direction;
 
 		long newValue = currentValue;
 		newValue += changeAmount;
 
-		if (newValue > (int) numberModel.getMaximum()) {
-			setNewValue((int) numberModel.getMaximum());
-		} else if (newValue < (int) numberModel.getMinimum()) {
-			setNewValue((int) numberModel.getMinimum());
+		if (newValue > rangeModel.getMaximum()) {
+			setNewValue(rangeModel.getMaximum());
+		} else if (newValue < rangeModel.getMinimum()) {
+			setNewValue(rangeModel.getMinimum());
 		} else {
 			setNewValue((int) newValue);
 		} // if
@@ -37,38 +38,52 @@ public class HDSeekPanel extends HDNumberBox {
 	// -------------------------------------------------------
 
 	public HDSeekPanel() {
-		super(new SpinnerNumberModel(12, Integer.MIN_VALUE, Integer.MAX_VALUE, 1), true);
-		initialize();
+		this(true);
 	}// Constructor
 
 	public HDSeekPanel(boolean decimalDisplay) {
-		super(new SpinnerNumberModel(12, Integer.MIN_VALUE, Integer.MAX_VALUE, 1), decimalDisplay);
+		super(decimalDisplay);
 		initialize();
+		appInit();
 	}// Constructor
 
-	public HDSeekPanel(SpinnerNumberModel numberModel) {
-		super(numberModel, true);
-		initialize();
-	}// Constructor
+	///////////////////////////////////////////////////////////////////////////
+	private void setStepValue(int step) {
+		this.stepValue = Math.max(1, step); // must be 1 or greater
+	}//setStepValue
+	
+	private void doFirst() {
+		setNewValue( rangeModel.getMinimum());
+	}// doFirst
 
-	public HDSeekPanel(SpinnerNumberModel numberModel, boolean decimalDisplay) {
-		super(numberModel, decimalDisplay);
-		initialize();
-	}// Constructor
+	private void doLast() {
+		setNewValue( rangeModel.getMaximum());
+	}// doLast
+
+	private void doNext() {
+		stepValue(UP);
+	}// doNext
+
+	private void doPrevious() {
+		stepValue(DOWN);
+	}// doPrevious
+
+	///////////////////////////////////////////////////////////////////////////
+	
+//	public void close() {
+//		
+//	}
+	
+	private void appClose() {
+		
+	}//appClose
+	
+	private void appInit() {
+		this.addMouseListener(adapterForPanel);
+		this.setStepValue(1);
+	}//appInit
 
 	public void initialize() {
-		addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent mouseEvent) {
-				if (mouseEvent.getClickCount() > 1) {
-					if (showDecimal) {
-						setHexDisplay();
-					} else {
-						setDecimalDisplay();
-					} // if inner
-				} // if click count
-			}// mouseClicked
-		});
 
 		setPreferredSize(new Dimension(390, 30));
 
@@ -80,11 +95,8 @@ public class HDSeekPanel extends HDNumberBox {
 		setLayout(gridBagLayout);
 
 		JButton btnFirst = new JButton("<<");
-		btnFirst.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setNewValue((int) numberModel.getMinimum());
-			}
-		});
+		btnFirst.setName(FIRST);
+		btnFirst.addActionListener(adapterForPanel);
 		GridBagConstraints gbc_btnFirst = new GridBagConstraints();
 		gbc_btnFirst.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnFirst.insets = new Insets(5, 1, 5, 5);
@@ -93,11 +105,13 @@ public class HDSeekPanel extends HDNumberBox {
 		add(btnFirst, gbc_btnFirst);
 
 		JButton btnPrior = new JButton("<");
-		btnPrior.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				stepValue(DOWN);
-			}
-		});
+		btnPrior.setName(PREVIOUS);
+		btnPrior.addActionListener(adapterForPanel);
+//		btnPrior.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent arg0) {
+//				stepValue(DOWN);
+//			}
+//		});
 		GridBagConstraints gbc_btnPrior = new GridBagConstraints();
 		gbc_btnPrior.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnPrior.insets = new Insets(5, 0, 5, 0);
@@ -105,17 +119,17 @@ public class HDSeekPanel extends HDNumberBox {
 		gbc_btnPrior.gridy = 0;
 		add(btnPrior, gbc_btnPrior);
 
-		txtValueDisplay.setFont(new Font("Courier New", Font.PLAIN, 13));
-		txtValueDisplay.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent arg0) {
-				if (txtValueDisplay.getText().equals("")) {
-					return;
-				} // if null
-				int radix = showDecimal ? 10 : 16;
-				setNewValue(Integer.valueOf(txtValueDisplay.getText(), radix));
-			}
-		});
+//		txtValueDisplay.setFont(new Font("Courier New", Font.PLAIN, 13));
+//		txtValueDisplay.addFocusListener(new FocusAdapter() {
+//			@Override
+//			public void focusLost(FocusEvent arg0) {
+//				if (txtValueDisplay.getText().equals("")) {
+//					return;
+//				} // if null
+//				int radix = showDecimal ? 10 : 16;
+//				setNewValue(Integer.valueOf(txtValueDisplay.getText(), radix));
+//			}
+//		});
 		GridBagConstraints gbc_txtValueDisplay = new GridBagConstraints();
 		gbc_txtValueDisplay.anchor = GridBagConstraints.CENTER;
 		gbc_txtValueDisplay.insets = new Insets(5, 2, 5, 2);
@@ -125,11 +139,13 @@ public class HDSeekPanel extends HDNumberBox {
 		add(txtValueDisplay, gbc_txtValueDisplay);
 
 		JButton btnNext = new JButton(">");
-		btnNext.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				stepValue(UP);
-			}
-		});
+		btnNext.setName(NEXT);
+		btnNext.addActionListener(adapterForPanel);
+//		btnNext.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				stepValue(UP);
+//			}
+//		});
 		GridBagConstraints gbc_btnNext = new GridBagConstraints();
 		gbc_btnNext.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnNext.insets = new Insets(5, 0, 5, 0);
@@ -138,11 +154,8 @@ public class HDSeekPanel extends HDNumberBox {
 		add(btnNext, gbc_btnNext);
 
 		JButton btnLast = new JButton(">>");
-		btnLast.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setNewValue((int) numberModel.getMaximum());
-			}
-		});
+		btnLast.setName(LAST);
+		btnLast.addActionListener(adapterForPanel);
 		GridBagConstraints gbc_btnLast = new GridBagConstraints();
 		gbc_btnLast.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnLast.insets = new Insets(5, 5, 5, 2);
@@ -155,7 +168,67 @@ public class HDSeekPanel extends HDNumberBox {
 
 	// ---------------------------
 
+	class AdapterForPanel implements ActionListener, MouseListener {
+
+		@Override
+		public void actionPerformed(ActionEvent actionEvent) {
+			String name = ((JComponent) actionEvent.getSource()).getName();
+			switch (name) {
+			case FIRST:
+				doFirst();
+				break;
+			case LAST:
+				doLast();
+				break;
+			case NEXT:
+				doNext();
+				break;
+			case PREVIOUS:
+				doPrevious();
+				break;
+			}// switch
+
+		}// actionPerformed
+
+		@Override
+		public void mouseClicked(MouseEvent mouseEvent) {
+			if (mouseEvent.getClickCount() > 1) {
+				if (showDecimal) {
+					setHexDisplay();
+				} else {
+					setDecimalDisplay();
+				} // if inner
+			} // if click count
+		}// mouseClicked
+
+		@Override
+		public void mouseEntered(MouseEvent mouseEvent) {
+			/* Not Used */
+		}// mouseEntered
+
+		@Override
+		public void mouseExited(MouseEvent mouseEvent) {
+			/* Not Used */
+		}// mouseExited
+
+		@Override
+		public void mousePressed(MouseEvent mouseEvent) {
+			// TODO Auto-generated method stub
+
+		}// mousePressed
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
+			/* Not Used */
+		}// mouseReleased
+
+	}// class AdapterForPanel
 
 	private static final int UP = 1;
 	private static final int DOWN = -1;
+
+	private static final String FIRST = "First";
+	private static final String LAST = "Last";
+	private static final String NEXT = "Next";
+	private static final String PREVIOUS = "Previous";
 }// class HDSeekPanel

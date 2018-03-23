@@ -7,9 +7,9 @@ import java.awt.GridBagLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
+import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.EventListenerList;
@@ -17,28 +17,33 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
-//import utilities.seekPanel.SeekValueChangeListener;
+/* @formatter:off */
 
 /**
  * 
- * @author Frank Martyn. This is a text box that only accepts either decimal or hexadecimal numbers. It supports a
- *         JSpinnerNumberModel to manage the values range of input data. The value input is limited byte the
- *         NumberModel. if value is greater than Max the value will be fixed to Max Value. Similarly if less than Min
- *         the value will be fixed at Min Value.
+ * @author Frank Martyn. This is a text box that only accepts either decimal or hexadecimal numbers.
+ *         It supports a DefaultBoundedRangeModel to manage the values range of input data.
+ *         The value input is limited byte the DefaultBoundedRangeModel. 
+ *         If value is greater than Max the value will be fixed to Max Value.
+ *         Similarly if less than Min, the value will be fixed at Min Value.
  * 
  *         The range of the value is Integer.Min to Integer.MAX.
  * 
- *         This class supports a HDNumberValueChangeListener that will fire a HDNumberValueChangeEvent when the value
- *         changes
- * 
- *         the method mute(boolean state) disables/enables the fireSeekValueChanged() method, so values can be changed
- *         without triggering events
- *
+ *         This class supports a HDNumberValueChangeListener that will fire a HDNumberValueChangeEvent
+ *         when the value changes
+ *        
+ *         The method mute(boolean state) disables/enables the fireSeekValueChanged() method,
+ *         so values can be changed without triggering events
+ *         
+ *			2018-03-01 - added setValueQuiet(int value);
  */
+/* @formatter:on  */
+
 public class HDNumberBox extends JPanel {
 	private static final long serialVersionUID = 1L;
 
-	SpinnerNumberModel numberModel;
+	DefaultBoundedRangeModel rangeModel = new DefaultBoundedRangeModel();
+
 	int currentValue, priorValue;
 	JFormattedTextField txtValueDisplay;
 	EventListenerList hdNumberValueChangeListenerList;
@@ -48,52 +53,50 @@ public class HDNumberBox extends JPanel {
 	SeekDocument displayDoc;
 	boolean muteNumberChangeEvent;
 
-	public void setNumberModel(SpinnerNumberModel numberModel) {
-		this.numberModel = numberModel;
-		int newValue = (int) numberModel.getValue();
-		priorValue = newValue;
-		currentValue = newValue;
-		setNewValue(newValue);
-	}// setNumberModel
+	// public void setNumberModel(SpinnerNumberModel numberModel) {
+	// this.numberModel = numberModel;
+	// int newValue = (int) numberModel.getValue();
+	// priorValue = newValue;
+	// currentValue = newValue;
+	// setNewValue(newValue);
+	// }// setNumberModel
 
-	public SpinnerNumberModel getNumberModel() {
-		return this.numberModel;
-	}// getNumberModel
+	// public SpinnerNumberModel getNumberModel() {
+	// return this.numberModel;
+	// }// getNumberModel
 
 	public int getValue() {
 		return currentValue;
 	}// getValue
-	
-	public String getStringValue(){
-		String displayFormat = showDecimal ? decimalDisplayFormat : hexDisplayFormat;
-		currentValue = (int) numberModel.getValue();
-		return String.format(displayFormat, currentValue);
 
-	}//getStringValue
+	// public String getStringValue() {
+	// String displayFormat = showDecimal ? decimalDisplayFormat : hexDisplayFormat;
+	// currentValue = (int) numberModel.getValue();
+	// return String.format(displayFormat, currentValue);
+	//
+	// }// getStringValue
 
-	public int getPriorValue() {
-		return (int) numberModel.getPreviousValue();
-	}// getPriorValue
+	// private int getPriorValue() {
+	// return (int) numberModel.getPreviousValue();
+	// }// getPriorValue
 
 	public void setValue(int newValue) {
 		setNewValue(newValue);
 		return;
 	}// setValue
-	
+
 	public void setValueQuiet(int newValue) {
 		muteNumberChangeEvent = true;
 		setNewValue(newValue);
 		muteNumberChangeEvent = false;
-	}//setValueQuiet
-
-
+	}// setValueQuiet
 
 	public void setMaxValue(int newMaxValue) {
-		numberModel.setMaximum(newMaxValue);
+		rangeModel.setMaximum(newMaxValue);
 	}// setMaxValue
 
 	public void setMinValue(int newMinValue) {
-		numberModel.setMinimum(newMinValue);
+		rangeModel.setMinimum(newMinValue);
 	}// setMinValue
 
 	public void setDecimalDisplay() {
@@ -122,15 +125,11 @@ public class HDNumberBox extends JPanel {
 		return showDecimal;
 	}// isDecimalDisplay
 
-//	private void mute(boolean state) {
-//		muteNumberChangeEvent = state;
-//	}// mute
-
 	// ---------------------------------------
 
 	private void displayValue() {
 		String displayFormat = showDecimal ? decimalDisplayFormat : hexDisplayFormat;
-		currentValue = (int) numberModel.getValue();
+		currentValue = (int) rangeModel.getValue();
 
 		String stringValue = String.format(displayFormat, currentValue);
 		txtValueDisplay.setText(stringValue);
@@ -138,12 +137,12 @@ public class HDNumberBox extends JPanel {
 	}// showValue
 
 	void setNewValue(int newValue) {
-		newValue = Math.min(newValue, (int) numberModel.getMaximum()); // upper
-		newValue = Math.max(newValue, (int) numberModel.getMinimum()); // lower
+		newValue = Math.min(newValue, (int) rangeModel.getMaximum()); // upper
+		newValue = Math.max(newValue, (int) rangeModel.getMinimum()); // lower
 
-		priorValue = (int) numberModel.getValue();
+		priorValue = (int) rangeModel.getValue();
 		currentValue = (newValue);
-		numberModel.setValue(newValue);
+		rangeModel.setValue(currentValue);
 		displayValue();
 		if (muteNumberChangeEvent) {
 			return;
@@ -153,25 +152,70 @@ public class HDNumberBox extends JPanel {
 		} // if
 	}// newValue
 
+	// void setNewValue(int newValue) {
+	// newValue = Math.min(newValue, (int) numberModel.getMaximum()); // upper
+	// newValue = Math.max(newValue, (int) numberModel.getMinimum()); // lower
+	//
+	// priorValue = (int) numberModel.getValue();
+	// currentValue = (newValue);
+	// numberModel.setValue(newValue);
+	// displayValue();
+	// if (muteNumberChangeEvent) {
+	// return;
+	// } // if
+	// if (priorValue != currentValue) {
+	// fireSeekValueChanged();
+	// } // if
+	// }// newValue
+
 	// -------------------------------------------------------
 
-	public HDNumberBox() {
-		this(new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1), true);
+	// public HDNumberBox() {
+	// this(new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1), true);
+	//
+	// }// Constructor
 
+	// public HDNumberBox(boolean decimalDisplay) {
+	// this(new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1), decimalDisplay);
+	// }// Constructor
+
+	// public HDNumberBox(SpinnerNumberModel numberModel) {
+	// this(numberModel, true);
+	// }// Constructor
+	//
+	// public HDNumberBox(SpinnerNumberModel numberModel, boolean decimalDisplay) {
+	// this.numberModel = numberModel;
+	//
+	// appInit0();
+	// Initialize();
+	// appInit();
+	//
+	// if (decimalDisplay) {
+	// setDecimalDisplay();
+	// } else {
+	// setHexDisplay();
+	// } // if
+	// }// Constructor
+	//
+	/* <><><><> */
+
+	public HDNumberBox() {
+		this(Integer.MIN_VALUE, Integer.MAX_VALUE, 0, false);
 	}// Constructor
+
 
 	public HDNumberBox(boolean decimalDisplay) {
-		this(new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1), decimalDisplay);
+		this(Integer.MIN_VALUE, Integer.MAX_VALUE, 0, decimalDisplay);
 	}// Constructor
 
-	public HDNumberBox(SpinnerNumberModel numberModel) {
-		this(numberModel, true);
-	}// Constructor
+	public HDNumberBox(int minValue, int maxValue, int initValue, boolean decimalDisplay) {
+		this.rangeModel.setMinimum(minValue);
+		this.rangeModel.setMaximum(maxValue);
+		this.rangeModel.setValue(initValue);
+		// this.rangeModel.setExtent(maxValue - initValue);
 
-	public HDNumberBox(SpinnerNumberModel numberModel, boolean decimalDisplay) {
-		this.numberModel = numberModel;
+		displayDoc = new SeekDocument(true);
 
-		appInit0();
 		Initialize();
 		appInit();
 
@@ -180,14 +224,13 @@ public class HDNumberBox extends JPanel {
 		} else {
 			setHexDisplay();
 		} // if
+
 	}// Constructor
 
-	private void appInit0() {
-		displayDoc = new SeekDocument(true);
-	}// appInit0
+	/* <><><><> */
 
 	private void appInit() {
-		currentValue = (int) numberModel.getValue();
+		currentValue = (int) rangeModel.getValue();
 		txtValueDisplay.setDocument(displayDoc);
 		txtValueDisplay.setPreferredSize(new Dimension(100, 23));
 		hdNumberValueChangeListenerList = new EventListenerList();
@@ -219,9 +262,9 @@ public class HDNumberBox extends JPanel {
 				try {
 					setNewValue(Integer.valueOf(txtValueDisplay.getText(), radix));
 				} catch (Exception e) {
-					setNewValue(getPriorValue());
-				}//try
-			}//focusLost
+					setNewValue(rangeModel.getValue());
+				} // try
+			}// focusLost
 		});
 
 		txtValueDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
