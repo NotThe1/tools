@@ -99,7 +99,7 @@ public class BaseGUI_Template {
 	 */
 	private void initialize() {
 		frameBase = new JFrame();
-		frameBase.setTitle("WinTemplateForTesting    0.0");
+		frameBase.setTitle("Base for GUI Application    0.0");
 		frameBase.setBounds(100, 100, 450, 300);
 		frameBase.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frameBase.addWindowListener(new WindowAdapter() {
