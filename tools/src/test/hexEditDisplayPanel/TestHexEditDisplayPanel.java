@@ -1,4 +1,4 @@
-package test;
+package test.hexEditDisplayPanel;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.print.PrinterException;
+import java.nio.ByteBuffer;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.prefs.Preferences;
@@ -26,7 +27,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -38,10 +38,9 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 
 import myComponents.AppLogger;
-import myComponents.FontChooser;
-import myComponents.Hex64KSpinner;
+import myComponents.hexEditDisplayPanel.HexEditDisplayPanel;
 
-public class HandTesting {
+public class TestHexEditDisplayPanel {
 
 	private JFrame frmTemplate;
 	private JButton btnOne;
@@ -63,7 +62,7 @@ public class HandTesting {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					HandTesting window = new HandTesting();
+					TestHexEditDisplayPanel window = new TestHexEditDisplayPanel();
 					window.frmTemplate.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -74,21 +73,31 @@ public class HandTesting {
 
 	/* Standard Stuff */
 	
-	private void doFontChooser() {
-		FontChooser fc = new FontChooser(frmTemplate,txtLog.getFont());
-		if(fc.showDialog()== JOptionPane.OK_OPTION) {
-			txtLog.setFont(fc.selectedFont());
-		}//if
-		fc = null;
-		txtLog.getCaret().setVisible(true);
-	}//doFontChooser
-	
 	private void doBtnOne(){
-		doFontChooser();
+		int dataSize = (1024 * 4)+1;
+		ByteBuffer bb = ByteBuffer.allocate(dataSize);
+		bb.clear();
+		byte value;
+		for (int i = 0 ; i < bb.capacity();i++) {
+			value = (byte) (i & 0XFF);
+			bb.put(value);
+		}//for
+		hexPanel.clear();
+		hexPanel.setData(bb);
+		hexPanel.run();
 	}//doBtnOne
 	
 	private void doBtnTwo(){
-		
+		int dataSize = (1024 * 4) + 2;
+		byte[] bb = new byte[dataSize];
+		byte value;
+		for (int i = 0 ; i < bb.length;i++) {
+			value = (byte) (i & 0XFF);
+			bb[i] = value;
+		}//for
+		hexPanel.clear();		
+		hexPanel.setData(bb);
+		hexPanel.run();
 	}//doBtnTwo
 	
 	private void doBtnThree(){
@@ -123,7 +132,7 @@ public class HandTesting {
 
 
 	private void appClose() {
-		Preferences myPrefs =  Preferences.userNodeForPackage(HandTesting.class).node(this.getClass().getSimpleName());
+		Preferences myPrefs =  Preferences.userNodeForPackage(TestHexEditDisplayPanel.class).node(this.getClass().getSimpleName());
 		Dimension dim = frmTemplate.getSize();
 		myPrefs.putInt("Height", dim.height);
 		myPrefs.putInt("Width", dim.width);
@@ -135,8 +144,8 @@ public class HandTesting {
 	}//appClose
 
 	private void appInit() {
-		Preferences myPrefs =  Preferences.userNodeForPackage(HandTesting.class).node(this.getClass().getSimpleName());
-		frmTemplate.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
+		Preferences myPrefs =  Preferences.userNodeForPackage(TestHexEditDisplayPanel.class).node(this.getClass().getSimpleName());
+		frmTemplate.setSize(1099, 798);
 		frmTemplate.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
 		myPrefs = null;
@@ -144,11 +153,11 @@ public class HandTesting {
 		txtLog.setText(EMPTY_STRING);
 
 		log.setDoc(txtLog.getStyledDocument());
-		log.addInfo("Starting....");
+		log.info("Starting....");
 
 	}// appInit
 
-	public HandTesting() {
+	public TestHexEditDisplayPanel() {
 		initialize();
 		appInit();
 	}// Constructor
@@ -181,7 +190,7 @@ public class HandTesting {
 	 */
 	private void initialize() {
 		frmTemplate = new JFrame();
-		frmTemplate.setTitle("HandTesting    1.0");
+		frmTemplate.setTitle("Test   HexEditDisplayPanel    0.1");
 		frmTemplate.setBounds(100, 100, 450, 300);
 		frmTemplate.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmTemplate.addWindowListener(new WindowAdapter() {
@@ -212,7 +221,7 @@ public class HandTesting {
 		gbl_panelForButtons.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		panelForButtons.setLayout(gbl_panelForButtons);
 		
-		btnOne = new JButton("Font Chooser");
+		btnOne = new JButton("byteBuffer");
 		btnOne.setMinimumSize(new Dimension(100, 20));
 		GridBagConstraints gbc_btnOne = new GridBagConstraints();
 		gbc_btnOne.insets = new Insets(0, 0, 0, 5);
@@ -229,7 +238,7 @@ public class HandTesting {
 		btnOne.setMaximumSize(new Dimension(0, 0));
 		btnOne.setPreferredSize(new Dimension(100, 20));
 		
-		btnTwo = new JButton("Button 2");
+		btnTwo = new JButton("byte array");
 		btnTwo.setMinimumSize(new Dimension(100, 20));
 		GridBagConstraints gbc_btnTwo = new GridBagConstraints();
 		gbc_btnTwo.insets = new Insets(0, 0, 0, 5);
@@ -289,15 +298,22 @@ public class HandTesting {
 		GridBagLayout gbl_panelLeft = new GridBagLayout();
 		gbl_panelLeft.columnWidths = new int[]{0, 0};
 		gbl_panelLeft.rowHeights = new int[]{0, 0};
-		gbl_panelLeft.columnWeights = new double[]{0.0, Double.MIN_VALUE};
-		gbl_panelLeft.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		gbl_panelLeft.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_panelLeft.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		panelLeft.setLayout(gbl_panelLeft);
 		
-		Hex64KSpinner spinner = new Hex64KSpinner();
-		GridBagConstraints gbc_spinner = new GridBagConstraints();
-		gbc_spinner.gridx = 0;
-		gbc_spinner.gridy = 0;
-		panelLeft.add(spinner, gbc_spinner);
+		hexPanel = new HexEditDisplayPanel();
+		GridBagConstraints gbc_hexPanel = new GridBagConstraints();
+		gbc_hexPanel.fill = GridBagConstraints.BOTH;
+		gbc_hexPanel.gridx = 0;
+		gbc_hexPanel.gridy = 0;
+		panelLeft.add(hexPanel, gbc_hexPanel);
+//		GridBagLayout gbl_hexPanel = new GridBagLayout();
+//		gbl_hexPanel.columnWidths = new int[]{0};
+//		gbl_hexPanel.rowHeights = new int[]{0};
+//		gbl_hexPanel.columnWeights = new double[]{Double.MIN_VALUE};
+//		gbl_hexPanel.rowWeights = new double[]{Double.MIN_VALUE};
+//		hexPanel.setLayout(gbl_hexPanel);
 		
 		JPanel panelForLog = new JPanel();
 		splitPane1.setRightComponent(panelForLog);
@@ -414,17 +430,6 @@ public class HandTesting {
 			}
 		});
 		mnuFile.add(mnuFileExit);
-		
-		JMenu mnuItems = new JMenu("Items");
-		menuBar.add(mnuItems);
-		
-		JMenuItem mnuItemsFontChooser = new JMenuItem("FontChooser");
-		mnuItemsFontChooser.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				doFontChooser();
-			}
-		});
-		mnuItems.add(mnuItemsFontChooser);
 
 		
 
@@ -433,6 +438,7 @@ public class HandTesting {
 	private static final String PUM_LOG_CLEAR = "popupLogClear";
 
 	static final String EMPTY_STRING = "";
+	private HexEditDisplayPanel hexPanel;
 	
 	//////////////////////////////////////////////////////////////////////////
 	
