@@ -101,6 +101,16 @@ public class TestHexEditDisplayPanel {
 	}//doBtnTwo
 	
 	private void doBtnThree(){
+		String RO = "Read Only";
+		String RW = "Read/Write";
+		
+		if (btnThree.getText().equals(RO)){
+			btnThree.setText(RW);
+			hexPanel.setEditable(true);
+		}else {
+			btnThree.setText(RO);
+			hexPanel.setEditable(false);		
+		}//if
 		
 	}//doBtnThree
 	
@@ -154,7 +164,7 @@ public class TestHexEditDisplayPanel {
 
 		log.setDoc(txtLog.getStyledDocument());
 		log.info("Starting....");
-
+//		hexPanel.setEditable(false);
 	}// appInit
 
 	public TestHexEditDisplayPanel() {
@@ -254,7 +264,7 @@ public class TestHexEditDisplayPanel {
 		btnTwo.setPreferredSize(new Dimension(100, 20));
 		btnTwo.setMaximumSize(new Dimension(0, 0));
 		
-		btnThree = new JButton("Button 3");
+		btnThree = new JButton("Read/Write");
 		btnThree.setMinimumSize(new Dimension(100, 20));
 		GridBagConstraints gbc_btnThree = new GridBagConstraints();
 		gbc_btnThree.insets = new Insets(0, 0, 0, 5);

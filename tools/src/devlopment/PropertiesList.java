@@ -13,6 +13,7 @@ import javax.swing.ToolTipManager;
 
 
 public class PropertiesList extends JList<Object> {
+	private static final long serialVersionUID = 1L;
 	
 	SortedListModel model;
 	Properties tipProps;

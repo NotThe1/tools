@@ -144,7 +144,7 @@ public class HandTesting {
 		txtLog.setText(EMPTY_STRING);
 
 		log.setDoc(txtLog.getStyledDocument());
-		log.addInfo("Starting....");
+		log.info("Starting....");
 
 	}// appInit
 

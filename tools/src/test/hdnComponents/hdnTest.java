@@ -90,7 +90,7 @@ public class hdnTest {
 			public void valueChanged(HDNumberValueChangeEvent hDNumberValueChangeEvent) {
 				int oldValue = hDNumberValueChangeEvent.getOldValue();
 				int newValue = hDNumberValueChangeEvent.getNewValue();
-				log.addSpecial(String.format("Value changed from %d to %d",oldValue,newValue));	
+				log.specialf("Value changed from %d to %d",oldValue,newValue);
 			}
 			
 		});
@@ -103,7 +103,7 @@ public class hdnTest {
 			}else {
 				hdn1.setValueQuiet(i);
 			}
-			log.addInfo(String.format("i = %d, value = %d", i, hdn1.getValue()));
+			log.infof(String.format("i = %d, value = %d", i, hdn1.getValue()));
 		} // for
 		
 		
@@ -116,7 +116,7 @@ public class hdnTest {
 			public void valueChanged(HDNumberValueChangeEvent hDNumberValueChangeEvent) {
 				int oldValue = hDNumberValueChangeEvent.getOldValue();
 				int newValue = hDNumberValueChangeEvent.getNewValue();
-				log.addSpecial(String.format("Value changed from %d to %d",oldValue,newValue));	
+				log.specialf("Value changed from %d to %d",oldValue,newValue);	
 			}
 			
 		});
@@ -181,7 +181,7 @@ public class hdnTest {
 		txtLog.setText(EMPTY_STRING);
 
 		log.setDoc(txtLog.getStyledDocument());
-		log.addInfo("Starting....");
+		log.info("Starting....");
 		tb1.setSelected(false);
 		tb1.setSelected(true);
 		tb1.setSelected(false);
