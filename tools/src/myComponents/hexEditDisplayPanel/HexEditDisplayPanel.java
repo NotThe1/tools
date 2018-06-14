@@ -1,8 +1,11 @@
 package myComponents.hexEditDisplayPanel;
 /*
- *@version 1.0
+ * @version 1.1
+ * @date  2018-06-12
+ * 
+ * Adding a ChangeEvent to manage a dataChange one-time event
+ * 
  */
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -25,6 +28,9 @@ import javax.swing.JTextPane;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.EventListenerList;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
@@ -35,6 +41,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import myComponents.AppLogger;
+
 
 
 public class HexEditDisplayPanel extends JPanel implements Runnable {
@@ -63,7 +70,10 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 	private SimpleAttributeSet addressAttributes;
 	private SimpleAttributeSet dataAttributes;
 	private SimpleAttributeSet asciiAttributes;
-
+	
+	private boolean dataChanged;
+	private String name;
+	
 	@Override
 	public void run() {
 		clearAllDocs();
@@ -81,26 +91,39 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		return ans;
 	}// isVisible
 
-	public boolean isDataChanged() {
-		return hexFilter.isDataChanged();
-	}// isDataChanged
-
 	public void setDataChanged(boolean state) {
+		dataChanged = false;
 		hexFilter.setDataChanged(state);
 	}// setDataChanged
+	
+	public boolean isDataChanged() {
+		return dataChanged;
+	}//isDataChanged
+	
+	public void setName(String name) {
+		this.name =name;
+	}//setName
+	
+	public String getName() {
+		return name;
+	}//getName
 
 	public int getCurrentLineStart() {
 		return this.currentLineStart;
 	}// getCurrentLineStart
 
 	public void updateValue(int dot, byte newValue, String panelSource) {
+		if (!dataChanged) {
+			dataChanged = true;
+			fireChangeEvent();
+		}//if
 		int location = HEUtility.getSourceIndex(dot) + currentLineStart;
 		byte oldValue = source.get(location);
 
 		EditAtom editAtom = new EditAtom(location, oldValue, newValue, panelSource);
 		editCaretaker.addEdit(editAtom);
 
-		log.infof(String.format("%s  location: %#X, from %02X, to %02X", editAtom.getEditType(), location, oldValue,newValue));
+		log.infof(String.format("%s  location: %#X, from %02X, to %02X%n", editAtom.getEditType(), location, oldValue,newValue));
 		source.put(location, newValue);
 	}// updateSource
 
@@ -142,7 +165,6 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		} // if visible
 
 		int displacement = location - currentLineStart;
-		// int line =displacement/LINE_SIZE;
 		int lineStart = displacement / LINE_SIZE * HEUtility.COLUMNS_PER_LINE;
 		int bytePosition = displacement % LINE_SIZE;
 		int midLineAdjusment = bytePosition >= HEUtility.MID_LINE_START ? 1 : 0;
@@ -218,21 +240,20 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 
 	private void setTextPanesCaretListeners(boolean status) {
 		/* status true = on/enables; false = off/disabled */
-
 		if (status) {
 			textAddr.addCaretListener(adapterHexEditDisplay);
 			textHex.addCaretListener(adapterHexEditDisplay);
 		} else {
 			textAddr.removeCaretListener(adapterHexEditDisplay);
 			textHex.removeCaretListener(adapterHexEditDisplay);
-		} //
+		} //if
 
 	}// setTextPanesEnabled
 
 	private void addHexLineToDocument(int currentAddress, byte[] data) {
 		String strAddress = getAddress(currentAddress);
-		String strData = getHexData(data);
-		String strAscii = getAscii(data);
+		String strData = getDataLine(data);
+		String strAscii = getAsciiLine(data);
 
 		try {
 			addrDoc.insertString(addrDoc.getLength(), strAddress, addressAttributes);
@@ -252,7 +273,7 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		return String.format(FORMAT_ADDR, currentAddress);
 	}// getAddress
 
-	private String getHexData(byte[] data) {
+	private String getDataLine(byte[] data) {
 		StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (; i < data.length; i++) {
@@ -272,7 +293,7 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 
 	}// getData
 
-	private String getAscii(byte[] data) {
+	private String getAsciiLine(byte[] data) {
 		StringBuilder sb = new StringBuilder();
 
 		byte b;
@@ -297,24 +318,11 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 
 		return sb.toString();
 	}// getAscii
-	
-	public ByteBuffer getDataByteBuffer() {
-		ByteBuffer bb = ByteBuffer.allocate(source.capacity());
-		bb.rewind();
-		return bb;
-	}//getDataByteBuffer
-	
-	public byte[] getData() {
-		byte[] b = new byte[dataSize];
-		source.rewind();
-		source.get(b,0,dataSize);
-		return b;
-	}//getData
-
-
 
 	public void setData(ByteBuffer data) {
 		source = data.duplicate();
+		source.rewind();
+		dataChanged= false;
 	}// setData
 
 	public void setData(byte[] data) {
@@ -326,12 +334,22 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		source = ByteBuffer.allocate(bufferSize);
 		source.put(data);
 		source.rewind();
+		dataChanged= false;
 	}// setData
+	
+	public byte[] getData() {
+		byte[] ans = new byte[dataSize];
+		source.rewind();
+		source.get(ans);
+		return ans;
+	}//getData
 
 	protected void setUpScrollBar() {
 		if (source == null) {
 			return;
 		} // if
+			// javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			// public void run() {
 		currentMax = maximumNumberOfRows(textHex);
 		currentExtent = calcExtent(textHex);
 
@@ -342,6 +360,8 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		model.setExtent(currentExtent);
 
 		scrollBar.setBlockIncrement(currentExtent - 2);
+		// }// run
+		// });
 		scrollBar.updateUI();
 	}// setUpScrollBar
 
@@ -381,12 +401,30 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		StyleConstants.setForeground(asciiAttributes, Color.BLUE);
 
 	}// makeStyles1
-	
-	public void setEditable(boolean state) {
-		textHex.setEditable(state);
-	}//setEditable
-	
 		//////////////////////////////////////////////////////////////////////////////////////
+	//--------------------------------------------------
+	EventListenerList listenerList= new EventListenerList();
+	
+	public void addChangeListener(ChangeListener changeListener) {
+		listenerList.add(ChangeListener.class, changeListener);
+	}//addChangeListener
+	
+	public void removeChangeListener(ChangeListener changeListener) {
+		listenerList.remove(ChangeListener.class, changeListener);
+	}//removeChangeListener
+	
+	protected void fireChangeEvent() {
+		Object[] listeners = listenerList.getListenerList();
+		//process
+		ChangeEvent changeEvent = new ChangeEvent(this);
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if(listeners[i]==ChangeListener.class) {
+				((ChangeListener) listeners[i+1]).stateChanged(changeEvent);
+			}//if
+		}//for
+	}//fireChangeEvent
+	
+	//--------------------------------------------------
 
 	public HexEditDisplayPanel() {
 		setPreferredSize(new Dimension(790, 500));
@@ -396,7 +434,6 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		initialize();
 		appInit();
 	}// Constructor
-
 
 	private void appInit() {
 
@@ -418,6 +455,7 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} // try
+		setDataChanged(false);
 	}// appInit
 
 	private void initialize() {
@@ -505,6 +543,8 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		add(scrollBar, gbc_scrollBar);
 	}// initialize
 
+	// private static final String FORMAT_DATA = "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X
+	// %02X %02X ";
 	private static final String FORMAT_DATA = "%02X ";
 	private static final String FORMAT_ADDR = "%08X:";
 
@@ -632,6 +672,7 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 				e.printStackTrace();
 			} // try
 
+			// lblAddress.setText(String.format("%08X ", HEUtility.getSourceIndex(startData) + currentLineStart));
 			hdAddress.setValueQuiet(HEUtility.getSourceIndex(startData) + currentLineStart);
 		}// caretUpdate
 

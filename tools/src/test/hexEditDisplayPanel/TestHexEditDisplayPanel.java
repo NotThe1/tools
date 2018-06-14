@@ -106,10 +106,10 @@ public class TestHexEditDisplayPanel {
 		
 		if (btnThree.getText().equals(RO)){
 			btnThree.setText(RW);
-			hexPanel.setEditable(true);
+//			hexPanel.setEditable(true);
 		}else {
 			btnThree.setText(RO);
-			hexPanel.setEditable(false);		
+//			hexPanel.setEditable(false);		
 		}//if
 		
 	}//doBtnThree
