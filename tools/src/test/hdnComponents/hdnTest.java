@@ -35,8 +35,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
@@ -342,9 +344,9 @@ public class hdnTest {
 		panelLeft.add(panel, gbc_panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[] { 0, 0, 0, 0 };
-		gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_panel.columnWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
-		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
 
 		Component verticalStrut = Box.createVerticalStrut(20);
@@ -401,6 +403,7 @@ public class hdnTest {
 				panel.add(lblMin, gbc_lblMin);
 				
 				spinnerMax = new JSpinner();
+				spinnerMax.setModel(new SpinnerNumberModel(new Integer(100), null, null, new Integer(1)));
 				spinnerMax.setMinimumSize(new Dimension(50, 20));
 				spinnerMax.setPreferredSize(new Dimension(50, 20));
 				GridBagConstraints gbc_spinnerMax = new GridBagConstraints();
@@ -419,6 +422,7 @@ public class hdnTest {
 				panel.add(lblMax, gbc_lblMax);
 				
 				spinnerValue = new JSpinner();
+				spinnerValue.setModel(new SpinnerNumberModel(new Integer(32), null, null, new Integer(1)));
 				spinnerValue.setMinimumSize(new Dimension(50, 20));
 				spinnerValue.setPreferredSize(new Dimension(50, 20));
 				GridBagConstraints gbc_spinnerValue = new GridBagConstraints();
@@ -445,12 +449,58 @@ public class hdnTest {
 					}
 				});
 				GridBagConstraints gbc_btnSetHDN = new GridBagConstraints();
+				gbc_btnSetHDN.insets = new Insets(0, 0, 5, 0);
 				gbc_btnSetHDN.gridwidth = 2;
 				gbc_btnSetHDN.anchor = GridBagConstraints.EAST;
-				gbc_btnSetHDN.insets = new Insets(0, 0, 0, 5);
 				gbc_btnSetHDN.gridx = 1;
 				gbc_btnSetHDN.gridy = 9;
 				panel.add(btnSetHDN, gbc_btnSetHDN);
+				
+				txtFormat = new JTextField();
+				GridBagConstraints gbc_txtFormat = new GridBagConstraints();
+				gbc_txtFormat.insets = new Insets(0, 0, 5, 5);
+				gbc_txtFormat.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtFormat.gridx = 1;
+				gbc_txtFormat.gridy = 11;
+				panel.add(txtFormat, gbc_txtFormat);
+				txtFormat.setColumns(10);
+				
+				JButton btnResetBoth = new JButton("Reset Both");
+				btnResetBoth.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						hdn1.restDisplayFormat();
+					}
+					
+				});
+				GridBagConstraints gbc_btnResetBoth = new GridBagConstraints();
+				gbc_btnResetBoth.insets = new Insets(0, 0, 5, 0);
+				gbc_btnResetBoth.gridx = 2;
+				gbc_btnResetBoth.gridy = 11;
+				panel.add(btnResetBoth, gbc_btnResetBoth);
+				
+				JButton btnSetDecimal = new JButton("set Decimal");
+				btnSetDecimal.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						hdn1.setDecimalDisplay(txtFormat.getText());
+					}
+				});
+				GridBagConstraints gbc_btnSetDecimal = new GridBagConstraints();
+				gbc_btnSetDecimal.insets = new Insets(0, 0, 5, 0);
+				gbc_btnSetDecimal.gridx = 2;
+				gbc_btnSetDecimal.gridy = 12;
+				panel.add(btnSetDecimal, gbc_btnSetDecimal);
+				
+				JButton btnSetHex = new JButton("set Hex");
+				btnSetHex.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						hdn1.setHexDisplay(txtFormat.getText());
+					}
+				});
+				GridBagConstraints gbc_btnSetHex = new GridBagConstraints();
+				gbc_btnSetHex.fill = GridBagConstraints.HORIZONTAL;
+				gbc_btnSetHex.gridx = 2;
+				gbc_btnSetHex.gridy = 13;
+				panel.add(btnSetHex, gbc_btnSetHex);
 				
 				JPanel panel_1 = new JPanel();
 				panel_1.setBorder(new TitledBorder(new LineBorder(new Color(255, 0, 0), 1, true), "Seek Panel", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -641,6 +691,7 @@ public class hdnTest {
 	private JSpinner spinnerValue;
 	private HDSeekPanel seekPanel;
 	private JToggleButton tb2;
+	private JTextField txtFormat;
 
 	//////////////////////////////////////////////////////////////////////////
 
