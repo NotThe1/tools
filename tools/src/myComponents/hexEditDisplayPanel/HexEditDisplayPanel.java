@@ -42,7 +42,9 @@ import javax.swing.text.StyledDocument;
 
 import myComponents.AppLogger;
 
-
+/*
+ *     2018-08-18  - added limit for address box
+ */
 
 public class HexEditDisplayPanel extends JPanel implements Runnable {
 	private static final long serialVersionUID = 1L;
@@ -323,6 +325,7 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		source = data.duplicate();
 		source.rewind();
 		dataChanged= false;
+		setAddressLimits();
 	}// setData
 
 	public void setData(byte[] data) {
@@ -335,7 +338,13 @@ public class HexEditDisplayPanel extends JPanel implements Runnable {
 		source.put(data);
 		source.rewind();
 		dataChanged= false;
+		setAddressLimits();
 	}// setData
+	
+	public void setAddressLimits() {
+		hdAddress.setMinValue(0);
+		hdAddress.setMaxValue(source.capacity());
+	}//setAddressLimits
 	
 	public byte[] getData() {
 		byte[] ans = new byte[dataSize];
