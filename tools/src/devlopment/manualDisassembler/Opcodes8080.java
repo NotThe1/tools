@@ -20,7 +20,7 @@ public class Opcodes8080 {
 	
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	
-	private static final int  NORMAL = OpcodeStructure8080.NORMAL;
+//	private static final int  NORMAL = OpcodeStructure8080.NORMAL;
 	private static final int TOTAL = OpcodeStructure8080.TOTAL; // JMP POP PCHL
 	private static final int CONTINUATION = OpcodeStructure8080.CONTINUATION; // CALL and All conditionals
 	private static final int TERMINATES = OpcodeStructure8080.TERMINATES; // RET

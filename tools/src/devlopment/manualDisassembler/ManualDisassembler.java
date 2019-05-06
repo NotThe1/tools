@@ -157,12 +157,9 @@ public class ManualDisassembler implements ActionListener, ListSelectionListener
 		tabPaneDisplays.setSelectedIndex(TAB_WIP);
 	}// actionStart
 
-	private void try1() {
-		//
-	}// try1
 
 	private SimpleAttributeSet[] makeAttributes() {
-		int baseFontSize = txtWIPsource.getFont().getSize();
+//		int baseFontSize = txtWIPsource.getFont().getSize();
 		SimpleAttributeSet baseAttributes = new SimpleAttributeSet();
 		StyleConstants.setFontFamily(baseAttributes, "Courier New");
 
@@ -221,7 +218,7 @@ public class ManualDisassembler implements ActionListener, ListSelectionListener
 		boolean keepGoing = true;
 		int targetAddress;
 		while (keepGoing) {
-			int a = currentLocation;
+//			int a = currentLocation;
 			if(currentLocation > binaryData.capacity()){
 				return;
 			}
@@ -274,9 +271,9 @@ try{
 	}// buildFragments
 
 	private int makeTargetAddress(int currentLocation) {
-		int hi = (binaryData.get(currentLocation + 2) & 0xFF) * 256;
-		int lo = binaryData.get(currentLocation + 1);
-		int v = hi + lo;
+//		int hi = (binaryData.get(currentLocation + 2) & 0xFF) * 256;
+//		int lo = binaryData.get(currentLocation + 1);
+//		int v = hi + lo;
 		// System.out.printf("<makeTargetAddress> target = %04X from currentLocation %04X%n", v, currentLocation);
 		return ((binaryData.get(currentLocation + 2) & 0xFF) * 256) + (binaryData.get(currentLocation + 1) & 0xFF);
 	}// makeTargetAddress
@@ -331,6 +328,13 @@ try{
 			JOptionPane.showMessageDialog(null, binaryFile.getAbsolutePath()
 					+ " - IOException ", "processBianryFile",
 					JOptionPane.ERROR_MESSAGE);
+			try {
+				fout.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//try
+
 			return false; // exit gracefully
 		}// try
 			// binaryData.flip();
@@ -338,6 +342,12 @@ try{
 		haveBinanryFile(true);
 		frame.setTitle(APP_NAME + " - " + binaryFileName);
 		tabPaneDisplays.setSelectedIndex(TAB_BINARY_FILE);
+		try {
+			fout.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}//try
 		return result;
 	}
 
@@ -485,7 +495,7 @@ try{
 	private void showFragmentCode(Document doc, CodeFragment codeFragment) {
 		int startLocation = codeFragment.startLoc;
 		int endLocation = codeFragment.endLoc;
-		int codeSize = codeFragment.size();
+//		int codeSize = codeFragment.size();
 		clearDocument(doc);
 		OpcodeStructure8080 currentOpCode = null;
 
@@ -624,7 +634,7 @@ try{
 	}// buildASM
 
 	private void buildLiteralFragment(Document doc, CodeFragment codeFragment) {
-		HashMap<Byte, String> literals = new HashMap();
+		HashMap<Byte, String> literals = new HashMap<Byte, String>();
 		literals.put((byte) 0x00, "NULL");
 		literals.put((byte) 0x01, "SOH");
 		literals.put((byte) 0x07, "BELL");
@@ -638,8 +648,8 @@ try{
 		byte[] literalValues = new byte[codeFragment.size()];
 		binaryData.position(codeFragment.startLoc);
 		binaryData.get(literalValues, 0, codeFragment.size());
-		int crCount = 0;
-		int lfCount = 0;
+//		int crCount = 0;
+//		int lfCount = 0;
 		String literalData = null;
 		int subFragmentStart = 0;
 		int subLength = 0;
@@ -748,11 +758,11 @@ try{
 		int endLocation = codeFragment.endLoc;
 		int opCodeSize;
 
-		byte currentValue0, currentValue1, currentValue2;
-		String part1, part2, part3, part4, thisLabel;
+		byte  currentValue1, currentValue2;
+		String  part3;
 		while (currentLocation <= endLocation) {
 			currentOpCode = opcodeMap.get(binaryData.get(currentLocation));
-			currentValue0 = binaryData.get(currentLocation);
+//			currentValue0 = binaryData.get(currentLocation);
 			opCodeSize = currentOpCode.getSize();
 			currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
 			currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
@@ -832,6 +842,7 @@ try{
 		}// try - write objects
 	}// saveWIP
 
+	@SuppressWarnings("unchecked")
 	private void loadWIP(String fileName) {
 		try {
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName));
@@ -960,6 +971,7 @@ try{
 		if (lse.getValueIsAdjusting()) {
 			return;
 		}
+		@SuppressWarnings("rawtypes")
 		int index = ((JList) lse.getSource()).getSelectedIndex();
 		if (index == -1) {
 			return;
@@ -977,6 +989,7 @@ try{
 		System.exit(0);
 	}// appClose
 
+	@SuppressWarnings("unchecked")
 	private void appInit() {
 		// System.out.printf("System.getProperty(\"java.class.path\") = %s%n",System.getProperty("java.class.path"));
 		// System.out.printf("%n--------Enviornment Variables --------------%n");
@@ -1049,7 +1062,7 @@ try{
 
 	private final int TAB_WIP = 0;
 	private final int TAB_BINARY_FILE = 1;
-	private final int TAB_ASM = 2;
+//	private final int TAB_ASM = 2;
 
 	private final int ATTR_ADDRESS = 0;
 	private final int ATTR_BINARY_CODE = 1;
@@ -1078,7 +1091,7 @@ try{
 	private final static String AC_BTN_COMBINE_FRAGMENTS = "btnCombineFragment";
 
 	private final static String APP_NAME = "Manual Disassembler ";
-	private final static String SEMI = ";"; // SemiColon
+//	private final static String SEMI = ";"; // SemiColon
 	private final static String WIP = "Work In Process";
 	private final static String FILE_SUFFIX = "WIP";
 	private final static String FILE_SUFFIX_PERIOD = "." + FILE_SUFFIX;
@@ -1093,6 +1106,7 @@ try{
 	private JRadioButton rbLiteral;
 	private JRadioButton rbConstant;
 	private JRadioButton rbCode;
+	@SuppressWarnings("rawtypes")
 	private JList listCodeFragments;
 	private JButton btnStart;
 	private JButton btnAddFragment;
@@ -1121,6 +1135,7 @@ try{
 	/**
 	 * Initialize the contents of the frame.
 	 */
+	@SuppressWarnings("rawtypes")
 	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 986, 836);
