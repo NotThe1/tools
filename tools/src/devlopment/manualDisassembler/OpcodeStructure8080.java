@@ -12,14 +12,14 @@ public class OpcodeStructure8080 {
 	private String source;
 	private String destination;
 	private String function;
-	private int pcAction; // program counter action
+	private PCaction pcAction; // program counter action
 
 	OpcodeStructure8080(byte opCode, int size, String instruction, String destination, String source, String function) {
-		this(opCode, size, instruction, destination, source, function, NORMAL);
+		this(opCode, size, instruction, destination, source, function, PCaction.NORMAL);
 	}// CONSTRUCTOR
 
 	OpcodeStructure8080(byte opCode, int size, String instruction, String destination, String source, String function,
-			int pcAction) {
+			PCaction pcAction) {
 		this.opCode = opCode;
 		this.size = size;
 		this.instruction = instruction;
@@ -53,7 +53,7 @@ public class OpcodeStructure8080 {
 		return this.function;
 	}// getFunction
 	
-	public int getPcAction() {
+	public PCaction getPcAction() {
 		return this.pcAction;
 	}// getFunction
 
@@ -87,10 +87,5 @@ public class OpcodeStructure8080 {
 		}
 		return ans;
 	}// getAssemblerCode
-
-	public final static int NORMAL = 0;
-	public final static int TOTAL = 1; // JMP POP L
-	public final static int CONTINUATION = 2; // CALL and All conditionals
-	public final static int TERMINATES = 3; // RET
 
 }// class OpcodeStructure8080

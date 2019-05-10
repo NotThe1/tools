@@ -12,8 +12,11 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
+import java.util.prefs.Preferences;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -47,10 +51,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-
-//import codeSupport.ManualDisassembler0.CodeFragment;
-//import codeSupport.ManualDisassembler0.OperationStructure;
-
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -68,11 +68,16 @@ import javax.swing.text.Document;
 import javax.swing.text.Highlighter;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
+import myComponents.AppLogger;
 import myComponents.Hex64KSpinner;
 
-public class ManualDisassembler implements ActionListener, ListSelectionListener {
+public class ManualDisassembler {
 
+	private ApplicationAdapter applicationAdapter = new ApplicationAdapter();
+	private myComponents.AppLogger log = myComponents.AppLogger.getInstance();
+	private String hostDirectory;
 	private JFrame frame;
 
 	/**
@@ -82,8 +87,8 @@ public class ManualDisassembler implements ActionListener, ListSelectionListener
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ManualDisassembler window = new ManualDisassembler();
-					window.frame.setVisible(true);
+					ManualDisassembler manualDisassembler = new ManualDisassembler();
+					manualDisassembler.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -103,12 +108,12 @@ public class ManualDisassembler implements ActionListener, ListSelectionListener
 		int index = listCodeFragments.getSelectedIndex();
 		if (index == -1) {
 			return;
-		}// if
-			// System.out.printf("<removeFragment> getSelectedIndex() =  %s%n", listCodeFragments.getSelectedIndex());
+		} // if
+			// System.out.printf("<removeFragment> getSelectedIndex() = %s%n", listCodeFragments.getSelectedIndex());
 		codeFragmentModel.removeItem(listCodeFragments.getSelectedIndex());
 		if (index > codeFragmentModel.getSize() - 1) {
 			listCodeFragments.setSelectedIndex(codeFragmentModel.getSize() - 1);
-		}// if
+		} // if
 		listCodeFragments.updateUI();
 	}// removeFragment
 
@@ -116,11 +121,11 @@ public class ManualDisassembler implements ActionListener, ListSelectionListener
 		int index = listCodeFragments.getSelectedIndex();
 		if (index == -1) {
 			return;
-		}// if
+		} // if
 		CodeFragment cf = codeFragmentModel.getElementAt(index);
 		if (!cf.type.equals(CodeFragment.UNKNOWN)) {
 			return;
-		}// if
+		} // if
 		System.out.printf("<processFragment> - DoIt!%n");
 		entryPoints.push(cf.startLoc);
 		buildFragments();
@@ -151,15 +156,14 @@ public class ManualDisassembler implements ActionListener, ListSelectionListener
 			} else {
 				entryPoints.pop(); // toss the entry point , been there!
 			}
-		}// while
+		} // while
 			// combineFragments();
 		listCodeFragments.updateUI();
 		tabPaneDisplays.setSelectedIndex(TAB_WIP);
 	}// actionStart
 
-
 	private SimpleAttributeSet[] makeAttributes() {
-//		int baseFontSize = txtWIPsource.getFont().getSize();
+		// int baseFontSize = txtWIPsource.getFont().getSize();
 		SimpleAttributeSet baseAttributes = new SimpleAttributeSet();
 		StyleConstants.setFontFamily(baseAttributes, "Courier New");
 
@@ -195,13 +199,13 @@ public class ManualDisassembler implements ActionListener, ListSelectionListener
 			} else {
 				tempFragments.add(cfNew);
 				cfNew = codeFragmentModel.getElementAt(i);
-			}// if
+			} // if
 		}
 		tempFragments.add(cfNew);
 		codeFragmentModel.clear();
 		for (int i = 0; i < tempFragments.size(); i++) {
 			codeFragmentModel.addItem(tempFragments.get(i));
-		}// for - rebuild codeFragments
+		} // for - rebuild codeFragments
 		listCodeFragments.updateUI();
 	}
 
@@ -210,7 +214,7 @@ public class ManualDisassembler implements ActionListener, ListSelectionListener
 		int currentLocation = 0;
 		OpcodeStructure8080 currentOpCode = null;
 		;
-		int pcAction = 0;
+		PCaction pcAction = PCaction.NORMAL;
 		;
 
 		startLocation = entryPoints.pop();
@@ -218,8 +222,8 @@ public class ManualDisassembler implements ActionListener, ListSelectionListener
 		boolean keepGoing = true;
 		int targetAddress;
 		while (keepGoing) {
-//			int a = currentLocation;
-			if(currentLocation > binaryData.capacity()){
+			// int a = currentLocation;
+			if (currentLocation > binaryData.capacity()) {
 				return;
 			}
 
@@ -228,74 +232,76 @@ public class ManualDisassembler implements ActionListener, ListSelectionListener
 				codeFragmentModel.addItem(new CodeFragment(startLocation, (currentLocation - 1), CodeFragment.CODE));
 
 				return;
-			}//
-try{
-	currentOpCode = opcodeMap.get(binaryData.get(currentLocation));
-}catch(Exception ex){
-	ex.printStackTrace();
-	
-}
-			
+			} //
+			try {
+				currentOpCode = opcodeMap.get(binaryData.get(currentLocation));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+
+			}
+
 			// System.out.printf("Location = %04X, opcode = %s%n", currentLocation, currentOpCode.getInstruction());
 			pcAction = currentOpCode.getPcAction();
 
 			switch (pcAction) {
-			case OpcodeStructure8080.NORMAL: // regular opcodes and conditional RETURNS
+
+			case NORMAL: // regular opcodes and conditional RETURNS
 				currentLocation += currentOpCode.getSize();
 				keepGoing = true;
 				break;
-			case OpcodeStructure8080.CONTINUATION: // All CALLs and all Conditional RETURNS
+			case CONTINUATION: // All CALLs and all Conditional RETURNS
 				targetAddress = makeTargetAddress(currentLocation);
 				entryPoints.push(targetAddress);
 				labels.add(targetAddress);
 				currentLocation += currentOpCode.getSize();
 				keepGoing = true;
 				break;
-			case OpcodeStructure8080.TERMINATES: // RET
+			case TERMINATES: // RET
 				currentLocation += currentOpCode.getSize();
 				keepGoing = false;
 				break;
-			case OpcodeStructure8080.TOTAL: // JUMP PCHL
+			case TOTAL: // JUMP PCHL
 				if (currentOpCode.getInstruction().equals("JMP")) { // only for JMP
 					targetAddress = makeTargetAddress(currentLocation);
 					entryPoints.push(targetAddress);
 					labels.add(targetAddress);
-				}// if
+				} // if
 				currentLocation += currentOpCode.getSize();
 				keepGoing = false;
 				break;
 			}// switch
-		}// - keep going
+		} // - keep going
 		codeFragmentModel.addItem(new CodeFragment(startLocation, (currentLocation - 1), CodeFragment.CODE));
 		return;
 	}// buildFragments
 
 	private int makeTargetAddress(int currentLocation) {
-//		int hi = (binaryData.get(currentLocation + 2) & 0xFF) * 256;
-//		int lo = binaryData.get(currentLocation + 1);
-//		int v = hi + lo;
+		// int hi = (binaryData.get(currentLocation + 2) & 0xFF) * 256;
+		// int lo = binaryData.get(currentLocation + 1);
+		// int v = hi + lo;
 		// System.out.printf("<makeTargetAddress> target = %04X from currentLocation %04X%n", v, currentLocation);
 		return ((binaryData.get(currentLocation + 2) & 0xFF) * 256) + (binaryData.get(currentLocation + 1) & 0xFF);
 	}// makeTargetAddress
 
 	private void openBinaryFile() {
-		String fileLocation = "C:\\Users\\admin\\Dropbox\\Resources\\NativeFiles";
-		Path sourcePath = Paths.get(fileLocation);
-		JFileChooser chooser = new JFileChooser(sourcePath.resolve(fileLocation).toString());
-		if (chooser.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) {
+//		String fileLocation = "C:\\Users\\admin\\Dropbox\\Resources\\NativeFiles";
+		
+		Path sourcePath = Paths.get(hostDirectory);
+		JFileChooser chooser = new JFileChooser(sourcePath.resolve(hostDirectory).toString());
+		if (chooser.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION) {
 			return;
-		}// if
-
+		} // if
+		hostDirectory = chooser.getSelectedFile().getParent();
 		binaryFile = chooser.getSelectedFile();
+		log.infof("Opening Binary File %s%n", chooser.getSelectedFile());
 		if (!processBianryFile(binaryFile)) {
-			JOptionPane.showMessageDialog(null, "Problem with binary Source file" + binaryFile.getAbsolutePath()
-					, "openBinaryFile()",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Problem with binary Source file" + binaryFile.getAbsolutePath(),
+					"openBinaryFile()", JOptionPane.ERROR_MESSAGE);
 			return;
-		}// if
+		} // if
 		codeFragmentModel.removeItem(0);
-		codeFragmentModel.addItem(new CodeFragment(OFFSET, (int) (binaryFile.length() + OFFSET) - 1,
-				CodeFragment.UNKNOWN));
+		codeFragmentModel
+				.addItem(new CodeFragment(OFFSET, (int) (binaryFile.length() + OFFSET) - 1, CodeFragment.UNKNOWN));
 
 	}// openBinaryFile
 
@@ -310,8 +316,7 @@ try{
 			fout = new FileInputStream(binaryFile);
 			fcIn = fout.getChannel();
 		} catch (FileNotFoundException fileNotFoundException) {
-			JOptionPane.showMessageDialog(null, binaryFile.getAbsolutePath()
-					+ "not found", "processBianryFile",
+			JOptionPane.showMessageDialog(null, binaryFile.getAbsolutePath() + "not found", "processBianryFile",
 					JOptionPane.ERROR_MESSAGE);
 			return false;
 		} // exit gracefully
@@ -325,18 +330,17 @@ try{
 			fcIn.read(binaryData);
 			fcIn.close();
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, binaryFile.getAbsolutePath()
-					+ " - IOException ", "processBianryFile",
+			JOptionPane.showMessageDialog(null, binaryFile.getAbsolutePath() + " - IOException ", "processBianryFile",
 					JOptionPane.ERROR_MESSAGE);
 			try {
 				fout.close();
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}//try
+			} // try
 
 			return false; // exit gracefully
-		}// try
+		} // try
 			// binaryData.flip();
 		displayBinaryFile(binaryData, (int) roundedFileSize);
 		haveBinanryFile(true);
@@ -347,7 +351,7 @@ try{
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}//try
+		} // try
 		return result;
 	}
 
@@ -360,11 +364,11 @@ try{
 		try {
 			int lineNumber = OFFSET / CHARACTERS_PER_LINE;
 			while (binaryData.position() + CHARACTERS_PER_LINE <= binaryData.capacity()) {
-				// System.out.printf("<displayBinaryFile> lineNumber = %d,  position = %d%n", lineNumber,
+				// System.out.printf("<displayBinaryFile> lineNumber = %d, position = %d%n", lineNumber,
 				// binaryData.position());
 				binaryData.get(displayLine, 0, CHARACTERS_PER_LINE);
 				docBinary.insertString(docBinary.getLength(), formatLine(displayLine, lineNumber++), null);
-			}// while
+			} // while
 		} catch (BadLocationException badLocationException) {
 			badLocationException.printStackTrace();
 
@@ -393,8 +397,8 @@ try{
 			if (i == 7) {
 				sbHex.append(" ");
 				sbDot.append(" ");
-			}// if
-		}// for
+			} // if
+		} // for
 		sbHex.append(" ");
 		sbDot.append(String.format("%n"));
 		return sbHex.toString() + sbDot.toString();
@@ -403,13 +407,13 @@ try{
 	private void clearDocument(Document doc) {
 		if (doc == null) {
 			return;
-		}// if
+		} // if
 		try {
 			doc.remove(0, doc.getLength());
 		} catch (BadLocationException e) {
 			// ignore
 			e.printStackTrace();
-		}// try
+		} // try
 	}// clearDocument
 
 	private void haveBinanryFile(boolean state) {
@@ -433,7 +437,7 @@ try{
 			btnCombineFragments.setEnabled(state);
 			btnBuildASM.setEnabled(state);
 			listCodeFragments.setEnabled(state);
-		}// if
+		} // if
 	}// haveBinanryFile
 
 	private void setFragmentRadioButton(String type) {
@@ -469,7 +473,7 @@ try{
 		} catch (BadLocationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}//
+		} //
 	}// displayFragmentSource
 
 	private void displayFragmentSource(JTextPane txtArea, CodeFragment codeFragment) {
@@ -495,7 +499,7 @@ try{
 	private void showFragmentCode(Document doc, CodeFragment codeFragment) {
 		int startLocation = codeFragment.startLoc;
 		int endLocation = codeFragment.endLoc;
-//		int codeSize = codeFragment.size();
+		// int codeSize = codeFragment.size();
 		clearDocument(doc);
 		OpcodeStructure8080 currentOpCode = null;
 
@@ -548,7 +552,7 @@ try{
 			}
 			currentLocation += opCodeSize;
 
-		}// while opcodeMap
+		} // while opcodeMap
 	}// showFragmentCode
 
 	private void buildSourceHeader(Document doc) {
@@ -579,8 +583,7 @@ try{
 	}// buildSourceHeader
 
 	private void buildFragmentHeader(Document doc, CodeFragment codeFragment) {
-		String displayText = String.format(
-				"%n;     <New %s fragment-----from %04X to %04X (%3$4X : %3$4d)>%n",
+		String displayText = String.format("%n;     <New %s fragment-----from %04X to %04X (%3$4X : %3$4d)>%n",
 				codeFragment.type, codeFragment.startLoc, codeFragment.endLoc, codeFragment.size());
 		appendToDocASM(displayText);
 		displayText = String.format(";%17s  %05XH%n", "ORG", codeFragment.startLoc);
@@ -597,14 +600,14 @@ try{
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}// try
+		} // try
 	}// appendToDoc
 
 	private void buildASM() {
 		if (codeFragmentModel.getSize() < 2) {
 			return;
-		}// if
-		clearDocument(docASM);				// Star with clean doc
+		} // if
+		clearDocument(docASM); // Star with clean doc
 		buildSourceHeader(docASM);
 		CodeFragment codeFragment;
 
@@ -629,7 +632,7 @@ try{
 			default:
 			}// switch
 
-		}// for
+		} // for
 		txtASM.setCaretPosition(0);
 	}// buildASM
 
@@ -648,8 +651,8 @@ try{
 		byte[] literalValues = new byte[codeFragment.size()];
 		binaryData.position(codeFragment.startLoc);
 		binaryData.get(literalValues, 0, codeFragment.size());
-//		int crCount = 0;
-//		int lfCount = 0;
+		// int crCount = 0;
+		// int lfCount = 0;
 		String literalData = null;
 		int subFragmentStart = 0;
 		int subLength = 0;
@@ -667,28 +670,28 @@ try{
 					byte[] subFragmentString = new byte[subLength];
 					for (int j = 0; j < subLength; j++) {
 						subFragmentString[j] = literalValues[j + subFragmentStart];
-					}// for
+					} // for
 					literalData = new String(subFragmentString);
 					String displayText = String.format("%17s  '%s'%n", "DB", literalData);
 					appendToDocASM(displayText);
-				}// if
+				} // if
 				String displayText = String.format("%17s  %s%n", "DB", literals.get(literalValues[i]));
 				appendToDocASM(displayText);
 				subFragmentStart = i + 1;
 				break;
 			default:
 			}// switch
-		}// for
+		} // for
 		int remainder = codeFragment.size() - subFragmentStart;
 		if (remainder > 0) {
 			byte[] subFragmentString = new byte[remainder];
 			for (int k = 0; k < remainder; k++) {
 				subFragmentString[k] = literalValues[k + subFragmentStart];
-			}// for
+			} // for
 			literalData = new String(subFragmentString);
 			String displayText = String.format("%17s  '%s'%n", "DB", literalData);
 			appendToDocASM(displayText);
-		}// if - remaing data
+		} // if - remaing data
 
 	}// buildUnknownFragent
 
@@ -700,42 +703,40 @@ try{
 		for (int i = codeFragment.size(); i > 0;) {
 			if (i == 0) {
 				break;
-			}// if
+			} // if
 			switch (i % dbPerLine) {
 			case 0:
-				displayText = String.format("%17s  %03XH,%03XH,%03XH,%03XH,%03XH%n", "DB",
-						binaryData.get(locBase), binaryData.get(locBase + 1), binaryData.get(locBase + 2),
-						binaryData.get(locBase + 3), binaryData.get(locBase + 4));
+				displayText = String.format("%17s  %03XH,%03XH,%03XH,%03XH,%03XH%n", "DB", binaryData.get(locBase),
+						binaryData.get(locBase + 1), binaryData.get(locBase + 2), binaryData.get(locBase + 3),
+						binaryData.get(locBase + 4));
 				i -= dbPerLine;
 				locBase += dbPerLine;
 				break;
 			case 4:
-				displayText = String.format("%17s  %03XH,%03XH,%03XH,%03XH%n", "DB",
-						binaryData.get(locBase), binaryData.get(locBase + 1), binaryData.get(locBase + 2),
-						binaryData.get(locBase + 3));
+				displayText = String.format("%17s  %03XH,%03XH,%03XH,%03XH%n", "DB", binaryData.get(locBase),
+						binaryData.get(locBase + 1), binaryData.get(locBase + 2), binaryData.get(locBase + 3));
 				i -= dbPerLine - 1;
 				locBase += dbPerLine - 1;
 				break;
 			case 3:
-				displayText = String.format("%17s  %03XH,%03XH,%03XH%n", "DB",
-						binaryData.get(locBase), binaryData.get(locBase + 1), binaryData.get(locBase + 2));
+				displayText = String.format("%17s  %03XH,%03XH,%03XH%n", "DB", binaryData.get(locBase),
+						binaryData.get(locBase + 1), binaryData.get(locBase + 2));
 				i -= dbPerLine - 2;
 				locBase += dbPerLine - 2;
 				break;
 			case 2:
-				displayText = String.format("%17s  %03XH,%03XH%n", "DB",
-						binaryData.get(locBase), binaryData.get(locBase + 1));
+				displayText = String.format("%17s  %03XH,%03XH%n", "DB", binaryData.get(locBase),
+						binaryData.get(locBase + 1));
 				i -= dbPerLine - 3;
 				locBase += dbPerLine - 3;
 				break;
 			case 1:
-				displayText = String.format("%17s  %03XH%n", "DB",
-						binaryData.get(locBase));
+				displayText = String.format("%17s  %03XH%n", "DB", binaryData.get(locBase));
 				i -= dbPerLine - 4;
 				locBase += dbPerLine - 4;
 				break;
 			}// switch
-				// displayText = String.format("%17s  %05XH%n", "DS", codeFragment.size());
+				// displayText = String.format("%17s %05XH%n", "DS", codeFragment.size());
 			appendToDocASM(displayText);
 
 		}
@@ -758,18 +759,18 @@ try{
 		int endLocation = codeFragment.endLoc;
 		int opCodeSize;
 
-		byte  currentValue1, currentValue2;
-		String  part3;
+		byte currentValue1, currentValue2;
+		String part3;
 		while (currentLocation <= endLocation) {
 			currentOpCode = opcodeMap.get(binaryData.get(currentLocation));
-//			currentValue0 = binaryData.get(currentLocation);
+			// currentValue0 = binaryData.get(currentLocation);
 			opCodeSize = currentOpCode.getSize();
 			currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
 			currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
 			try {
 				if (labels.contains(currentLocation)) {
 					appendToDocASM(String.format("L%04X:%n", currentLocation));
-				}// if - its a label
+				} // if - its a label
 
 				switch (opCodeSize) {
 				case 1:
@@ -792,7 +793,7 @@ try{
 			}
 			currentLocation += opCodeSize;
 
-		}// while opcodeMap
+		} // while opcodeMap
 			// txtArea.setCaretPosition(0);
 	}// buildCodeFragment
 
@@ -805,8 +806,8 @@ try{
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}// try
-		}// if - make directory if not there
+			} // try
+		} // if - make directory if not there
 
 		JFileChooser chooser = new JFileChooser(directory);
 		chooser.setMultiSelectionEnabled(false);
@@ -828,7 +829,7 @@ try{
 
 	private void saveWIP(String fileName) {
 		try {
-			String relativeFileName = FILE_LOCATION + "/" + fileName;
+			String relativeFileName = hostDirectory + "/" + fileName;
 			System.out.printf("relativeFileName = %s%n", relativeFileName);
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(relativeFileName));
 			oos.writeObject(binaryFile);
@@ -837,9 +838,11 @@ try{
 			oos.writeObject(labels);
 			oos.writeObject(codeFragmentModel);
 			oos.close();
+			log.infof("Saved WIP file %s%n", fileName);
 		} catch (IOException ioe) {
+			log.error("Error saving WIP %s %n %S%n",fileName,ioe.getMessage());
 			ioe.printStackTrace();
-		}// try - write objects
+		} // try - write objects
 	}// saveWIP
 
 	@SuppressWarnings("unchecked")
@@ -851,29 +854,30 @@ try{
 			beenThere = (Set<Integer>) ois.readObject();
 			labels = (Set<Integer>) ois.readObject();
 			codeFragmentModel = (CodeFragmentModel) ois.readObject();
+			log.infof("Opened WIP file %s%n", fileName);
 			ois.close();
 		} catch (FileNotFoundException fnfe) {
-			JOptionPane.showMessageDialog(null, fileName
-					+ "not found", "loadWIP()",
-					JOptionPane.ERROR_MESSAGE);
+			log.errorf("WIP File not found : %s%n%n", fileName);
+			JOptionPane.showMessageDialog(null, fileName + "not found", "loadWIP()", JOptionPane.ERROR_MESSAGE);
 			return; // exit gracefully
 		} catch (IOException ie) {
-			JOptionPane.showMessageDialog(null, binaryFile.getAbsolutePath()
-					+ ie.getMessage(), "IO error",
+			JOptionPane.showMessageDialog(null, binaryFile.getAbsolutePath() + ie.getMessage(), "IO error",
 					JOptionPane.ERROR_MESSAGE);
+			log.errorf("WIP IO Error : File %s%n %S%n%n",ie.getMessage(), fileName);
+
 			return; // exit gracefully
 		} catch (ClassNotFoundException e) {
-			JOptionPane.showMessageDialog(null, "ClassNotFoundException", "loadWIP()",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "ClassNotFoundException", "loadWIP()", JOptionPane.ERROR_MESSAGE);
+			log.warnf("WIP file : %s ClassNotFoundException%n%n", fileName);
 			return; // exit gracefully
-		}// try
+		} // try
 
 		if (!processBianryFile(binaryFile)) {
-			JOptionPane.showMessageDialog(null, "Problem with binary Source file" + binaryFile.getAbsolutePath()
-					, "openBinaryFile()",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Problem with binary Source file" + binaryFile.getAbsolutePath(),
+					"openBinaryFile()", JOptionPane.ERROR_MESSAGE);
+			log.errorf("Problem with binary Source file: %s%n%n", fileName);
 			return;
-		}// if
+		} // if
 
 		btnProcessFragment.setEnabled(true);
 		btnAddFragment.setEnabled(true);
@@ -887,135 +891,47 @@ try{
 	}
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-	@Override
-	public void actionPerformed(ActionEvent actionEvent) {
-		String actionCommand = actionEvent.getActionCommand();
-		String message = null;
-		switch (actionCommand) {
-		case AC_MNU_FILE_OPEN:
-			openBinaryFile();
-			break;
-		case AC_MNU_FILE_LOAD_WIP:
-			JFileChooser chooserLoad = getFileChooser(FILE_LOCATION, WIP, FILE_SUFFIX);
-			if (chooserLoad.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION) {
-				System.out.printf("You cancelled the Save as...%n", "");
-			} else {
-				//String fileNameParts[] = chooserLoad.getSelectedFile().getName().split("\\.");
-				//loadWIP(fileNameParts[0] + FILE_SUFFIX_PERIOD);
-				loadWIP(chooserLoad.getSelectedFile().getAbsolutePath());
-			}// if - returnValue
-
-			break;
-		case AC_MNU_FILE_SAVE_WIP:
-			saveWIP();
-			break;
-		case AC_MNU_FILE_SAVE_WIP_AS:
-			JFileChooser chooserSaveAs = getFileChooser(FILE_LOCATION, WIP, FILE_SUFFIX);
-			if (chooserSaveAs.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION) {
-				System.out.printf("You cancelled the Save as...%n", "");
-			} else {
-				String fileNameParts[] = chooserSaveAs.getSelectedFile().getName().split("\\.");
-				saveWIP(fileNameParts[0] + FILE_SUFFIX_PERIOD);
-			}// if - returnValue
-			break;
-		case AC_MNU_FILE_RESET:
-			appInit();
-			break;
-		case AC_MNU_FILE_EXIT:
-			appClose();
-
-			break;
-		case AC_MNU_CODE_NEW:
-			message = "mnuCodeFragmentNew";
-			break;
-		case AC_MNU_CODE_LOAD:
-			message = "mnuCodeFragmentLoad";
-			break;
-		case AC_MNU_CODE_SAVE:
-			message = "mnuCodeFragmentSave";
-			break;
-		case AC_MNU_CODE_SAVE_AS:
-			message = "mnuCodeFragmentSaveAs";
-			break;
-
-		case AC_BTN_START:
-			actionStart();
-			break;
-		case AC_BTN_BUILD_ASM:
-			buildASM();
-			break;
-
-		case AC_BTN_ADD_FRAGMENT:
-			addFragement();
-			break;
-		case AC_BTN_REMOVE_FRAGMENT:
-			removeFragment();
-			break;
-		case AC_BTN_PROCESS_FRAGMENT:
-			processFragment();
-			break;
-		case AC_BTN_COMBINE_FRAGMENTS:
-			combineFragments();
-			break;
-		default:
-			message = actionCommand;
-		}// switch
-		if (message != null) {
-			System.out.printf("<actionPerformed> actionCommand = %s%n", actionCommand);
-		}// if
-	}// actionPerformed
-
-	@Override
-	public void valueChanged(ListSelectionEvent lse) {
-		if (lse.getValueIsAdjusting()) {
-			return;
-		}
-		@SuppressWarnings("rawtypes")
-		int index = ((JList) lse.getSource()).getSelectedIndex();
-		if (index == -1) {
-			return;
-		}
-		CodeFragment codeFragment = codeFragmentModel.getElementAt(index);
-		spinnerBeginFragment.setValue(codeFragment.startLoc);
-		spinnerEndFragment.setValue(codeFragment.endLoc);
-		setFragmentRadioButton(codeFragment.type);
-		displayFragmenBinary(txtWIPbinary, codeFragment.startLoc - OFFSET, codeFragment.endLoc - OFFSET);
-		displayFragmentSource(txtWIPsource, codeFragment);
-	}// valueChanged
-
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	private void appClose() {
+		Preferences myPrefs = Preferences.userNodeForPackage(ManualDisassembler.class)
+				.node(this.getClass().getSimpleName());
+		Dimension dim = frame.getSize();
+		myPrefs.putInt("Height", dim.height);
+		myPrefs.putInt("Width", dim.width);
+		Point point = frame.getLocation();
+		myPrefs.putInt("LocX", point.x);
+		myPrefs.putInt("LocY", point.y);
+
+		myPrefs.put("HostDirectory", hostDirectory);
+
+		myPrefs = null;
+
 		System.exit(0);
 	}// appClose
 
 	@SuppressWarnings("unchecked")
 	private void appInit() {
-		// System.out.printf("System.getProperty(\"java.class.path\") = %s%n",System.getProperty("java.class.path"));
-		// System.out.printf("%n--------Enviornment Variables --------------%n");
-		// Map<String,String> envVars = System.getenv();
-		// Set<String> envVarKeys = envVars.keySet();
-		// System.out.printf("$d vars in list%n%n",envVars.size());
-		// for(String enVarKey:envVarKeys){
-		// System.out.printf("%25s  :  %-25s%n",enVarKey,System.getenv(enVarKey));
-		// }
-		// System.out.printf("%n--------System Properties-------------%n");
-		// Properties properties = System.getProperties();
-		// Set<String> propertyNames = properties.stringPropertyNames();
-		// for(String propertyName : propertyNames ){
-		// System.out.printf("%25s  :  %-25s%n",propertyName,System.getProperty(propertyName));
-		// }
-		// System.out.printf("FILE_LOCATION = %s%n",FILE_LOCATION);
+		StyledDocument styledDoc = textLog.getStyledDocument();
+		textLog.setFont(new Font("Arial", Font.PLAIN, 15));
+		AppLogger log = AppLogger.getInstance();
+		log.setDoc(styledDoc);
+		log.setTextPane(textLog, "Disk Utility Log");
+
+		Preferences myPrefs = Preferences.userNodeForPackage(ManualDisassembler.class)
+				.node(this.getClass().getSimpleName());
+		frame.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
+		frame.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
+
+		hostDirectory = myPrefs.get("HostDirectory", System.getProperty(USER_HOME, THIS_DIR));
 
 		if (opcodeMap == null) {
 			opcodeMap = Opcodes8080.makeCodeMap();
-		}// if
+		} // if
 		if (codeFragmentModel != null) {
 			codeFragmentModel = null;
-		}// if
+		} // if
 		if (entryPoints != null) {
 			entryPoints = null;
-		}// if
+		} // if
 
 		entryPoints = new Stack<Integer>();
 		codeFragmentModel = new CodeFragmentModel();
@@ -1031,6 +947,7 @@ try{
 		haveBinanryFile(false);
 		binaryFileName = "<No biary file selected>";
 		frame.setTitle(APP_NAME + "   " + binaryFileName);
+		log.infof("Starting %s......%n",APP_NAME);
 	}// appInit
 
 	/**
@@ -1062,7 +979,7 @@ try{
 
 	private final int TAB_WIP = 0;
 	private final int TAB_BINARY_FILE = 1;
-//	private final int TAB_ASM = 2;
+	// private final int TAB_ASM = 2;
 
 	private final int ATTR_ADDRESS = 0;
 	private final int ATTR_BINARY_CODE = 1;
@@ -1091,11 +1008,13 @@ try{
 	private final static String AC_BTN_COMBINE_FRAGMENTS = "btnCombineFragment";
 
 	private final static String APP_NAME = "Manual Disassembler ";
-//	private final static String SEMI = ";"; // SemiColon
+	// private final static String SEMI = ";"; // SemiColon
 	private final static String WIP = "Work In Process";
 	private final static String FILE_SUFFIX = "WIP";
 	private final static String FILE_SUFFIX_PERIOD = "." + FILE_SUFFIX;
-	public final static String FILE_SEPARATOR = System.getProperty("file.separator");
+	public static final String USER_HOME = "user.home";
+	public static final String THIS_DIR = ".";
+	public static final String FILE_SEPARATOR = System.getProperties().getProperty("file.separator");
 	public final static String FILE_LOCATION = System.getenv("APPDATA") + FILE_SEPARATOR + "Disassembler";
 	// public final static String FILE_LOCATION = "Disassembler";file.separator
 
@@ -1129,6 +1048,9 @@ try{
 	private JMenuItem mnuFileOpenBinaryFile;
 	private JSeparator separator_2;
 	private JMenuItem mnuFileReset;
+	private JScrollPane tabLog;
+	private JLabel label_2;
+	private JTextPane textLog;
 
 	// ------------------------------------------------------------------------------
 
@@ -1138,7 +1060,13 @@ try{
 	@SuppressWarnings("rawtypes")
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 986, 836);
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				appClose();
+			}
+		});
+		// frame.setBounds(100, 100, 986, 836);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0 };
@@ -1162,7 +1090,7 @@ try{
 
 		btnStart = new JButton("Start");
 		btnStart.setActionCommand(AC_BTN_START);
-		btnStart.addActionListener(this);
+		btnStart.addActionListener(applicationAdapter);
 		GridBagConstraints gbc_btnStart = new GridBagConstraints();
 		gbc_btnStart.anchor = GridBagConstraints.WEST;
 		gbc_btnStart.insets = new Insets(0, 0, 5, 5);
@@ -1172,7 +1100,7 @@ try{
 
 		btnBuildASM = new JButton("Build ASM");
 		btnBuildASM.setActionCommand(AC_BTN_BUILD_ASM);
-		btnBuildASM.addActionListener(this);
+		btnBuildASM.addActionListener(applicationAdapter);
 		GridBagConstraints gbc_btnBuildASM = new GridBagConstraints();
 		gbc_btnBuildASM.insets = new Insets(0, 0, 5, 0);
 		gbc_btnBuildASM.gridx = 1;
@@ -1337,7 +1265,7 @@ try{
 
 		btnAddFragment = new JButton("Add/Update");
 		btnAddFragment.setActionCommand(AC_BTN_ADD_FRAGMENT);
-		btnAddFragment.addActionListener(this);
+		btnAddFragment.addActionListener(applicationAdapter);
 		GridBagConstraints gbc_btnAddFragment = new GridBagConstraints();
 		gbc_btnAddFragment.insets = new Insets(0, 0, 5, 5);
 		gbc_btnAddFragment.gridx = 0;
@@ -1346,7 +1274,7 @@ try{
 
 		btnRemoveFragment = new JButton("Remove");
 		btnRemoveFragment.setActionCommand(AC_BTN_REMOVE_FRAGMENT);
-		btnRemoveFragment.addActionListener(this);
+		btnRemoveFragment.addActionListener(applicationAdapter);
 		GridBagConstraints gbc_btnRemoveFragment = new GridBagConstraints();
 		gbc_btnRemoveFragment.insets = new Insets(0, 0, 5, 0);
 		gbc_btnRemoveFragment.gridx = 1;
@@ -1355,7 +1283,7 @@ try{
 
 		btnProcessFragment = new JButton("Process");
 		btnProcessFragment.setActionCommand(AC_BTN_PROCESS_FRAGMENT);
-		btnProcessFragment.addActionListener(this);
+		btnProcessFragment.addActionListener(applicationAdapter);
 		GridBagConstraints gbc_btnProcessFragment = new GridBagConstraints();
 		gbc_btnProcessFragment.insets = new Insets(0, 0, 0, 5);
 		gbc_btnProcessFragment.gridx = 0;
@@ -1364,7 +1292,7 @@ try{
 
 		btnCombineFragments = new JButton("Combine");
 		btnCombineFragments.setActionCommand(AC_BTN_COMBINE_FRAGMENTS);
-		btnCombineFragments.addActionListener(this);
+		btnCombineFragments.addActionListener(applicationAdapter);
 		GridBagConstraints gbc_btnCombineFragments = new GridBagConstraints();
 		gbc_btnCombineFragments.anchor = GridBagConstraints.NORTHEAST;
 		gbc_btnCombineFragments.gridx = 1;
@@ -1379,7 +1307,7 @@ try{
 		panelFragments.add(scrollPaneFragments, gbc_scrollPaneFragments);
 
 		listCodeFragments = new JList();
-		listCodeFragments.addListSelectionListener(this);
+		listCodeFragments.addListSelectionListener(applicationAdapter);
 		listCodeFragments.setFont(new Font("Courier New", Font.PLAIN, 12));
 		scrollPaneFragments.setViewportView(listCodeFragments);
 
@@ -1476,6 +1404,18 @@ try{
 		lblSourceHeader.setHorizontalAlignment(SwingConstants.CENTER);
 		panelScrollASM.setColumnHeaderView(lblSourceHeader);
 
+		tabLog = new JScrollPane();
+		tabPaneDisplays.addTab("Log", null, tabLog, null);
+
+		label_2 = new JLabel("Appication Log");
+		label_2.setHorizontalAlignment(SwingConstants.CENTER);
+		label_2.setForeground(Color.BLUE);
+		label_2.setFont(new Font("Arial", Font.BOLD, 18));
+		tabLog.setColumnHeaderView(label_2);
+
+		textLog = new JTextPane();
+		tabLog.setViewportView(textLog);
+
 		// paneTop.add(panelMain, gbc_panelMain);
 
 		JMenuBar menuBar = new JMenuBar();
@@ -1486,12 +1426,12 @@ try{
 
 		mnuFileOpenBinaryFile = new JMenuItem("Open Binary File...");
 		mnuFileOpenBinaryFile.setActionCommand(AC_MNU_FILE_OPEN);
-		mnuFileOpenBinaryFile.addActionListener(this);
+		mnuFileOpenBinaryFile.addActionListener(applicationAdapter);
 		mnuFile.add(mnuFileOpenBinaryFile);
 
 		mnuFileLoadWIP = new JMenuItem("Load WIP...");
 		mnuFileLoadWIP.setActionCommand(AC_MNU_FILE_LOAD_WIP);
-		mnuFileLoadWIP.addActionListener(this);
+		mnuFileLoadWIP.addActionListener(applicationAdapter);
 		mnuFile.add(mnuFileLoadWIP);
 
 		JSeparator separator = new JSeparator();
@@ -1499,16 +1439,16 @@ try{
 
 		JMenuItem mnuFileExit = new JMenuItem("Exit");
 		mnuFileExit.setActionCommand(AC_MNU_FILE_EXIT);
-		mnuFileExit.addActionListener(this);
+		mnuFileExit.addActionListener(applicationAdapter);
 
 		mnuFileSaveWIP = new JMenuItem("Save WIP");
 		mnuFileSaveWIP.setActionCommand(AC_MNU_FILE_SAVE_WIP);
-		mnuFileSaveWIP.addActionListener(this);
+		mnuFileSaveWIP.addActionListener(applicationAdapter);
 		mnuFile.add(mnuFileSaveWIP);
 
 		mnuFileSaveWIPas = new JMenuItem("Save WIP as...");
 		mnuFileSaveWIPas.setActionCommand(AC_MNU_FILE_SAVE_WIP_AS);
-		mnuFileSaveWIPas.addActionListener(this);
+		mnuFileSaveWIPas.addActionListener(applicationAdapter);
 		mnuFile.add(mnuFileSaveWIPas);
 
 		separator_2 = new JSeparator();
@@ -1516,7 +1456,7 @@ try{
 
 		mnuFileReset = new JMenuItem("Reset");
 		mnuFileReset.setActionCommand(AC_MNU_FILE_RESET);
-		mnuFileReset.addActionListener(this);
+		mnuFileReset.addActionListener(applicationAdapter);
 		mnuFile.add(mnuFileReset);
 
 		JSeparator separator_1 = new JSeparator();
@@ -1526,10 +1466,106 @@ try{
 
 	// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-	// ....................................................................................................
+	class ApplicationAdapter implements ActionListener, ListSelectionListener {
 
-	// ............................................................................................
+		@Override // ActionListener
+		public void actionPerformed(ActionEvent actionEvent) {
+			String actionCommand = actionEvent.getActionCommand();
+			String message = null;
+			switch (actionCommand) {
+			case AC_MNU_FILE_OPEN:
+				openBinaryFile();
+				break;
+			case AC_MNU_FILE_LOAD_WIP:
+				JFileChooser chooserLoad = getFileChooser(hostDirectory, WIP, FILE_SUFFIX);
+				if (chooserLoad.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION) {
+					System.out.printf("You cancelled the Save as...%n", "");
+				} else {
+					// String fileNameParts[] = chooserLoad.getSelectedFile().getName().split("\\.");
+					// loadWIP(fileNameParts[0] + FILE_SUFFIX_PERIOD);
+					hostDirectory = chooserLoad.getSelectedFile().getParent();
+					loadWIP(chooserLoad.getSelectedFile().getAbsolutePath());
+				} // if - returnValue
 
-	// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+				break;
+			case AC_MNU_FILE_SAVE_WIP:
+				saveWIP();
+				break;
+			case AC_MNU_FILE_SAVE_WIP_AS:
+				JFileChooser chooserSaveAs = getFileChooser(FILE_LOCATION, WIP, FILE_SUFFIX);
+				if (chooserSaveAs.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION) {
+					System.out.printf("You cancelled the Save as...%n", "");
+				} else {
+					String fileNameParts[] = chooserSaveAs.getSelectedFile().getName().split("\\.");
+					saveWIP(fileNameParts[0] + FILE_SUFFIX_PERIOD);
+				} // if - returnValue
+				break;
+			case AC_MNU_FILE_RESET:
+				appInit();
+				break;
+			case AC_MNU_FILE_EXIT:
+				appClose();
+
+				break;
+			case AC_MNU_CODE_NEW:
+				message = "mnuCodeFragmentNew";
+				break;
+			case AC_MNU_CODE_LOAD:
+				message = "mnuCodeFragmentLoad";
+				break;
+			case AC_MNU_CODE_SAVE:
+				message = "mnuCodeFragmentSave";
+				break;
+			case AC_MNU_CODE_SAVE_AS:
+				message = "mnuCodeFragmentSaveAs";
+				break;
+
+			case AC_BTN_START:
+				actionStart();
+				break;
+			case AC_BTN_BUILD_ASM:
+				buildASM();
+				break;
+
+			case AC_BTN_ADD_FRAGMENT:
+				addFragement();
+				break;
+			case AC_BTN_REMOVE_FRAGMENT:
+				removeFragment();
+				break;
+			case AC_BTN_PROCESS_FRAGMENT:
+				processFragment();
+				break;
+			case AC_BTN_COMBINE_FRAGMENTS:
+				combineFragments();
+				break;
+			default:
+				message = actionCommand;
+			}// switch
+			if (message != null) {
+				System.out.printf("<actionPerformed> actionCommand = %s%n", actionCommand);
+			} // if
+
+		}// actionPerformed
+
+		@Override // ListSelectionListener
+		public void valueChanged(ListSelectionEvent lse) {
+			if (lse.getValueIsAdjusting()) {
+				return;
+			}
+			@SuppressWarnings("rawtypes")
+			int index = ((JList) lse.getSource()).getSelectedIndex();
+			if (index == -1) {
+				return;
+			}
+			CodeFragment codeFragment = codeFragmentModel.getElementAt(index);
+			spinnerBeginFragment.setValue(codeFragment.startLoc);
+			spinnerEndFragment.setValue(codeFragment.endLoc);
+			setFragmentRadioButton(codeFragment.type);
+			displayFragmenBinary(txtWIPbinary, codeFragment.startLoc - OFFSET, codeFragment.endLoc - OFFSET);
+			displayFragmentSource(txtWIPsource, codeFragment);
+		}// valueChanged
+
+	}// class ApplicationAdapter
 
 }// class ManualDissambler
