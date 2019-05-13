@@ -55,6 +55,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
@@ -137,7 +138,7 @@ public class ManualDisassembler {
 		btnAddFragment.setEnabled(true);
 		btnRemoveFragment.setEnabled(true);
 		btnCombineFragments.setEnabled(true);
-		btnBuildASM.setEnabled(true);
+		btn8080Z80.setEnabled(true);
 		listCodeFragments.setEnabled(true);
 
 		// int lastLocation = binaryData.capacity();
@@ -209,10 +210,76 @@ public class ManualDisassembler {
 		listCodeFragments.updateUI();
 	}
 
+//	private void buildFragments0() {
+//		int startLocation = 0;
+//		int currentLocation = 0;
+//		OpcodeStructure8080 currentOpCode = null;
+//		;
+//		PCaction pcAction = PCaction.NORMAL;
+//		;
+//
+//		startLocation = entryPoints.pop();
+//		currentLocation = startLocation;
+//		boolean keepGoing = true;
+//		int targetAddress;
+//		while (keepGoing) {
+//			// int a = currentLocation;
+//			if (currentLocation > binaryData.capacity()) {
+//				return;
+//			}
+//
+//			if (beenThere.add(currentLocation) == false) {
+//				// System.out.printf("already visited %04X%n", startLocation);
+//				codeFragmentModel.addItem(new CodeFragment(startLocation, (currentLocation - 1), CodeFragment.CODE));
+//
+//				return;
+//			} //
+//			try {
+//				currentOpCode = opcodeMap.get(binaryData.get(currentLocation));
+//			} catch (Exception ex) {
+//				ex.printStackTrace();
+//
+//			}
+//
+//			// System.out.printf("Location = %04X, opcode = %s%n", currentLocation, currentOpCode.getInstruction());
+//			pcAction = currentOpCode.getPcAction();
+//
+//			switch (pcAction) {
+//
+//			case NORMAL: // regular opcodes and conditional RETURNS
+//				currentLocation += currentOpCode.getSize();
+//				keepGoing = true;
+//				break;
+//			case CONTINUATION: // All CALLs and all Conditional RETURNS
+//				targetAddress = makeTargetAddress(currentLocation);
+//				entryPoints.push(targetAddress);
+//				labels.add(targetAddress);
+//				currentLocation += currentOpCode.getSize();
+//				keepGoing = true;
+//				break;
+//			case TERMINATES: // RET
+//				currentLocation += currentOpCode.getSize();
+//				keepGoing = false;
+//				break;
+//			case TOTAL: // JUMP PCHL
+//				if (currentOpCode.getInstruction().equals("JMP")) { // only for JMP
+//					targetAddress = makeTargetAddress(currentLocation);
+//					entryPoints.push(targetAddress);
+//					labels.add(targetAddress);
+//				} // if
+//				currentLocation += currentOpCode.getSize();
+//				keepGoing = false;
+//				break;
+//			}// switch
+//		} // - keep going
+//		codeFragmentModel.addItem(new CodeFragment(startLocation, (currentLocation - 1), CodeFragment.CODE));
+//		return;
+//	}// buildFragments
+
 	private void buildFragments() {
 		int startLocation = 0;
 		int currentLocation = 0;
-		OpcodeStructure8080 currentOpCode = null;
+		OperationStructure currentOpCode = null;
 		;
 		PCaction pcAction = PCaction.NORMAL;
 		;
@@ -221,9 +288,10 @@ public class ManualDisassembler {
 		currentLocation = startLocation;
 		boolean keepGoing = true;
 		int targetAddress;
+		String mapKey;
 		while (keepGoing) {
-			// int a = currentLocation;
-			if (currentLocation > binaryData.capacity()) {
+
+			if (currentLocation >= binaryData.capacity()) {
 				return;
 			}
 
@@ -234,14 +302,17 @@ public class ManualDisassembler {
 				return;
 			} //
 			try {
-				currentOpCode = opcodeMap.get(binaryData.get(currentLocation));
+				mapKey = String.format("%02X", binaryData.get(currentLocation));
+				currentOpCode = OpCodeMap.get(mapKey);
+//				currentOpCode = OpCodeMap8080.get(mapKey);
+				// currentOpCode = OpCodeMap8080.get(binaryData.get(currentLocation));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 
-			}
+			} //
 
 			// System.out.printf("Location = %04X, opcode = %s%n", currentLocation, currentOpCode.getInstruction());
-			pcAction = currentOpCode.getPcAction();
+			pcAction = currentOpCode.getPCaction();
 
 			switch (pcAction) {
 
@@ -273,7 +344,7 @@ public class ManualDisassembler {
 		} // - keep going
 		codeFragmentModel.addItem(new CodeFragment(startLocation, (currentLocation - 1), CodeFragment.CODE));
 		return;
-	}// buildFragments
+	}// buildFragments1
 
 	private int makeTargetAddress(int currentLocation) {
 		// int hi = (binaryData.get(currentLocation + 2) & 0xFF) * 256;
@@ -284,8 +355,8 @@ public class ManualDisassembler {
 	}// makeTargetAddress
 
 	private void openBinaryFile() {
-//		String fileLocation = "C:\\Users\\admin\\Dropbox\\Resources\\NativeFiles";
-		
+		// String fileLocation = "C:\\Users\\admin\\Dropbox\\Resources\\NativeFiles";
+
 		Path sourcePath = Paths.get(hostDirectory);
 		JFileChooser chooser = new JFileChooser(sourcePath.resolve(hostDirectory).toString());
 		if (chooser.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION) {
@@ -462,17 +533,21 @@ public class ManualDisassembler {
 
 	private void displayFragmenBinary(JTextArea txtArea, int startLocation, int endLocation) {
 		Highlighter.HighlightPainter yellowPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+			txtArea.getHighlighter().removeAllHighlights();
 
 		try {
 			int lineStart = txtArea.getLineStartOffset((startLocation / CHARACTERS_PER_LINE));
 			int lineEnd = txtArea.getLineEndOffset((endLocation / CHARACTERS_PER_LINE));
 
 			txtArea.getHighlighter().removeAllHighlights();
+			if (startLocation>=endLocation) {
+				return;
+			}// if
 			txtArea.getHighlighter().addHighlight(lineStart, lineEnd, yellowPainter);
 			txtArea.setCaretPosition(lineStart);
 		} catch (BadLocationException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			//e1.printStackTrace();
 		} //
 	}// displayFragmentSource
 
@@ -497,6 +572,158 @@ public class ManualDisassembler {
 	}// displayFragmentSource
 
 	private void showFragmentCode(Document doc, CodeFragment codeFragment) {
+		int startLocation = codeFragment.startLoc;
+		int endLocation = codeFragment.endLoc;
+		// int codeSize = codeFragment.size();
+		clearDocument(doc);
+		// OpcodeStructure8080 currentOpCode = null;
+		OperationStructure currentOpCode = null;
+
+		// workingSets[ATTR_ADDRESS] = new SimpleAttributeSet(baseAttributes);
+		// workingSets[ATTR_BINARY_CODE] = new SimpleAttributeSet(baseAttributes);
+		// workingSets[ATTR_ASM_CODE] = new SimpleAttributeSet(baseAttributes);
+		// workingSets[ATTR_FUNCTION] = new SimpleAttributeSet(baseAttributes);
+
+		SimpleAttributeSet[] attributeSets = makeAttributes();
+
+		int currentLocation = startLocation;
+		int opCodeSize;
+		byte currentValue0, currentValue1, currentValue2, currentValue3;
+		String part1 = "", part2 = "", part3 = "", part3A= "", part4 = "";
+		String fmt00 = "";
+		while (currentLocation <= endLocation) {
+			String mapKey = String.format("%02X", binaryData.get(currentLocation));
+			currentOpCode = OpCodeMap.get(mapKey);
+//			currentOpCode = OpCodeMap8080.get(mapKey);bbb
+			// currentOpCode = opcodeMap.get(binaryData.get(currentLocation));
+			currentValue0 = binaryData.get(currentLocation);
+			opCodeSize = currentOpCode.getSize();
+
+			currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
+			currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
+			currentValue3 = opCodeSize > 3 ? binaryData.get(currentLocation + 2) : 0;
+			try {
+
+				part1 = String.format("%04X%4s", currentLocation, "");
+				doc.insertString(doc.getLength(), part1, attributeSets[ATTR_ADDRESS]);
+
+				switch (opCodeSize) {
+				case 1:
+					part2 = String.format("%02X%8s", currentValue0, "");
+					break;
+				case 2:
+					part2 = String.format("%02X%02X%6s", currentValue0, currentValue1, "");
+					break;
+				case 3:
+					part2 = String.format("%02X%02X%02X%4s", currentValue0, currentValue1, currentValue2, "");
+					// doc.insertString(doc.getLength(), part2, attributeSets[ATTR_BINARY_CODE]);
+					// part3 = String.format("%-15s", currentOpCode.getAssemblerCode(currentValue1, currentValue2));
+					// doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
+					break;
+				default:
+					log.errorf("Bad opCode size : %d at Location: %04X%n%n", opCodeSize,currentLocation);
+				}// switch
+				doc.insertString(doc.getLength(), part2, attributeSets[ATTR_BINARY_CODE]);
+
+				switch (currentOpCode.getType()) {
+				case I00:
+					fmt00 = "%-5s";
+					part3A = String.format(fmt00, currentOpCode.getInstruction());
+					 part3 = String.format("%-21s",part3A);
+					break;
+				case I01:
+					fmt00 = "%-5s%s";
+					part3A = String.format(fmt00, currentOpCode.getInstruction(),
+							 currentOpCode.getDestination());
+					 part3 = String.format("%-21s",part3A);
+					break;
+				case I02:
+					fmt00 = "%-5s%s,%s";
+					part3A = String.format(fmt00, currentOpCode.getInstruction(),
+							 currentOpCode.getDestination(),
+							 currentOpCode.getSource());
+					 part3 = String.format("%-21s",part3A);
+					break;
+				case I10:
+					 fmt00 = "%-5s%02XH";
+					 part3A = String.format(fmt00, currentOpCode.getInstruction(),
+							currentValue1);
+					 part3 = String.format("%-21s",part3A);
+					break;
+				case I11:
+					 fmt00 = "%-5s%s,%02X";
+					 part3A = String.format(fmt00, currentOpCode.getInstruction(),
+							currentOpCode.getDestination(),currentValue1);
+					 part3 = String.format("%-21s",part3A);
+					break;
+				case I12:
+					 fmt00 = "%-5s%02XH";
+					 part3A = String.format(fmt00, currentOpCode.getInstruction(),
+							currentValue1);
+					 part3 = String.format("%-21s",part3A);
+					break;
+				case I13:
+					break;
+				case I14:
+					break;
+				case I15:
+					break;
+				case I16:
+					break;
+				case I20:
+					 fmt00 = "%-5s%02X%02XH";
+					 part3A = String.format(fmt00, currentOpCode.getInstruction(),
+							 currentValue2,currentValue1);
+					 part3 = String.format("%-21s",part3A);
+					break;
+				case I21:
+					 fmt00 = "%-5s%s,%02X%02XH";
+					 part3A = String.format(fmt00, currentOpCode.getInstruction(),
+							 currentOpCode.getDestination(),
+							 currentValue2,currentValue1);
+					 part3 = String.format("%-21s",part3A);
+					break;
+				case I22:
+					break;
+				case I23:
+					break;
+				case I24:
+					fmt00 = "%-5s(%02X%02XH),%s";
+					 part3A = String.format(fmt00, currentOpCode.getInstruction(),
+							 
+							 currentValue2,currentValue1,currentOpCode.getSource());
+					 part3 = String.format("%-21s",part3A);
+					break;
+				case I25:
+					break;
+				case I26:
+					fmt00 = "%-5s%s,(%02X%02XH)";
+					 part3A = String.format(fmt00, currentOpCode.getInstruction(),
+							 
+							 currentOpCode.getDestination(),currentValue2,currentValue1);
+					 part3 = String.format("%-21s",part3A);
+					break;
+				case I27:
+					break;
+				default:
+					log.errorf("Bad Instruction type : %s at Location: %04X%n%n",
+							currentOpCode.getType().toString(),currentLocation);
+				}// Type
+				
+				 doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
+				 part3 = "";
+
+				part4 = String.format("%s%n", currentOpCode.getFunction());
+				doc.insertString(doc.getLength(), part4, attributeSets[ATTR_FUNCTION]);
+			} catch (BadLocationException badLocationException) {
+				badLocationException.printStackTrace();
+			}
+			currentLocation += opCodeSize;
+
+		} // while opcodeMap
+	}// showFragmentCode
+
+	private void showFragmentCode00(Document doc, CodeFragment codeFragment) {
 		int startLocation = codeFragment.startLoc;
 		int endLocation = codeFragment.endLoc;
 		// int codeSize = codeFragment.size();
@@ -553,7 +780,7 @@ public class ManualDisassembler {
 			currentLocation += opCodeSize;
 
 		} // while opcodeMap
-	}// showFragmentCode
+	}// showFragmentCode00
 
 	private void buildSourceHeader(Document doc) {
 		lblSourceHeader.setText(binaryFilePath);
@@ -602,6 +829,26 @@ public class ManualDisassembler {
 			e.printStackTrace();
 		} // try
 	}// appendToDoc
+
+	private void setAssemblerType() {
+		if (btn8080Z80.getText() == "Z80") {
+			btn8080Z80.setText("8080");
+		} else {
+			btn8080Z80.setText("Z80");
+		} // if
+		setOpCodeMap();
+	}// setAssemblerType
+	private void setOpCodeMap() {
+		OpCodeMap = null;
+		if(btn8080Z80.getText()== "Z80") {
+			OpCodeMap = new OpCodeMapZ80();
+		}else {
+			OpCodeMap = new OpCodeMapIntel();
+		}//if
+		
+	}//setOpCodeMap
+
+
 
 	private void buildASM() {
 		if (codeFragmentModel.getSize() < 2) {
@@ -840,7 +1087,7 @@ public class ManualDisassembler {
 			oos.close();
 			log.infof("Saved WIP file %s%n", fileName);
 		} catch (IOException ioe) {
-			log.error("Error saving WIP %s %n %S%n",fileName,ioe.getMessage());
+			log.error("Error saving WIP %s %n %S%n", fileName, ioe.getMessage());
 			ioe.printStackTrace();
 		} // try - write objects
 	}// saveWIP
@@ -863,7 +1110,7 @@ public class ManualDisassembler {
 		} catch (IOException ie) {
 			JOptionPane.showMessageDialog(null, binaryFile.getAbsolutePath() + ie.getMessage(), "IO error",
 					JOptionPane.ERROR_MESSAGE);
-			log.errorf("WIP IO Error : File %s%n %S%n%n",ie.getMessage(), fileName);
+			log.errorf("WIP IO Error : File %s%n %S%n%n", ie.getMessage(), fileName);
 
 			return; // exit gracefully
 		} catch (ClassNotFoundException e) {
@@ -883,7 +1130,7 @@ public class ManualDisassembler {
 		btnAddFragment.setEnabled(true);
 		btnRemoveFragment.setEnabled(true);
 		btnCombineFragments.setEnabled(true);
-		btnBuildASM.setEnabled(true);
+		btn8080Z80.setEnabled(true);
 		listCodeFragments.setModel(codeFragmentModel);
 		listCodeFragments.setEnabled(true);
 
@@ -923,9 +1170,17 @@ public class ManualDisassembler {
 
 		hostDirectory = myPrefs.get("HostDirectory", System.getProperty(USER_HOME, THIS_DIR));
 
-		if (opcodeMap == null) {
-			opcodeMap = Opcodes8080.makeCodeMap();
-		} // if
+		btn8080Z80.setText(myPrefs.get("AssemblerType", "Z80"));
+
+		myPrefs = null;
+		//
+		// OpCodeMap8080 opcode8080Map;
+
+		//
+		setOpCodeMap();
+//		if (opcodeMap == null) {
+//			opcodeMap = Opcodes8080.makeCodeMap();
+//		} // if
 		if (codeFragmentModel != null) {
 			codeFragmentModel = null;
 		} // if
@@ -947,7 +1202,7 @@ public class ManualDisassembler {
 		haveBinanryFile(false);
 		binaryFileName = "<No biary file selected>";
 		frame.setTitle(APP_NAME + "   " + binaryFileName);
-		log.infof("Starting %s......%n",APP_NAME);
+		log.infof("Starting %s......%n", APP_NAME);
 	}// appInit
 
 	/**
@@ -965,6 +1220,7 @@ public class ManualDisassembler {
 	private ByteBuffer binaryData;
 	private CodeFragmentModel codeFragmentModel;
 	private Opcodes8080 opcodeMap;
+	private AbstractOpCodeMap OpCodeMap;//   *******
 	private Document docBinary;
 	// private Document docWIPbinary;
 	// private Document docWIPsource;
@@ -1001,6 +1257,7 @@ public class ManualDisassembler {
 
 	private final static String AC_BTN_START = "btnStart";
 	private final static String AC_BTN_BUILD_ASM = "btnBuildASM";
+	private final static String AC_BTN_Z80_ASM = "btn8080Z80";
 
 	private final static String AC_BTN_ADD_FRAGMENT = "btnAddFragment";
 	private final static String AC_BTN_REMOVE_FRAGMENT = "btnRemoveFragment";
@@ -1040,6 +1297,7 @@ public class ManualDisassembler {
 	private JTextPane txtWIPsource;
 	private JButton btnCombineFragments;
 	private JButton btnBuildASM;
+	private JToggleButton btn8080Z80;
 	private JTextArea txtASM;
 	private JLabel lblSourceHeader;
 	private JMenuItem mnuFileSaveWIP;
@@ -1070,13 +1328,14 @@ public class ManualDisassembler {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, Double.MIN_VALUE, 0.0 };
 		frame.getContentPane().setLayout(gridBagLayout);
 
 		JPanel paneTop = new JPanel();
 		GridBagConstraints gbc_paneTop = new GridBagConstraints();
+		gbc_paneTop.insets = new Insets(0, 0, 5, 0);
 		gbc_paneTop.fill = GridBagConstraints.BOTH;
 		gbc_paneTop.gridx = 0;
 		gbc_paneTop.gridy = 0;
@@ -1107,8 +1366,19 @@ public class ManualDisassembler {
 		gbc_btnBuildASM.gridy = 0;
 		paneTop.add(btnBuildASM, gbc_btnBuildASM);
 
+		btn8080Z80 = new JToggleButton("Z80 / 8080");
+		btn8080Z80.setHorizontalAlignment(SwingConstants.RIGHT);
+		btn8080Z80.setActionCommand(AC_BTN_Z80_ASM);
+		btn8080Z80.addActionListener(applicationAdapter);
+		GridBagConstraints gbc_btn8080Z80 = new GridBagConstraints();
+		gbc_btn8080Z80.insets = new Insets(0, 0, 5, 0);
+		gbc_btn8080Z80.gridx = 2;
+		gbc_btn8080Z80.gridy = 0;
+		paneTop.add(btn8080Z80, gbc_btn8080Z80);
+
 		JPanel panelMain = new JPanel();
 		GridBagConstraints gbc_panelMain = new GridBagConstraints();
+		gbc_panelMain.insets = new Insets(0, 0, 5, 0);
 		gbc_panelMain.fill = GridBagConstraints.BOTH;
 		gbc_panelMain.gridx = 0;
 		gbc_panelMain.gridy = 1;
@@ -1525,6 +1795,9 @@ public class ManualDisassembler {
 				break;
 			case AC_BTN_BUILD_ASM:
 				buildASM();
+				break;
+			case AC_BTN_Z80_ASM:
+				setAssemblerType();
 				break;
 
 			case AC_BTN_ADD_FRAGMENT:
