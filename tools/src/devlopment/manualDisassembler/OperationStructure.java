@@ -10,12 +10,12 @@ package devlopment.manualDisassembler;
 	private String function;
 	private PCaction pcAction;
 
-	OperationStructure(String opCode, InstrucionType type,int size,
+	public OperationStructure(String opCode, InstrucionType type,int size,
 			String instruction, String destination, String source, String function) {
 		this(opCode,type,size,instruction,destination,source,function,PCaction.NORMAL);
 	}// CONSTRUCTOR
 	
-	OperationStructure(String opCode, InstrucionType type,int size,
+	public OperationStructure(String opCode, InstrucionType type,int size,
 			String instruction, String destination, String source, String function,PCaction pcAction) {
 		this.opCode = opCode;
 		this.type = type;
