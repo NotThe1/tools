@@ -23,9 +23,8 @@ public class CodeFragment implements Comparable<CodeFragment>, Serializable {
 		this.type = (type == null) ? UNKNOWN : type;
 		if (startLoc > endLoc) {
 			this.endLoc = startLoc;
-			System.out.printf("<Constructor - CodeFragment startLoc = %04X, endLoc = %04X%n", startLoc, endLoc);
 			this.type = UNKNOWN;
-		}//
+		}//if
 	}// Constructor
 
 	public int size() {

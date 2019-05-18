@@ -6,7 +6,7 @@ public abstract class AbstractOpCodeMap  {
 
 	public AbstractOpCodeMap() {
 		// TODO Auto-generated constructor stub
-	}//
+	}//Constructor
 	
 	 public OperationStructure getOperationStructure(String key) {
 		if (codeMap.containsKey(key)) {
