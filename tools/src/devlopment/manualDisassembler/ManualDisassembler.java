@@ -230,7 +230,7 @@ public class ManualDisassembler {
 
 			try {
 				mapKey = String.format("%02X", binaryData.get(currentLocation));
-				currentOpCode = OpCodeMap.get(mapKey);
+				currentOpCode = opCodeMap.get(mapKey);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			} // try
@@ -328,7 +328,7 @@ public class ManualDisassembler {
 		displayBinaryFile(binaryData, (int) roundedFileSize);
 		haveBinanryFile(true);
 		frame.setTitle(APP_NAME + " - " + binaryFileName);
-		tabPaneDisplays.setSelectedIndex(TAB_BINARY_FILE);
+//		tabPaneDisplays.setSelectedIndex(TAB_BINARY_FILE);
 		try {
 			fout.close();
 		} catch (IOException e) {
@@ -436,7 +436,67 @@ public class ManualDisassembler {
 	}// //
 
 	private void displayFragmenBinary(JTextArea txtArea, int startLocation, int endLocation) {
-		Highlighter.HighlightPainter yellowPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+		// displayFragmenBinary1(txtArea, startLocation, endLocation);
+
+		Highlighter.HighlightPainter painterHEX = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+		Highlighter.HighlightPainter painterASCII = new DefaultHighlighter.DefaultHighlightPainter(Color.LIGHT_GRAY);
+		txtArea.getHighlighter().removeAllHighlights();
+		final int ASCII_BIAS = 62;
+		
+		try {
+			int charsToHighlight = endLocation - startLocation + 1;
+			int lineNumber = (startLocation / CHARACTERS_PER_LINE);
+			int caretPosition = txtArea.getLineStartOffset(lineNumber);
+			
+			int startIndex = startLocation % CHARACTERS_PER_LINE;
+			int endIndex = 0;
+			
+			int startIndentHex =  6 + (3 * startIndex);
+			int startIndentASCII = ASCII_BIAS + startIndex-6;
+			if (startIndex > 7) {
+				startIndentHex++;
+				startIndentASCII++;
+			}// if
+			
+			
+			int hiLiteCount;
+			int hiLiteCountHex;
+			int lineToHiLite;
+			int lineStartHex; 
+			int lineStartASCII;
+			
+			while (charsToHighlight > 0) {
+
+				endIndex = Math.min(CHARACTERS_PER_LINE, startIndex+charsToHighlight);
+				
+				hiLiteCount = endIndex-startIndex;
+				hiLiteCountHex =  3 * hiLiteCount ;
+				if((startIndex <8)&&(endIndex>8)) {// gap between columns 7 & 8
+					hiLiteCountHex++;
+				}//if
+				lineToHiLite =txtArea.getLineStartOffset(lineNumber++);
+				lineStartHex = lineToHiLite + startIndentHex;
+				lineStartASCII = lineToHiLite + startIndentASCII;
+		
+				txtArea.getHighlighter().addHighlight(lineStartHex, lineStartHex + hiLiteCountHex-1, painterHEX);
+				txtArea.getHighlighter().addHighlight(lineStartASCII, lineStartASCII + hiLiteCount+1, painterASCII);
+				txtArea.setCaretPosition(caretPosition);
+				startIndex = 0;
+				startIndentHex = 6 ;
+				startIndentASCII = ASCII_BIAS-6;
+				charsToHighlight -= hiLiteCount;
+			} // while
+
+		} catch (BadLocationException e) {
+			System.err.printf("[ManualDisassembler.displayFragmenBinary] %s%n", "catch");
+			log.errorf("bad highlight values Start = %04X,  End = %04X%n", startLocation, endLocation);
+		} // try
+
+	}// displayFragmenBinary - in process
+
+	private void displayFragmenBinary1(JTextArea txtArea, int startLocation, int endLocation) {
+		// displayFragmenBinary(txtArea, startLocation, endLocation);
+		Highlighter.HighlightPainter yellowPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.green);
 		txtArea.getHighlighter().removeAllHighlights();
 
 		try {
@@ -487,7 +547,7 @@ public class ManualDisassembler {
 		String part1 = "", part2 = "", part3 = "", part4 = "";
 		while (currentLocation <= endLocation) {
 			String mapKey = String.format("%02X", binaryData.get(currentLocation));
-			currentOpCode = OpCodeMap.get(mapKey);
+			currentOpCode = opCodeMap.get(mapKey);
 			currentValue0 = binaryData.get(currentLocation);
 			opCodeSize = currentOpCode.getSize();
 
@@ -572,7 +632,7 @@ public class ManualDisassembler {
 	}// appendToDoc
 
 	private void setAssemblerType() {
-		if (btn8080Z80.getText() == "Z80") {
+		if (btn8080Z80.getText().equals("Z80")) {
 			btn8080Z80.setText("8080");
 		} else {
 			btn8080Z80.setText("Z80");
@@ -581,11 +641,11 @@ public class ManualDisassembler {
 	}// setAssemblerType
 
 	private void setOpCodeMap() {
-		OpCodeMap = null;
-		if (btn8080Z80.getText() == "Z80") {
-			OpCodeMap = new OpCodeMapZ80();
+		opCodeMap = null;
+		if (btn8080Z80.getText().equals("Z80")) {
+			opCodeMap = new OpCodeMapZ80();
 		} else {
-			OpCodeMap = new OpCodeMapIntel();
+			opCodeMap = new OpCodeMapIntel();
 		} // if
 	}// setOpCodeMap
 
@@ -741,7 +801,7 @@ public class ManualDisassembler {
 		String part3, mapKey;
 		while (currentLocation <= endLocation) {
 			mapKey = String.format("%02X", binaryData.get(currentLocation));
-			currentOpCode = OpCodeMap.get(mapKey);
+			currentOpCode = opCodeMap.get(mapKey);
 			// currentValue0 = binaryData.get(currentLocation);
 			opCodeSize = currentOpCode.getSize();
 			// currentValue0 = opCodeSize > 1 ? binaryData.get(currentLocation) : 0;
@@ -782,7 +842,7 @@ public class ManualDisassembler {
 
 	private String makePart3(OperationStructure currentOpCode, int currentLocation) {
 		String mapKey = String.format("%02X", binaryData.get(currentLocation));
-		currentOpCode = OpCodeMap.get(mapKey);
+		currentOpCode = opCodeMap.get(mapKey);
 		int opCodeSize = currentOpCode.getSize();
 
 		byte currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
@@ -941,7 +1001,7 @@ public class ManualDisassembler {
 		listCodeFragments.setEnabled(true);
 
 		listCodeFragments.updateUI();
-	}//loadWIP
+	}// loadWIP
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	private void appClose() {
@@ -956,7 +1016,7 @@ public class ManualDisassembler {
 
 		myPrefs.put("HostDirectory", hostDirectory);
 		myPrefs.put("AssemblerType", btn8080Z80.getText());
-
+		System.out.printf("[ManualDisassembler.appClose] %s%n", btn8080Z80.getText());
 		myPrefs = null;
 
 		System.exit(0);
@@ -980,9 +1040,8 @@ public class ManualDisassembler {
 		btn8080Z80.setText(myPrefs.get("AssemblerType", "Z80"));
 
 		myPrefs = null;
-		
 		setOpCodeMap();
-		
+
 		if (codeFragmentModel != null) {
 			codeFragmentModel = null;
 		} // if
@@ -1022,7 +1081,7 @@ public class ManualDisassembler {
 	private ByteBuffer binaryData;
 	private CodeFragmentModel codeFragmentModel;
 	// private Opcodes8080 opcodeMap;
-	private AbstractOpCodeMap OpCodeMap;// *******
+	private AbstractOpCodeMap opCodeMap;// *******
 	private Document docBinary;
 	// private Document docWIPbinary;
 	// private Document docWIPsource;
