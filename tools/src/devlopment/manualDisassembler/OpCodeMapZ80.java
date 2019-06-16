@@ -729,9 +729,9 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		//
 		codeMap.put("C0", new OperationStructure("C0", InstrucionType.I01, 1, "RET", "NZ", "", "if NZ, (PC)<-(SP)"));
 		codeMap.put("C1", new OperationStructure("C1", InstrucionType.I01, 1, "POP", "BC", "", "(BC<-(SP)"));
-		codeMap.put("C2", new OperationStructure("C2", InstrucionType.I21, 3, "JP", "NZ", "D16", "if NZ,PC<-D16",PCaction.CONTINUATION));
+		codeMap.put("C2", new OperationStructure("C2", InstrucionType.I31, 3, "JP", "NZ", "D16", "if NZ,PC<-D16",PCaction.CONTINUATION));
 		codeMap.put("C3", new OperationStructure("C3", InstrucionType.I20, 3, "JP", "D16", "", "PC<-D16",PCaction.TOTAL));
-		codeMap.put("C4", new OperationStructure("C4", InstrucionType.I21, 3, "CALL", "NZ", "D16",
+		codeMap.put("C4", new OperationStructure("C4", InstrucionType.I31, 3, "CALL", "NZ", "D16",
 				"if NZ,(SP)<-PC,(PC),- address",PCaction.CONTINUATION));
 		codeMap.put("C5", new OperationStructure("C5", InstrucionType.I01, 1, "PUSH", "BC", "", "(SP)<-(BC)"));
 		codeMap.put("C6", new OperationStructure("C6", InstrucionType.I11, 2, "ADD", "A", "D8", "A<-A + byte2"));
@@ -739,9 +739,9 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("C8",
 				new OperationStructure("C8", InstrucionType.I01, 1, "RET", "Z", "", "if Z set, PC<-(SP); SP<-SP+2"));
 		codeMap.put("C9", new OperationStructure("C9", InstrucionType.I00, 1, "RET", "", "", "PC<-(SP); SP<-SP+2",PCaction.TERMINATES));
-		codeMap.put("CA", new OperationStructure("CA", InstrucionType.I21, 3, "JP", "Z", "D16", "if Z set,PC<-D16",PCaction.CONTINUATION));
+		codeMap.put("CA", new OperationStructure("CA", InstrucionType.I31, 3, "JP", "Z", "D16", "if Z set,PC<-D16",PCaction.CONTINUATION));
 		// /* CB */ Bit instructions makeBitTypes
-		codeMap.put("CC", new OperationStructure("CC", InstrucionType.I21, 3, "CALL", "Z", "D16", "if Z,CALL D16", PCaction.CONTINUATION));
+		codeMap.put("CC", new OperationStructure("CC", InstrucionType.I31, 3, "CALL", "Z", "D16", "if Z,CALL D16", PCaction.CONTINUATION));
 		codeMap.put("CD", new OperationStructure("CD", InstrucionType.I20, 3, "CALL", "D16", "", "CALL D16", PCaction.CONTINUATION));
 		codeMap.put("CE",
 				new OperationStructure("CE", InstrucionType.I11, 2, "ADC", "A", "D8", "A<- A + data + cy"));
@@ -751,11 +751,11 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 				new OperationStructure("D0", InstrucionType.I01, 1, "RET", "NC", "", "if CY not set, (PC)<-(SP)"));
 		codeMap.put("D1", new OperationStructure("D1", InstrucionType.I01, 1, "POP", "DE", "", ""));
 		codeMap.put("D2",
-				new OperationStructure("D2", InstrucionType.I21, 3, "JP", "NC", "D16", "if CY not set,PC<-D16", PCaction.CONTINUATION));
+				new OperationStructure("D2", InstrucionType.I31, 3, "JP", "NC", "D16", "if CY not set,PC<-D16", PCaction.CONTINUATION));
 		codeMap.put("D3",
 				new OperationStructure("D3", InstrucionType.I12, 2, "OUT", "D8", "A", "OUT  (D8),A   I/O")); // Special
 		codeMap.put("D4",
-				new OperationStructure("D4", InstrucionType.I21, 3, "CALL", "NC", "D16", "if CY not set,CALL D16", PCaction.CONTINUATION));
+				new OperationStructure("D4", InstrucionType.I31, 3, "CALL", "NC", "D16", "if CY not set,CALL D16", PCaction.CONTINUATION));
 		codeMap.put("D5", new OperationStructure("D5", InstrucionType.I01, 1, "PUSH", "DE", "", ""));
 		codeMap.put("D6", new OperationStructure("D6", InstrucionType.I10, 2, "SUB", "D8", "", "A<-A - byte2"));
 		codeMap.put("D7", new OperationStructure("D7", InstrucionType.I01, 1, "RST", "10", "", "CALL $10", PCaction.CONTINUATION));
@@ -764,9 +764,9 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("D9",
 				new OperationStructure("D9", InstrucionType.I00, 1, "EXX", "", "", "Main regs <-> Alt regs", PCaction.TOTAL));
 		codeMap.put("DA",
-				new OperationStructure("DA", InstrucionType.I21, 3, "JP", "C", "D16", "if CY  set,PC<-D16", PCaction.CONTINUATION));
+				new OperationStructure("DA", InstrucionType.I31, 3, "JP", "C", "D16", "if CY  set,PC<-D16", PCaction.CONTINUATION));
 		codeMap.put("DB", new OperationStructure("DB", InstrucionType.I16, 2, "IN", "A", "D8", "i/O")); // Special
-		codeMap.put("DC", new OperationStructure("DC", InstrucionType.I21, 3, "CALL", "C", "D16",
+		codeMap.put("DC", new OperationStructure("DC", InstrucionType.I31, 3, "CALL", "C", "D16",
 				"if CY set ,(SP)<-PC,PC<- address", PCaction.CONTINUATION));
 		/*
 		 * DD codeMap.put("DD", new OperationStructure("DD", InstrucionType.MAIN, 3, "Alt", "D16", "",
@@ -780,10 +780,10 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 				new OperationStructure("E0", InstrucionType.I01, 1, "RET", "PO", "", "if P is reset, set,PC<-(SP)"));
 		codeMap.put("E1", new OperationStructure("E1", InstrucionType.I01, 1, "POP", "HL", "", ""));
 		codeMap.put("E2",
-				new OperationStructure("E2", InstrucionType.I21, 3, "JP", "PO", "D16", "if P is reset,PC<-D16", PCaction.CONTINUATION));
+				new OperationStructure("E2", InstrucionType.I31, 3, "JP", "PO", "D16", "if P is reset,PC<-D16", PCaction.CONTINUATION));
 		codeMap.put("E3",
 				new OperationStructure("E3", InstrucionType.I02, 1, "EX", "(SP)", "HL", "L<->(SP);H<->(SP+1)"));
-		codeMap.put("E4", new OperationStructure("E4", InstrucionType.I21, 3, "CALL", "PO", "D16",
+		codeMap.put("E4", new OperationStructure("E4", InstrucionType.I31, 3, "CALL", "PO", "D16",
 				"if P is reset,(SP)<-PC,PC<- address", PCaction.CONTINUATION));
 		codeMap.put("E5", new OperationStructure("E5", InstrucionType.I01, 1, "PUSH", "HL", "", ""));
 		codeMap.put("E6", new OperationStructure("E6", InstrucionType.I10, 2, "AND", "D8", "", "A<-A & byte2"));
@@ -793,9 +793,9 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("E9",
 				new OperationStructure("E9", InstrucionType.I01, 1, "JP", "(HL)", "", "PC.hi<-H;PC.lo<-L", PCaction.TOTAL));
 		codeMap.put("EA",
-				new OperationStructure("EA", InstrucionType.I21, 3, "JP", "PE", "D16", "if P is set,PC<-D16", PCaction.CONTINUATION));
+				new OperationStructure("EA", InstrucionType.I31, 3, "JP", "PE", "D16", "if P is set,PC<-D16", PCaction.CONTINUATION));
 		codeMap.put("EB", new OperationStructure("EB", InstrucionType.I02, 1, "EX", "DE", "HL", "H<->D;L<->E")); // Special
-		codeMap.put("EC", new OperationStructure("EC", InstrucionType.I21, 3, "CALL", "PE", "D16",
+		codeMap.put("EC", new OperationStructure("EC", InstrucionType.I31, 3, "CALL", "PE", "D16",
 				"if P is set,(SP)<-PC,PC<- address", PCaction.CONTINUATION));
 		// /* ED */ Extended instructions makeExtendedTypes
 		codeMap.put("EE", new OperationStructure("EE", InstrucionType.I10, 2, "XOR", "D8", "", "A<- A ^ data"));
@@ -806,9 +806,9 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("F1", new OperationStructure("F1", InstrucionType.I01, 1, "POP", "AF", "",
 				"flags<-(SP);A<-(SP+1)"));
 		codeMap.put("F2",
-				new OperationStructure("F2", InstrucionType.I21, 3, "JP", "P", "D16", "if S reset,PC<-D16", PCaction.CONTINUATION));
+				new OperationStructure("F2", InstrucionType.I31, 3, "JP", "P", "D16", "if S reset,PC<-D16", PCaction.CONTINUATION));
 		codeMap.put("F3", new OperationStructure("F3", InstrucionType.I00, 1, "DI", "", "", "Disable interrups"));
-		codeMap.put("F4", new OperationStructure("F4", InstrucionType.I21, 3, "CALL", "P", "D16",
+		codeMap.put("F4", new OperationStructure("F4", InstrucionType.I31, 3, "CALL", "P", "D16",
 				"if S reset,(SP)<-PC,PC<- address", PCaction.CONTINUATION));
 		codeMap.put("F5", new OperationStructure("F5", InstrucionType.I01, 1, "PUSH", "AF", "", "(SP)<-A & cc"));
 		codeMap.put("F6", new OperationStructure("F6", InstrucionType.I10, 2, "OR", "D8", "", "A<-A | byte2"));
@@ -816,9 +816,9 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("F8",
 				new OperationStructure("F8", InstrucionType.I01, 1, "RET", "M", "", "if S set, set,PC<-(SP)"));
 		codeMap.put("F9", new OperationStructure("F9", InstrucionType.I02, 1, "LD", "SP", "HL", "SP<-HL"));
-		codeMap.put("FA", new OperationStructure("FA", InstrucionType.I21, 3, "JP", "M", "D16", "if S set,PC<-D16", PCaction.CONTINUATION));
+		codeMap.put("FA", new OperationStructure("FA", InstrucionType.I31, 3, "JP", "M", "D16", "if S set,PC<-D16", PCaction.CONTINUATION));
 		codeMap.put("FB", new OperationStructure("FB", InstrucionType.I00, 1, "EI", "", "", "Enable interrupts"));
-		codeMap.put("FC", new OperationStructure("FC", InstrucionType.I21, 3, "CALL", "M", "D16",
+		codeMap.put("FC", new OperationStructure("FC", InstrucionType.I31, 3, "CALL", "M", "D16",
 				"if S set,(SP)<-PC,PC<- address", PCaction.CONTINUATION));
 		/*
 		 * FDcodeMap.put("FD", new OperationStructure("FD", InstrucionType.MAIN, 3, "Alt", "D16", "",

@@ -22,7 +22,10 @@ public enum InstrucionType {
 	I24,
 	I25,
 	I26,
-	I27
+	I27,
+	
+	I30,
+	I31,
 }// InstructionType
 
 
@@ -38,7 +41,7 @@ public enum InstrucionType {
 // I15	1 argument		- instruction target,(Source + value2H)		[BIT 0,(IX+06H)]
 // I16	1 argument		- instruction target,(value1)				[IN A,(08H)]
 
-// I20	2 arguments		- instruction value2:value1H				[JP 0789AH]
+// I20	2 arguments		- instruction Lvalue2:value1				[JP 0789AH]
 // I21	2 arguments		- instruction target,value2:value1H			[LD BC,0BCDEH]
 // I22	2 arguments		- instruction target,value3:value2H			[LD IX,0BCDEH]
 // I23	2 arguments		- instruction (value3:value2H),source		[LD (0F012H),IX]
@@ -46,6 +49,8 @@ public enum InstrucionType {
 // I25	2 arguments		- instruction target,(value3:value2H)		[LD IY,(0789AH)]
 // I26	2 arguments		- instruction target,(value2:value1H)		[LD HL,(0BCDEH)]
 // I27	2 arguments		- instruction (target + value2),value3		[LD (IX+0EH),00]
+
+// I31	2 arguments		- instruction target,Lvalue2:value1			[JP NZ,0BCDEH]
 
 
 
