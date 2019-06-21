@@ -28,7 +28,7 @@ public class OpCodeMapIntel extends AbstractOpCodeMap {
 		codeMap.put("0C", new OperationStructure("0C", InstrucionType.I01, 1, "INR", "C", "", "C <-C+1"));
 		codeMap.put("0D", new OperationStructure("0D", InstrucionType.I01, 1, "DCR", "C", "", "C <-C-1"));
 		codeMap.put("0E", new OperationStructure("0E", InstrucionType.I11, 2, "MVI", "C", "D8", "C,-byte2"));
-		codeMap.put("0F", new OperationStructure("0F", InstrucionType.I00, 1, "RAR", "", "", "A = A>> not thru carry"));
+		codeMap.put("0F", new OperationStructure("0F", InstrucionType.I00, 1, "RRC", "", "", "A = A>> not thru carry"));
 		//
 		codeMap.put("10", new OperationStructure("10", InstrucionType.I00, 1, "ALT", "", "","NOP"));
 		codeMap.put("11", new OperationStructure("11", InstrucionType.I21, 3, "LXI", "D", "D16", "D<-byte3,E<-byte2"));
@@ -45,7 +45,7 @@ public class OpCodeMapIntel extends AbstractOpCodeMap {
 		codeMap.put("1C", new OperationStructure("1C", InstrucionType.I01, 1, "INR", "E", "", "E <-E+1"));
 		codeMap.put("1D", new OperationStructure("1D", InstrucionType.I01, 1, "DCR", "E", "", "E <-E-1"));
 		codeMap.put("1E", new OperationStructure("1E", InstrucionType.I11, 2, "MVI", "E", "D8", "E,-byte2"));
-		codeMap.put("1F", new OperationStructure("1f", InstrucionType.I00, 1, "RRC", "", "", "A = A>>  thru carry"));
+		codeMap.put("1F", new OperationStructure("1F", InstrucionType.I00, 1, "RAR", "", "", "A = A>>  thru carry"));
 		//
 		codeMap.put("20", new OperationStructure("20", InstrucionType.I00, 1, "ALT", "", "","NOP"));
 		codeMap.put("21", new OperationStructure("21", InstrucionType.I21, 3, "LXI", "H", "D16", "H<-byte3,L<-byte2"));
@@ -141,7 +141,7 @@ public class OpCodeMapIntel extends AbstractOpCodeMap {
 		codeMap.put("73", new OperationStructure("73", InstrucionType.I02, 1, "MOV", "M", "E", "M <- E"));
 		codeMap.put("74", new OperationStructure("74", InstrucionType.I02, 1, "MOV", "M", "H", "M <- H"));
 		codeMap.put("75", new OperationStructure("75", InstrucionType.I02, 1, "MOV", "M", "L", "M <- L"));
-		codeMap.put("76", new OperationStructure("76", InstrucionType.I00, 1, "HALT", "", "", "Halt")); // Special
+		codeMap.put("76", new OperationStructure("76", InstrucionType.I00, 1, "HLT", "", "", "Halt")); // Special
 		codeMap.put("77", new OperationStructure("77", InstrucionType.I02, 1, "MOV", "M", "A", "M <- A"));
 		//
 		codeMap.put("78", new OperationStructure("78", InstrucionType.I02, 1, "MOV", "A", "B", "A <- B"));
@@ -239,7 +239,7 @@ public class OpCodeMapIntel extends AbstractOpCodeMap {
 		codeMap.put("CB", new OperationStructure("CB", InstrucionType.I00, 1, "ALT", "", "", "NOP"));
 		codeMap.put("CC", new OperationStructure("CC", InstrucionType.I20, 3, "CZ", "", "D16", "if Z,CALL D16", PCaction.CONTINUATION));
 		codeMap.put("CD", new OperationStructure("CD", InstrucionType.I20, 3, "CALL", "D16", "", "CALL D16", PCaction.CONTINUATION));
-		codeMap.put("CE", new OperationStructure("CE", InstrucionType.I10, 2, "ADI", "D8", "", "A<- A + data + cy"));
+		codeMap.put("CE", new OperationStructure("CE", InstrucionType.I10, 2, "ACI", "D8", "", "A<- A + data + cy"));
 		codeMap.put("CF", new OperationStructure("CF", InstrucionType.I01, 1, "RST", "1", "", "CALL $8", PCaction.CONTINUATION));
 		//
 		codeMap.put("D0", new OperationStructure("D0", InstrucionType.I00, 1, "RNC", "", "", "if CY not set, (PC)<-(SP)"));

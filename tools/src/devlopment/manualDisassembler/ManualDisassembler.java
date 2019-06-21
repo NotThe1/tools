@@ -84,7 +84,7 @@ public class ManualDisassembler {
 	private String hostDirectory;
 	// private String currentFileName;
 	private JFrame frame;
-	private static String version = "Version C.0.";
+	private static String version = "Version 1.0.";
 
 	/**
 	 * Launch the application.
@@ -655,9 +655,11 @@ public class ManualDisassembler {
 		appendToDoc(doc, header);
 		header = String.format("%-10s %-7s %-10s %-25s%n", "QMARK", "EQU", "3FH", "; Question Mark");
 		appendToDoc(doc, header);
-
-		header = String.format("%n%n%15s  %05XH%n%n", "ORG", OFFSET);
+		header = String.format("%-10s %-7s %-10s %-25s%n", "LFEDC", "EQU", "0FEDCH", ";****  D16 ******");
 		appendToDoc(doc, header);
+//
+//		header = String.format("%n%n%15s  %05XH%n%n", "ORG", OFFSET);
+//		appendToDoc(doc, header);
 
 	}// buildSourceHeader
 
@@ -936,6 +938,9 @@ public class ManualDisassembler {
 		case I15:
 			break;
 		case I16:
+			fmt00 = "%-5s%s,(0%02XH)";
+			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination(),
+					currentValue1);
 			break;
 		case I20:
 			fmt00 = "%-5sL%02X%02X";

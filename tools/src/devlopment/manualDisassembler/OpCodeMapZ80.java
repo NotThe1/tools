@@ -758,7 +758,7 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 				new OperationStructure("D4", InstrucionType.I31, 3, "CALL", "NC", "D16", "if CY not set,CALL D16", PCaction.CONTINUATION));
 		codeMap.put("D5", new OperationStructure("D5", InstrucionType.I01, 1, "PUSH", "DE", "", ""));
 		codeMap.put("D6", new OperationStructure("D6", InstrucionType.I10, 2, "SUB", "D8", "", "A<-A - byte2"));
-		codeMap.put("D7", new OperationStructure("D7", InstrucionType.I01, 1, "RST", "10", "", "CALL $10", PCaction.CONTINUATION));
+		codeMap.put("D7", new OperationStructure("D7", InstrucionType.I01, 1, "RST", "10H", "", "CALL $10", PCaction.CONTINUATION));
 		codeMap.put("D8",
 				new OperationStructure("D8", InstrucionType.I01, 1, "RET", "C", "", "if CY  set,PC<-(SP)"));
 		codeMap.put("D9",
@@ -773,7 +773,7 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		 * "Alt CALL D16"));
 		 */
 		codeMap.put("DE",
-				new OperationStructure("DE", InstrucionType.I10, 2, "SBC", "A", "D8", "A<- A - data - cy"));
+				new OperationStructure("DE", InstrucionType.I11, 2, "SBC", "A", "D8", "A<- A - data - cy"));
 		codeMap.put("DF", new OperationStructure("DF", InstrucionType.I01, 1, "RST", "18H", "", "CALL $18", PCaction.CONTINUATION));
 		//
 		codeMap.put("E0",
