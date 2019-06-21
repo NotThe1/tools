@@ -21,9 +21,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.Stack;
 import java.util.prefs.Preferences;
@@ -79,6 +82,7 @@ public class ManualDisassembler {
 	private ApplicationAdapter applicationAdapter = new ApplicationAdapter();
 	private myComponents.AppLogger log = myComponents.AppLogger.getInstance();
 	private String hostDirectory;
+	// private String currentFileName;
 	private JFrame frame;
 	private static String version = "Version C.0.";
 
@@ -175,6 +179,38 @@ public class ManualDisassembler {
 		StyleConstants.setForeground(workingSets[ATTR_FUNCTION], Color.GRAY);
 		return workingSets;
 	}// makeAttributes
+
+	private void saveSourceFile() {
+		String fileType = btn8080Z80.getText().equals("Z80") ? ".Z80" : ".asm";
+		String fileName = binaryFileName.replaceAll("(?i)\\.COM", fileType);
+		String absoluteSourcePath = hostDirectory + FILE_SEPARATOR + fileName;
+		try {
+			FileWriter fw = new FileWriter(new File(absoluteSourcePath));
+			PrintWriter pw = new PrintWriter(fw);
+			Scanner scanner = new Scanner(txtSource.getText());
+			String listingLine;
+			while (scanner.hasNextLine()) {
+				listingLine = scanner.nextLine();
+				listingLine = listingLine.replaceAll("\\s++$", EMPTY_STRING);
+				if (listingLine.equals(EMPTY_STRING)) {
+					continue; // skip empty line
+				} // if
+				pw.println(listingLine);
+			} // while
+			scanner.close();
+			pw.close();
+			fw.close();
+			JOptionPane.showMessageDialog(frame, "Saved source file " + absoluteSourcePath,"Save Source",JOptionPane.INFORMATION_MESSAGE);
+			log.infof("Saved source file %s%n", absoluteSourcePath);
+		} catch (Exception e) {
+			log.error("%nFailed to Save source file %s%n", fileName);
+			log.errorf("error message : %s%n%n", e.getMessage());
+		} // try
+	}// saveSourceFile
+
+	private void saveSourceFileAs() {
+
+	}// saveSourceFile
 
 	private void combineFragments() {
 		ArrayList<CodeFragment> tempFragments = new ArrayList<CodeFragment>();
@@ -295,7 +331,6 @@ public class ManualDisassembler {
 		boolean result = true; // assume all goes well
 		binaryFileName = binaryFile.getName();
 		binaryFilePath = binaryFile.getAbsolutePath();
-
 		FileChannel fcIn = null;
 		FileInputStream fout = null;
 		try {
@@ -328,7 +363,7 @@ public class ManualDisassembler {
 		displayBinaryFile(binaryData, (int) roundedFileSize);
 		haveBinanryFile(true);
 		frame.setTitle(APP_NAME + " - " + binaryFileName);
-//		tabPaneDisplays.setSelectedIndex(TAB_BINARY_FILE);
+		// tabPaneDisplays.setSelectedIndex(TAB_BINARY_FILE);
 		try {
 			fout.close();
 		} catch (IOException e) {
@@ -413,7 +448,13 @@ public class ManualDisassembler {
 			// btnBuildASM.setEnabled(state);
 			listCodeFragments.setEnabled(state);
 		} // if
+		btnBuildSource.setEnabled(state);
 	}// haveBinanryFile
+
+	private void haveSourceFile(boolean state) {
+		mnuFileSaveSource.setEnabled(state);
+		mnuFileSaveSourceAs.setEnabled(state);
+	}// haveSourceFile
 
 	private void setFragmentRadioButton(String type) {
 		switch (type) {
@@ -442,48 +483,47 @@ public class ManualDisassembler {
 		Highlighter.HighlightPainter painterASCII = new DefaultHighlighter.DefaultHighlightPainter(Color.LIGHT_GRAY);
 		txtArea.getHighlighter().removeAllHighlights();
 		final int ASCII_BIAS = 62;
-		
+
 		try {
 			int charsToHighlight = endLocation - startLocation + 1;
 			int lineNumber = (startLocation / CHARACTERS_PER_LINE);
 			int caretPosition = txtArea.getLineStartOffset(lineNumber);
-			
+
 			int startIndex = startLocation % CHARACTERS_PER_LINE;
 			int endIndex = 0;
-			
-			int startIndentHex =  6 + (3 * startIndex);
-			int startIndentASCII = ASCII_BIAS + startIndex-6;
+
+			int startIndentHex = 6 + (3 * startIndex);
+			int startIndentASCII = ASCII_BIAS + startIndex - 6;
 			if (startIndex > 7) {
 				startIndentHex++;
 				startIndentASCII++;
-			}// if
-			
-			
+			} // if
+
 			int hiLiteCount;
 			int hiLiteCountHex;
 			int lineToHiLite;
-			int lineStartHex; 
+			int lineStartHex;
 			int lineStartASCII;
-			
+
 			while (charsToHighlight > 0) {
 
-				endIndex = Math.min(CHARACTERS_PER_LINE, startIndex+charsToHighlight);
-				
-				hiLiteCount = endIndex-startIndex;
-				hiLiteCountHex =  3 * hiLiteCount ;
-				if((startIndex <8)&&(endIndex>8)) {// gap between columns 7 & 8
+				endIndex = Math.min(CHARACTERS_PER_LINE, startIndex + charsToHighlight);
+
+				hiLiteCount = endIndex - startIndex;
+				hiLiteCountHex = 3 * hiLiteCount;
+				if ((startIndex < 8) && (endIndex > 8)) {// gap between columns 7 & 8
 					hiLiteCountHex++;
-				}//if
-				lineToHiLite =txtArea.getLineStartOffset(lineNumber++);
+				} // if
+				lineToHiLite = txtArea.getLineStartOffset(lineNumber++);
 				lineStartHex = lineToHiLite + startIndentHex;
 				lineStartASCII = lineToHiLite + startIndentASCII;
-		
-				txtArea.getHighlighter().addHighlight(lineStartHex, lineStartHex + hiLiteCountHex-1, painterHEX);
-				txtArea.getHighlighter().addHighlight(lineStartASCII, lineStartASCII + hiLiteCount+1, painterASCII);
+
+				txtArea.getHighlighter().addHighlight(lineStartHex, lineStartHex + hiLiteCountHex - 1, painterHEX);
+				txtArea.getHighlighter().addHighlight(lineStartASCII, lineStartASCII + hiLiteCount + 1, painterASCII);
 				txtArea.setCaretPosition(caretPosition);
 				startIndex = 0;
-				startIndentHex = 6 ;
-				startIndentASCII = ASCII_BIAS-6;
+				startIndentHex = 6;
+				startIndentASCII = ASCII_BIAS - 6;
 				charsToHighlight -= hiLiteCount;
 			} // while
 
@@ -516,22 +556,25 @@ public class ManualDisassembler {
 
 	private void displayFragmentSource(JTextPane txtArea, CodeFragment codeFragment) {
 		String type = codeFragment.type;
+		Document doc = txtArea.getDocument();
 		switch (type) {
 		case CodeFragment.CODE:
-			showFragmentCode(txtArea.getDocument(), codeFragment);
+			showFragmentCode(doc, codeFragment);
 			break;
 		case CodeFragment.CONSTANT:
 			break;
 		case CodeFragment.LITERAL:
-			Document doc = txtArea.getDocument();
 			clearDocument(doc);
-			appendToDoc(doc,String.format(";%17s  %05XH%n", "ORG", codeFragment.startLoc));
+			appendToDoc(doc, String.format(";%17s  %05XH%n", "ORG", codeFragment.startLoc));
 			buildLiteralFragment(doc, codeFragment);
 			break;
 		case CodeFragment.RESERVED:
+			clearDocument(doc);
+			appendToDoc(doc, String.format(";%17s  %05XH%n", "ORG", codeFragment.startLoc));
+			buildReservedFragment(doc, codeFragment);
 			break;
 		case CodeFragment.UNKNOWN:
-			showFragmentCode(txtArea.getDocument(), codeFragment);
+			showFragmentCode(doc, codeFragment);
 			break;
 		default:
 		}// switch
@@ -557,7 +600,7 @@ public class ManualDisassembler {
 
 			currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
 			currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
-//			currentValue3 = opCodeSize > 3 ? binaryData.get(currentLocation + 2) : 0;
+			// currentValue3 = opCodeSize > 3 ? binaryData.get(currentLocation + 2) : 0;
 			try {
 				part1 = makePart1(currentLocation);
 				switch (opCodeSize) {
@@ -589,45 +632,48 @@ public class ManualDisassembler {
 	}// showFragmentCode
 
 	private void buildSourceHeader(Document doc) {
-		lblSourceHeader.setText(binaryFilePath);
+		String fileType = btn8080Z80.getText().equals("Z80") ? ".Z80" : ".asm";
+		String fileName = binaryFileName.replaceAll("\\.COM", fileType);
+
+		lblSourceHeader.setText(hostDirectory);
 		clearDocument(docASM);
-		String header = String.format(";Source File name - %s%n", binaryFileName);
-		appendToDoc(doc,header);
+		String header = String.format(";Source File name - %s%n", fileName);
+		appendToDoc(doc, header);
 		header = String.format(";Generated by - ManualDisassembler %s on %s%n%n", version, new Date().toString());
-		appendToDoc(doc,header);
+		appendToDoc(doc, header);
 		header = String.format("%-10s %-7s %-10s %-25s%n", "NULL", "EQU", "00H", "; Null");
-		appendToDoc(doc,header);
+		appendToDoc(doc, header);
 		header = String.format("%-10s %-7s %-10s %-25s%n", "SOH", "EQU", "01H", "; Start of Heading");
-		appendToDoc(doc,header);
+		appendToDoc(doc, header);
 		header = String.format("%-10s %-7s %-10s %-25s%n", "BELL", "EQU", "07H", "; Bell");
-		appendToDoc(doc,header);
+		appendToDoc(doc, header);
 		header = String.format("%-10s %-7s %-10s %-25s%n", "LF", "EQU", "0AH", "; Line Feed");
-		appendToDoc(doc,header);
+		appendToDoc(doc, header);
 		header = String.format("%-10s %-7s %-10s %-25s%n", "CR", "EQU", "0DH", "; Carriage Return");
-		appendToDoc(doc,header);
+		appendToDoc(doc, header);
 		header = String.format("%-10s %-7s %-10s %-25s%n", "DOLLAR", "EQU", "24H", "; Dollar Sign");
-		appendToDoc(doc,header);
+		appendToDoc(doc, header);
 		header = String.format("%-10s %-7s %-10s %-25s%n", "QMARK", "EQU", "3FH", "; Question Mark");
-		appendToDoc(doc,header);
+		appendToDoc(doc, header);
 
 		header = String.format("%n%n%15s  %05XH%n%n", "ORG", OFFSET);
-		appendToDoc(doc,header);
+		appendToDoc(doc, header);
 
 	}// buildSourceHeader
 
 	private void buildFragmentHeader(Document doc, CodeFragment codeFragment) {
 		String displayText = String.format("%n;     <New %s fragment-----from %04X to %04X (%4$4XH : %4$4dD)>%n",
 				codeFragment.type, codeFragment.startLoc, codeFragment.endLoc, codeFragment.size());
-		appendToDoc(doc,displayText);
+		appendToDoc(doc, displayText);
 		displayText = String.format(";%17s  %05XH%n", "ORG", codeFragment.startLoc);
-		appendToDoc(doc,displayText);
+		appendToDoc(doc, displayText);
 	}// buildFragmentHeader
 
-	private void appendToDoc(Document doc,String textToAppend) {
-		appendToDoc(doc,textToAppend, null);
+	private void appendToDoc(Document doc, String textToAppend) {
+		appendToDoc(doc, textToAppend, null);
 	}// appendToDocASM
 
-	private void appendToDoc(Document doc,String textToAppend, AttributeSet attributeSet) {
+	private void appendToDoc(Document doc, String textToAppend, AttributeSet attributeSet) {
 		try {
 			doc.insertString(doc.getLength(), textToAppend, attributeSet);
 		} catch (BadLocationException e) {
@@ -653,7 +699,7 @@ public class ManualDisassembler {
 		} // if
 	}// setOpCodeMap
 
-	private void buildASM() {
+	private void buildSource() {
 		clearDocument(docASM); // Star with clean doc
 		buildSourceHeader(docASM);
 		CodeFragment codeFragment;
@@ -662,26 +708,28 @@ public class ManualDisassembler {
 			codeFragment = codeFragmentModel.getElementAt(i);
 			switch (codeFragment.type) {
 			case CodeFragment.CODE:
-				buildCodeFragement(txtASM.getDocument(), codeFragment);
+				buildCodeFragement(txtSource.getDocument(), codeFragment);
 				break;
 			case CodeFragment.CONSTANT:
-				buildConstantFragment(txtASM.getDocument(), codeFragment);
+				buildConstantFragment(txtSource.getDocument(), codeFragment);
 				break;
 			case CodeFragment.LITERAL:
-				buildFragmentHeader(txtASM.getDocument(), codeFragment);
-				buildLiteralFragment(txtASM.getDocument(), codeFragment);
+				buildFragmentHeader(txtSource.getDocument(), codeFragment);
+				buildLiteralFragment(txtSource.getDocument(), codeFragment);
 				break;
 			case CodeFragment.RESERVED:
-				buildUnknownFragment(txtASM.getDocument(), codeFragment);
+				buildFragmentHeader(txtSource.getDocument(), codeFragment);
+				buildReservedFragment(txtSource.getDocument(), codeFragment);
 				break;
 			case CodeFragment.UNKNOWN:
-				buildUnknownFragment(txtASM.getDocument(), codeFragment);
+				buildUnknownFragment(txtSource.getDocument(), codeFragment);
 				break;
 			default:
 			}// switch
 
 		} // for
-		txtASM.setCaretPosition(0);
+		txtSource.setCaretPosition(0);
+		haveSourceFile(true);
 	}// buildASM
 
 	private void buildLiteralFragment(Document doc, CodeFragment codeFragment) {
@@ -695,14 +743,14 @@ public class ManualDisassembler {
 		literals.put((byte) 0x24, "DOLLAR");
 		literals.put((byte) 0x3F, "QMARK");
 
-//		buildFragmentHeader(doc, codeFragment);
+		// buildFragmentHeader(doc, codeFragment);
 		byte[] literalValues = new byte[codeFragment.size()];
 		binaryData.position(codeFragment.startLoc);
 		binaryData.get(literalValues, 0, codeFragment.size());
 		String literalData = null;
 		int subFragmentStart = 0;
 		int subLength = 0;
-		appendToDoc(doc,String.format("L%04X:%n", codeFragment.startLoc));
+		appendToDoc(doc, String.format("L%04X:%n", codeFragment.startLoc));
 		for (int i = 0; i < codeFragment.size(); i++) {
 			switch (literalValues[i]) {
 			case 0x00: // NULL
@@ -720,10 +768,10 @@ public class ManualDisassembler {
 					} // for
 					literalData = new String(subFragmentString);
 					String displayText = String.format("%17s  '%s'%n", "DB", literalData);
-					appendToDoc(doc,displayText);
+					appendToDoc(doc, displayText);
 				} // if
 				String displayText = String.format("%17s  %s%n", "DB", literals.get(literalValues[i]));
-				appendToDoc(doc,displayText);
+				appendToDoc(doc, displayText);
 				subFragmentStart = i + 1;
 				break;
 			default:
@@ -737,7 +785,7 @@ public class ManualDisassembler {
 			} // for
 			literalData = new String(subFragmentString);
 			String displayText = String.format("%17s  '%s'%n", "DB", literalData);
-			appendToDoc(doc,displayText);
+			appendToDoc(doc, displayText);
 		} // if - remaing data
 
 	}// buildLiteralFragment
@@ -783,7 +831,7 @@ public class ManualDisassembler {
 				locBase += dbPerLine - 4;
 				break;
 			}// switch
-			appendToDoc(doc,displayText);
+			appendToDoc(doc, displayText);
 
 		} // for
 
@@ -792,7 +840,14 @@ public class ManualDisassembler {
 	private void buildUnknownFragment(Document doc, CodeFragment codeFragment) {
 		buildFragmentHeader(doc, codeFragment);
 		String displayText = String.format("%17s  %05XH%n", "DS", codeFragment.size());
-		appendToDoc(doc,displayText);
+		appendToDoc(doc, displayText);
+	}// buildUnknownFragent
+
+	private void buildReservedFragment(Document doc, CodeFragment codeFragment) {
+		// buildFragmentHeader(doc, codeFragment);
+		String displayText = String.format("%17s  %05XH%n", "DS", codeFragment.size());
+		appendToDoc(doc, displayText);
+		// buildReservedFragment(doc, codeFragment);
 	}// buildUnknownFragent
 
 	private void buildCodeFragement(Document doc, CodeFragment codeFragment) {
@@ -810,17 +865,17 @@ public class ManualDisassembler {
 			opCodeSize = currentOpCode.getSize();
 			try {
 				if (labels.contains(currentLocation)) {
-					appendToDoc(doc,String.format("L%04X:%n", currentLocation));
+					appendToDoc(doc, String.format("L%04X:%n", currentLocation));
 				} // if - its a label
 				part3 = "      " + makePart3(currentOpCode, currentLocation);
 				doc.insertString(doc.getLength(), part3, null);
 				doc.insertString(doc.getLength(), System.lineSeparator(), null);
 			} catch (BadLocationException badLocationException) {
 				badLocationException.printStackTrace();
-			}//try
+			} // try
 			currentLocation += opCodeSize;
 		} // while opcodeMap
-		
+
 	}// buildCodeFragment
 
 	private String makePart1(int currentLocation) {
@@ -862,16 +917,16 @@ public class ManualDisassembler {
 					currentOpCode.getSource());
 			break;
 		case I10:
-			fmt00 = "%-5s%02XH";
+			fmt00 = "%-5s0%02XH";
 			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentValue1);
 			break;
 		case I11:
-			fmt00 = "%-5s%s,%02X";
+			fmt00 = "%-5s%s,0%02XH";
 			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination(),
 					currentValue1);
 			break;
 		case I12:
-			fmt00 = "%-5s%02XH";
+			fmt00 = "%-5s0%02XH";
 			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentValue1);
 			break;
 		case I13:
@@ -886,8 +941,12 @@ public class ManualDisassembler {
 			fmt00 = "%-5sL%02X%02X";
 			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentValue2, currentValue1);
 			break;
+		case I20A:
+			fmt00 = "%-5s0%02X%02XH";
+			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentValue2, currentValue1);
+			break;
 		case I21:
-			fmt00 = "%-5s%s,%02X%02XH";
+			fmt00 = "%-5s%s,0%02X%02XH";
 			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination(), currentValue2,
 					currentValue1);
 			break;
@@ -896,14 +955,14 @@ public class ManualDisassembler {
 		case I23:
 			break;
 		case I24:
-			fmt00 = "%-5s(%02X%02XH),%s";
+			fmt00 = "%-5s(0%02X%02XH),%s";
 			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentValue2, currentValue1,
 					currentOpCode.getSource());
 			break;
 		case I25:
 			break;
 		case I26:
-			fmt00 = "%-5s%s,(%02X%02XH)";
+			fmt00 = "%-5s%s,(0%02X%02XH)";
 			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination(), currentValue2,
 					currentValue1);
 			break;
@@ -1038,12 +1097,10 @@ public class ManualDisassembler {
 				.node(this.getClass().getSimpleName());
 		frame.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
 		frame.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
-
 		hostDirectory = myPrefs.get("HostDirectory", System.getProperty(USER_HOME, THIS_DIR));
-
 		btn8080Z80.setText(myPrefs.get("AssemblerType", "Z80"));
-
 		myPrefs = null;
+
 		setOpCodeMap();
 
 		if (codeFragmentModel != null) {
@@ -1057,7 +1114,7 @@ public class ManualDisassembler {
 		codeFragmentModel = new CodeFragmentModel();
 
 		docBinary = txtBinaryFile.getDocument();
-		docASM = txtASM.getDocument();
+		docASM = txtSource.getDocument();
 		clearDocument(txtWIPsource.getDocument());
 		clearDocument(docBinary);
 		clearDocument(docASM);
@@ -1066,6 +1123,8 @@ public class ManualDisassembler {
 
 		haveBinanryFile(false);
 		binaryFileName = "<No biary file selected>";
+		haveSourceFile(false);
+
 		frame.setTitle(APP_NAME + "   " + binaryFileName);
 		log.infof("Starting %s......%n", APP_NAME);
 	}// appInit
@@ -1082,6 +1141,7 @@ public class ManualDisassembler {
 	private File binaryFile;
 	private String binaryFilePath;
 	private String binaryFileName = "";
+	private String binaryFileDirectory = "";//
 	private ByteBuffer binaryData;
 	private CodeFragmentModel codeFragmentModel;
 	// private Opcodes8080 opcodeMap;
@@ -1107,21 +1167,21 @@ public class ManualDisassembler {
 	private final int ATTR_ASM_CODE = 2;
 	private final int ATTR_FUNCTION = 3;
 
+	private final String EMPTY_STRING = "";
+
 	// private final static String AC_MNU_FILE_NEW = "mnuFileNew";
 	private final static String AC_MNU_FILE_OPEN = "mnuFileOpen";
 	private final static String AC_MNU_FILE_LOAD_WIP = "mnuFileLoadWIP";
 	private final static String AC_MNU_FILE_SAVE_WIP = "mnuFileSaveWIP";
 	private final static String AC_MNU_FILE_SAVE_WIP_AS = "mnuFileSaveWIPAs";
+	private final static String AC_MNU_FILE_SAVE_SOURCE = "mnuFileSaveSource";
+	private final static String AC_MNU_FILE_SAVE_SOURCE_AS = "mnuFileSaveSourceAs";
+
 	private final static String AC_MNU_FILE_RESET = "mnuFileReset";
 	private final static String AC_MNU_FILE_EXIT = "mnuFileExit";
 
-	private final static String AC_MNU_CODE_NEW = "mnuCodeFragmentNew";
-	private final static String AC_MNU_CODE_LOAD = "mnuCodeFragmentLoad";
-	private final static String AC_MNU_CODE_SAVE = "mnuCodeFragmentSave";
-	private final static String AC_MNU_CODE_SAVE_AS = "mnuCodeFragmentSaveAs";
-
 	private final static String AC_BTN_START = "btnStart";
-	private final static String AC_BTN_BUILD_ASM = "btnBuildASM";
+	private final static String AC_BTN_BUILD_SOURCE = "btnBuildSource";
 	private final static String AC_BTN_Z80_ASM = "btn8080Z80";
 
 	private final static String AC_BTN_ADD_FRAGMENT = "btnAddFragment";
@@ -1138,7 +1198,6 @@ public class ManualDisassembler {
 	public static final String THIS_DIR = ".";
 	public static final String FILE_SEPARATOR = System.getProperties().getProperty("file.separator");
 	public final static String FILE_LOCATION = System.getenv("APPDATA") + FILE_SEPARATOR + "Disassembler";
-	// public final static String FILE_LOCATION = "Disassembler";file.separator
 
 	private Hex64KSpinner spinnerEndFragment;
 	private Hex64KSpinner spinnerBeginFragment;
@@ -1161,9 +1220,9 @@ public class ManualDisassembler {
 	private JScrollPane scrollPaneWIPbinary;
 	private JTextPane txtWIPsource;
 	private JButton btnCombineFragments;
-	private JButton btnBuildASM;
+	private JButton btnBuildSource;
 	private JToggleButton btn8080Z80;
-	private JTextArea txtASM;
+	private JTextArea txtSource;
 	private JLabel lblSourceHeader;
 	private JMenuItem mnuFileSaveWIP;
 	private JMenuItem mnuFileLoadWIP;
@@ -1174,6 +1233,9 @@ public class ManualDisassembler {
 	private JScrollPane tabLog;
 	private JLabel label_2;
 	private JTextPane textLog;
+	private JSeparator separator_3;
+	private JMenuItem mnuFileSaveSource;
+	private JMenuItem mnuFileSaveSourceAs;
 
 	// ------------------------------------------------------------------------------
 
@@ -1222,14 +1284,14 @@ public class ManualDisassembler {
 		gbc_btnStart.gridy = 0;
 		paneTop.add(btnStart, gbc_btnStart);
 
-		btnBuildASM = new JButton("Build ASM");
-		btnBuildASM.setActionCommand(AC_BTN_BUILD_ASM);
-		btnBuildASM.addActionListener(applicationAdapter);
-		GridBagConstraints gbc_btnBuildASM = new GridBagConstraints();
-		gbc_btnBuildASM.insets = new Insets(0, 0, 5, 0);
-		gbc_btnBuildASM.gridx = 1;
-		gbc_btnBuildASM.gridy = 0;
-		paneTop.add(btnBuildASM, gbc_btnBuildASM);
+		btnBuildSource = new JButton("Build Source");
+		btnBuildSource.setActionCommand(AC_BTN_BUILD_SOURCE);
+		btnBuildSource.addActionListener(applicationAdapter);
+		GridBagConstraints gbc_btnBuildSource = new GridBagConstraints();
+		gbc_btnBuildSource.insets = new Insets(0, 0, 5, 0);
+		gbc_btnBuildSource.gridx = 1;
+		gbc_btnBuildSource.gridy = 0;
+		paneTop.add(btnBuildSource, gbc_btnBuildSource);
 
 		btn8080Z80 = new JToggleButton("Z80 / 8080");
 		btn8080Z80.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1529,9 +1591,9 @@ public class ManualDisassembler {
 		JScrollPane panelScrollASM = new JScrollPane();
 		tabPaneDisplays.addTab("Source Code", null, panelScrollASM, null);
 
-		txtASM = new JTextArea();
-		txtASM.setFont(new Font("Courier New", Font.PLAIN, 15));
-		panelScrollASM.setViewportView(txtASM);
+		txtSource = new JTextArea();
+		txtSource.setFont(new Font("Courier New", Font.PLAIN, 15));
+		panelScrollASM.setViewportView(txtSource);
 
 		lblSourceHeader = new JLabel("Source code");
 		lblSourceHeader.setForeground(Color.BLUE);
@@ -1567,10 +1629,10 @@ public class ManualDisassembler {
 		mnuFileLoadWIP = new JMenuItem("Load WIP...");
 		mnuFileLoadWIP.setActionCommand(AC_MNU_FILE_LOAD_WIP);
 		mnuFileLoadWIP.addActionListener(applicationAdapter);
-		mnuFile.add(mnuFileLoadWIP);
 
 		JSeparator separator = new JSeparator();
 		mnuFile.add(separator);
+		mnuFile.add(mnuFileLoadWIP);
 
 		JMenuItem mnuFileExit = new JMenuItem("Exit");
 		mnuFileExit.setActionCommand(AC_MNU_FILE_EXIT);
@@ -1592,6 +1654,19 @@ public class ManualDisassembler {
 		mnuFileReset = new JMenuItem("Reset");
 		mnuFileReset.setActionCommand(AC_MNU_FILE_RESET);
 		mnuFileReset.addActionListener(applicationAdapter);
+
+		mnuFileSaveSource = new JMenuItem("Source Save");
+		mnuFileSaveSource.setActionCommand(AC_MNU_FILE_SAVE_SOURCE);
+		mnuFileSaveSource.addActionListener(applicationAdapter);
+		mnuFile.add(mnuFileSaveSource);
+
+		mnuFileSaveSourceAs = new JMenuItem("Source Save As...");
+		mnuFileSaveSourceAs.setActionCommand(AC_MNU_FILE_SAVE_SOURCE_AS);
+		mnuFileSaveSourceAs.addActionListener(applicationAdapter);
+		mnuFile.add(mnuFileSaveSourceAs);
+
+		separator_3 = new JSeparator();
+		mnuFile.add(separator_3);
 		mnuFile.add(mnuFileReset);
 
 		JSeparator separator_1 = new JSeparator();
@@ -1613,11 +1688,9 @@ public class ManualDisassembler {
 				break;
 			case AC_MNU_FILE_LOAD_WIP:
 				JFileChooser chooserLoad = getFileChooser(hostDirectory, WIP, FILE_SUFFIX);
-				if (chooserLoad.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION) {
+				if (chooserLoad.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION) {
 					System.out.printf("You cancelled the Save as...%n", "");
 				} else {
-					// String fileNameParts[] = chooserLoad.getSelectedFile().getName().split("\\.");
-					// loadWIP(fileNameParts[0] + FILE_SUFFIX_PERIOD);
 					hostDirectory = chooserLoad.getSelectedFile().getParent();
 					loadWIP(chooserLoad.getSelectedFile().getAbsolutePath());
 				} // if - returnValue
@@ -1635,6 +1708,12 @@ public class ManualDisassembler {
 					saveWIP(fileNameParts[0] + FILE_SUFFIX_PERIOD);
 				} // if - returnValue
 				break;
+			case AC_MNU_FILE_SAVE_SOURCE:
+				saveSourceFile();
+				break;
+			case AC_MNU_FILE_SAVE_SOURCE_AS:
+				saveSourceFileAs();
+				break;
 			case AC_MNU_FILE_RESET:
 				appInit();
 				break;
@@ -1642,24 +1721,12 @@ public class ManualDisassembler {
 				appClose();
 
 				break;
-			case AC_MNU_CODE_NEW:
-				message = "mnuCodeFragmentNew";
-				break;
-			case AC_MNU_CODE_LOAD:
-				message = "mnuCodeFragmentLoad";
-				break;
-			case AC_MNU_CODE_SAVE:
-				message = "mnuCodeFragmentSave";
-				break;
-			case AC_MNU_CODE_SAVE_AS:
-				message = "mnuCodeFragmentSaveAs";
-				break;
 
 			case AC_BTN_START:
 				actionStart();
 				break;
-			case AC_BTN_BUILD_ASM:
-				buildASM();
+			case AC_BTN_BUILD_SOURCE:
+				buildSource();
 				break;
 			case AC_BTN_Z80_ASM:
 				setAssemblerType();
