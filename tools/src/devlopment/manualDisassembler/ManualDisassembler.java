@@ -84,7 +84,8 @@ public class ManualDisassembler {
 	private String hostDirectory;
 	// private String currentFileName;
 	private JFrame frame;
-	private static String version = "Version 1.0.";
+	private static String version = "Version 2.0.";
+	private SimpleAttributeSet[] attributeSets;
 
 	/**
 	 * Launch the application.
@@ -200,7 +201,8 @@ public class ManualDisassembler {
 			scanner.close();
 			pw.close();
 			fw.close();
-			JOptionPane.showMessageDialog(frame, "Saved source file " + absoluteSourcePath,"Save Source",JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(frame, "Saved source file " + absoluteSourcePath, "Save Source",
+					JOptionPane.INFORMATION_MESSAGE);
 			log.infof("Saved source file %s%n", absoluteSourcePath);
 		} catch (Exception e) {
 			log.error("%nFailed to Save source file %s%n", fileName);
@@ -330,7 +332,6 @@ public class ManualDisassembler {
 	private boolean processBianryFile(File binaryFile) {
 		boolean result = true; // assume all goes well
 		binaryFileName = binaryFile.getName();
-		binaryFilePath = binaryFile.getAbsolutePath();
 		FileChannel fcIn = null;
 		FileInputStream fout = null;
 		try {
@@ -528,38 +529,18 @@ public class ManualDisassembler {
 			} // while
 
 		} catch (BadLocationException e) {
-			System.err.printf("[ManualDisassembler.displayFragmenBinary] %s%n", "catch");
 			log.errorf("bad highlight values Start = %04X,  End = %04X%n", startLocation, endLocation);
 		} // try
 
 	}// displayFragmenBinary - in process
-
-	private void displayFragmenBinary1(JTextArea txtArea, int startLocation, int endLocation) {
-		// displayFragmenBinary(txtArea, startLocation, endLocation);
-		Highlighter.HighlightPainter yellowPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.green);
-		txtArea.getHighlighter().removeAllHighlights();
-
-		try {
-			int lineStart = txtArea.getLineStartOffset((startLocation / CHARACTERS_PER_LINE));
-			int lineEnd = txtArea.getLineEndOffset((endLocation / CHARACTERS_PER_LINE));
-
-			txtArea.getHighlighter().removeAllHighlights();
-			if (startLocation >= endLocation) {
-				return;
-			} // if
-			txtArea.getHighlighter().addHighlight(lineStart, lineEnd, yellowPainter);
-			txtArea.setCaretPosition(lineStart);
-		} catch (BadLocationException e1) {
-			e1.printStackTrace();
-		} // try
-	}// displayFragmentSource
 
 	private void displayFragmentSource(JTextPane txtArea, CodeFragment codeFragment) {
 		String type = codeFragment.type;
 		Document doc = txtArea.getDocument();
 		switch (type) {
 		case CodeFragment.CODE:
-			showFragmentCode(doc, codeFragment);
+			// showFragmentCode(doc, codeFragment);
+			buildCodeFragement(doc, codeFragment, false);
 			break;
 		case CodeFragment.CONSTANT:
 			break;
@@ -582,13 +563,44 @@ public class ManualDisassembler {
 	}// displayFragmentSource
 
 	private void showFragmentCode(Document doc, CodeFragment codeFragment) {
-		int startLocation = codeFragment.startLoc;
+		int currentLocation = codeFragment.startLoc;
 		int endLocation = codeFragment.endLoc;
 		clearDocument(doc);
-		OperationStructure currentOpCode = null;
-		SimpleAttributeSet[] attributeSets = makeAttributes();
 
-		int currentLocation = startLocation;
+		buildFragmentHeader(doc, codeFragment);
+		OperationStructure currentOpCode = null;
+
+		int opCodeSize;
+
+		String part3, mapKey;
+		while (currentLocation <= endLocation) {
+			mapKey = getStructureKey(currentLocation);
+			currentOpCode = opCodeMap.get(mapKey);
+			opCodeSize = currentOpCode.getSize();
+			try {
+				if (labels.contains(currentLocation)) {
+					appendToDoc(doc, String.format("L%04X:%n", currentLocation));
+				} // if - its a label
+				part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
+				doc.insertString(doc.getLength(), part3, null);
+				doc.insertString(doc.getLength(), System.lineSeparator(), null);
+			} catch (BadLocationException badLocationException) {
+				badLocationException.printStackTrace();
+			} // try
+			currentLocation += opCodeSize;
+		} // while opcodeMap
+
+	}// showFragementCode
+
+	private void showFragmentCode1(Document doc, CodeFragment codeFragment) {
+		int currentLocation = codeFragment.startLoc;
+		int endLocation = codeFragment.endLoc;
+		clearDocument(doc);
+		buildFragmentHeader(doc, codeFragment);
+
+		OperationStructure currentOpCode = null;
+		// SimpleAttributeSet[] attributeSets = makeAttributes();
+
 		int opCodeSize;
 		byte currentValue0, currentValue1, currentValue2;
 		String part1 = "", part2 = "", part3 = "", part4 = "";
@@ -602,21 +614,21 @@ public class ManualDisassembler {
 			currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
 			// currentValue3 = opCodeSize > 3 ? binaryData.get(currentLocation + 2) : 0;
 			try {
-				part1 = makePart1(currentLocation);
-				switch (opCodeSize) {
-				case 1:
-					part2 = makePart2(currentValue0);
-					break;
-				case 2:
-					part2 = makePart2(currentValue0, currentValue1);
-					break;
-				case 3:
-					part2 = makePart2(currentValue0, currentValue1, currentValue2);
-					break;
-				default:
-					log.errorf("Bad opCode size : %d at Location: %04X%n%n", opCodeSize, currentLocation);
-				}// switch
-				part3 = makePart3(currentOpCode, currentLocation);
+				// part1 = makePart1(currentLocation);
+				// switch (opCodeSize) {
+				// case 1:
+				// part2 = makePart2(currentValue0);
+				// break;
+				// case 2:
+				// part2 = makePart2(currentValue0, currentValue1);
+				// break;
+				// case 3:
+				// part2 = makePart2(currentValue0, currentValue1, currentValue2);
+				// break;
+				// default:
+				// log.errorf("Bad opCode size : %d at Location: %04X%n%n", opCodeSize, currentLocation);
+				// }// switch
+				part3 = makePart3(mapKey, currentOpCode, currentLocation);
 				part4 = String.format("%s%n", currentOpCode.getFunction());
 
 				doc.insertString(doc.getLength(), part1, attributeSets[ATTR_ADDRESS]);
@@ -629,7 +641,7 @@ public class ManualDisassembler {
 			} // try
 			currentLocation += opCodeSize;
 		} // while opcodeMap
-	}// showFragmentCode
+	}// showFragmentCode1
 
 	private void buildSourceHeader(Document doc) {
 		String fileType = btn8080Z80.getText().equals("Z80") ? ".Z80" : ".asm";
@@ -655,16 +667,16 @@ public class ManualDisassembler {
 		appendToDoc(doc, header);
 		header = String.format("%-10s %-7s %-10s %-25s%n", "QMARK", "EQU", "3FH", "; Question Mark");
 		appendToDoc(doc, header);
-		header = String.format("%-10s %-7s %-10s %-25s%n", "LFEDC", "EQU", "0FEDCH", ";****  D16 ******");
+		header = String.format("%n%-10s %-7s %-10s %-25s%n", "L0005", "EQU", "0005", "; BDOS Entry");
 		appendToDoc(doc, header);
-//
-//		header = String.format("%n%n%15s  %05XH%n%n", "ORG", OFFSET);
-//		appendToDoc(doc, header);
+		//
+		// header = String.format("%n%n%15s %05XH%n%n", "ORG", OFFSET);
+		// appendToDoc(doc, header);
 
 	}// buildSourceHeader
 
 	private void buildFragmentHeader(Document doc, CodeFragment codeFragment) {
-		String displayText = String.format("%n;     <New %s fragment-----from %04X to %04X (%4$4XH : %4$4dD)>%n",
+		String displayText = String.format("%n;     <%s fragment from %04X to %04X. Size  Hex:%4$X, Decimal:%4$d )>%n",
 				codeFragment.type, codeFragment.startLoc, codeFragment.endLoc, codeFragment.size());
 		appendToDoc(doc, displayText);
 		displayText = String.format(";%17s  %05XH%n", "ORG", codeFragment.startLoc);
@@ -853,25 +865,51 @@ public class ManualDisassembler {
 	}// buildUnknownFragent
 
 	private void buildCodeFragement(Document doc, CodeFragment codeFragment) {
+		buildCodeFragement(doc, codeFragment, true);
+	}// buildCodeFragement
+
+	private void buildCodeFragement(Document doc, CodeFragment codeFragment, boolean sourceCode) {
+		int currentLocation = codeFragment.startLoc;
+		int endLocation = codeFragment.endLoc;
+		labels.add(currentLocation);
+
+		if (!sourceCode) {
+			clearDocument(doc);
+		} //
+
 		buildFragmentHeader(doc, codeFragment);
 		OperationStructure currentOpCode = null;
 
-		int currentLocation = codeFragment.startLoc;
-		int endLocation = codeFragment.endLoc;
 		int opCodeSize;
 
-		String part3, mapKey;
+		String part1 = null, part2 = null, part3 = null, part4 = null, mapKey;
 		while (currentLocation <= endLocation) {
-			mapKey = String.format("%02X", binaryData.get(currentLocation));
+			// mapKey = String.format("%02X", binaryData.get(currentLocation));
+			mapKey = getStructureKey(currentLocation);
 			currentOpCode = opCodeMap.get(mapKey);
 			opCodeSize = currentOpCode.getSize();
 			try {
 				if (labels.contains(currentLocation)) {
-					appendToDoc(doc, String.format("L%04X:%n", currentLocation));
+					doc.insertString(doc.getLength(), String.format("L%04X:%n", currentLocation),
+							attributeSets[ATTR_ASM_CODE]);
 				} // if - its a label
-				part3 = "      " + makePart3(currentOpCode, currentLocation);
-				doc.insertString(doc.getLength(), part3, null);
+
+				if (sourceCode) {
+					part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
+					doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
+				} else {
+					part1 = makePart1(currentLocation);
+					part2 = makePart2(currentLocation, opCodeSize);
+					part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
+					part4 = currentOpCode.getFunction();
+					doc.insertString(doc.getLength(), part1, attributeSets[ATTR_ADDRESS]);
+					doc.insertString(doc.getLength(), part2, attributeSets[ATTR_BINARY_CODE]);
+					doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
+					doc.insertString(doc.getLength(), part4, attributeSets[ATTR_FUNCTION]);
+
+				} // if
 				doc.insertString(doc.getLength(), System.lineSeparator(), null);
+
 			} catch (BadLocationException badLocationException) {
 				badLocationException.printStackTrace();
 			} // try
@@ -884,76 +922,109 @@ public class ManualDisassembler {
 		return String.format("%04X%4s", currentLocation, "");
 	}// makePart1
 
-	private String makePart2(byte currentValue0) {
-		return String.format("%02X%8s", currentValue0, "");
-	}// makePart2
-
-	private String makePart2(byte currentValue0, byte currentValue1) {
-		return String.format("%02X%02X%6s", currentValue0, currentValue1, "");
-	}// makePart2
-
-	private String makePart2(byte currentValue0, byte currentValue1, byte currentValue2) {
-		return String.format("%02X%02X%02X%4s", currentValue0, currentValue1, currentValue2, "");
-	}// makePart2
-
-	private String makePart3(OperationStructure currentOpCode, int currentLocation) {
-		String mapKey = String.format("%02X", binaryData.get(currentLocation));
-		currentOpCode = opCodeMap.get(mapKey);
-		int opCodeSize = currentOpCode.getSize();
-
+	private String makePart2(int currentLocation, int opCodeSize) {
+		String ans = "";
+		byte currentValue0 = binaryData.get(currentLocation);
 		byte currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
 		byte currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
+		byte currentValue3 = opCodeSize > 3 ? binaryData.get(currentLocation + 3) : 0;
+		switch (opCodeSize) {
+		case 1:
+			// ans = String.format("%02X%8s", currentValue0, "");
+			ans = String.format("%02X", currentValue0);
+			break;
+		case 2:
+			// ans = String.format("%02X%02X%6s", currentValue0, currentValue1, "");
+			ans = String.format("%02X%02X", currentValue0, currentValue1);
+			break;
+		case 3:
+			// ans = String.format("%02X%02X%02X%4s", currentValue0, currentValue1, currentValue2, "");
+			ans = String.format("%02X%02X%02X", currentValue0, currentValue1, currentValue2);
+			break;
+		case 4:
+			// ans = String.format("%02X%02X%02X%02X%4s", currentValue0, currentValue1, currentValue2, currentValue3,
+			// "");
+			ans = String.format("%02X%02X%02X%02X", currentValue0, currentValue1, currentValue2, currentValue3);
+			break;
+		default:
+			// ans = String.format("Bad opcode at location %04X", currentLocation);
+			log.info(ans);
+			break;
+		}// switch
+		return String.format("%-10s", ans);
+	}// makePart2
+
+	// private String makePart21(byte currentValue0) {
+	// return String.format("%02X%8s", currentValue0, "");
+	// }// makePart2
+	//
+	// private String makePart22(byte currentValue0, byte currentValue1) {
+	// return String.format("%02X%02X%6s", currentValue0, currentValue1, "");
+	// }// makePart2
+	//
+	// private String makePart23(byte currentValue0, byte currentValue1, byte currentValue2) {
+	// return String.format("%02X%02X%02X%4s", currentValue0, currentValue1, currentValue2, "");
+	// }// makePart2
+
+	private String makePart3(String mapKey, OperationStructure currentOpCode, int currentLocation) {
+		// String mapKey = String.format("%02X", binaryData.get(currentLocation));
+		// currentOpCode = opCodeMap.get(mapKey);
+		int opCodeSize = currentOpCode.getSize();
+		String instruction = currentOpCode.getInstruction();
+		String destination = currentOpCode.getDestination();
+		String source = currentOpCode.getSource();
+		byte currentValue1 = 0,currentValue2 = 0,currentValue3=0;
+try {
+		 currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
+		 currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
+		 currentValue3 = binaryData.get(currentLocation + 3);	
+} catch (Exception e) {
+	log.warnf("Index out of bounds at current location %04X%n", currentLocation);
+} //try
+		// byte currentValue4 = binaryData.get(currentLocation + 4);
 		String fmt00, part3A = "";
 		switch (currentOpCode.getType()) {
 		case I00:
 			fmt00 = "%-5s";
-			part3A = String.format(fmt00, currentOpCode.getInstruction());
+			part3A = String.format(fmt00, instruction);
 			break;
 		case I01:
 			fmt00 = "%-5s%s";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination());
+			part3A = String.format(fmt00, instruction, destination);
 			break;
 		case I02:
 			fmt00 = "%-5s%s,%s";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination(),
-					currentOpCode.getSource());
+			part3A = String.format(fmt00, instruction, destination, source);
 			break;
 		case I10:
 			fmt00 = "%-5s0%02XH";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentValue1);
+			part3A = String.format(fmt00, instruction, currentValue1);
 			break;
 		case I11:
 			fmt00 = "%-5s%s,0%02XH";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination(),
-					currentValue1);
+			part3A = String.format(fmt00, instruction, destination, currentValue1);
 			break;
 		case I12:
 			fmt00 = "%-5s0%02XH";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentValue1);
-			break;
-		case I13:
+			part3A = String.format(fmt00, instruction, currentValue1);
 			break;
 		case I14:
 			break;
-		case I15:
-			break;
 		case I16:
 			fmt00 = "%-5s%s,(0%02XH)";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination(),
-					currentValue1);
+			part3A = String.format(fmt00, instruction, destination, currentValue1);
 			break;
 		case I20:
 			fmt00 = "%-5sL%02X%02X";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentValue2, currentValue1);
+			part3A = String.format(fmt00, instruction, currentValue2, currentValue1);
 			break;
 		case I20A:
 			fmt00 = "%-5s0%02X%02XH";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentValue2, currentValue1);
+			part3A = String.format(fmt00, instruction, currentValue2, currentValue1);
 			break;
 		case I21:
 			fmt00 = "%-5s%s,0%02X%02XH";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination(), currentValue2,
-					currentValue1);
+			part3A = String.format(fmt00, instruction, destination, currentValue2, currentValue1);
 			break;
 		case I22:
 			break;
@@ -961,23 +1032,60 @@ public class ManualDisassembler {
 			break;
 		case I24:
 			fmt00 = "%-5s(0%02X%02XH),%s";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentValue2, currentValue1,
-					currentOpCode.getSource());
+			part3A = String.format(fmt00, instruction, currentValue2, currentValue1, source);
 			break;
 		case I25:
 			break;
 		case I26:
 			fmt00 = "%-5s%s,(0%02X%02XH)";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination(), currentValue2,
-					currentValue1);
+			part3A = String.format(fmt00, instruction, destination, currentValue2, currentValue1);
 			break;
 		case I27:
 			break;
 		case I31:
 			fmt00 = "%-5s%s,L%02X%02X";
-			part3A = String.format(fmt00, currentOpCode.getInstruction(), currentOpCode.getDestination(), currentValue2,
-					currentValue1);
+			part3A = String.format(fmt00, instruction, destination, currentValue2, currentValue1);
 			break;
+
+		// Extended Instructions
+		case Z02:
+			fmt00 = "%-5s%s,%s";
+			part3A = String.format(fmt00, instruction, destination, source);
+			break;
+
+		case Z13:
+			fmt00 = "%-5s(%s + 0%02XH)";
+			part3A = String.format(fmt00, instruction, destination, currentValue2);
+			break;
+		case Z14:
+			fmt00 = "%-5s(%s + 0%02XH),0%02XH";
+			part3A = String.format(fmt00, instruction, destination, currentValue2, currentValue3);
+			break;
+		case Z15:
+			fmt00 = "%-5s%s,(%s + 0%02XH)";
+			part3A = String.format(fmt00, instruction, source, destination,currentValue2);
+			break;
+		case Z17:
+			fmt00 = "%-5s(%s + 0%02XH),%s";
+			part3A = String.format(fmt00, instruction, source,currentValue2, destination);
+			break;
+		case Z18:
+			fmt00 = "%-5s%s,(%s + %02XH)";
+			part3A = String.format(fmt00, instruction, source,destination, currentValue2);
+			break;
+		case Z21:
+			fmt00 = "%-5s%s,0%02X%02XH";
+			part3A = String.format(fmt00, instruction, destination, currentValue3, currentValue2);
+			break;
+		case Z24:
+			fmt00 = "%-5s(0%02X%02XH),%s";
+			part3A = String.format(fmt00, instruction, currentValue3, currentValue2, source);
+			break;
+		case Z26:
+			fmt00 = "%-5s%s,(0%02X%02XH)";
+			part3A = String.format(fmt00, instruction, destination, currentValue3, currentValue2);
+			break;
+
 		default:
 			log.errorf("Bad Instruction type : %s at Location: %04X%n%n", currentOpCode.getType().toString(),
 					currentLocation);
@@ -1071,6 +1179,31 @@ public class ManualDisassembler {
 		listCodeFragments.updateUI();
 	}// loadWIP
 
+	private String getStructureKey(int currentLocation) {
+		String ans = "";
+		byte mem0 = binaryData.get(currentLocation);
+		// byte mem1 = binaryData.get(currentLocation+1);
+		switch (mem0) {
+		case (byte) 0xCB:
+		case (byte) 0xED:
+			ans = String.format("%02X%02X", mem0, binaryData.get(currentLocation + 1));
+			break;
+		case (byte) 0xDD:
+		case (byte) 0xFD:
+			byte mem1 = binaryData.get(currentLocation + 1);
+			if (mem1 == (byte) 0xCB) {
+				ans = String.format("%02XCB%02X", mem0, binaryData.get(currentLocation + 3));
+			} else {
+				ans = String.format("%02X%02X", mem0, binaryData.get(currentLocation + 1));
+			} // if
+			break;
+		default:
+			ans = String.format("%02X", binaryData.get(currentLocation));
+		}// switch
+
+		return ans;
+	}// getStructureKey
+
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	private void appClose() {
 		Preferences myPrefs = Preferences.userNodeForPackage(ManualDisassembler.class)
@@ -1084,8 +1217,7 @@ public class ManualDisassembler {
 
 		myPrefs.put("HostDirectory", hostDirectory);
 		myPrefs.put("AssemblerType", btn8080Z80.getText());
-		System.out.printf("[ManualDisassembler.appClose] %s%n", btn8080Z80.getText());
-		myPrefs = null;
+		// myPrefs = null;
 
 		System.exit(0);
 	}// appClose
@@ -1119,9 +1251,9 @@ public class ManualDisassembler {
 		codeFragmentModel = new CodeFragmentModel();
 
 		docBinary = txtBinaryFile.getDocument();
-		docASM = txtSource.getDocument();
 		clearDocument(txtWIPsource.getDocument());
 		clearDocument(docBinary);
+		docASM = txtSource.getDocument();
 		clearDocument(docASM);
 
 		listCodeFragments.setModel(codeFragmentModel);
@@ -1132,6 +1264,7 @@ public class ManualDisassembler {
 
 		frame.setTitle(APP_NAME + "   " + binaryFileName);
 		log.infof("Starting %s......%n", APP_NAME);
+		attributeSets = makeAttributes();
 	}// appInit
 
 	/**
@@ -1144,9 +1277,9 @@ public class ManualDisassembler {
 
 	// ------------------------------------------------------------------------------
 	private File binaryFile;
-	private String binaryFilePath;
+	// private String binaryFilePath;
 	private String binaryFileName = "";
-	private String binaryFileDirectory = "";//
+	// private String binaryFileDirectory = "";//
 	private ByteBuffer binaryData;
 	private CodeFragmentModel codeFragmentModel;
 	// private Opcodes8080 opcodeMap;
@@ -1164,7 +1297,7 @@ public class ManualDisassembler {
 	private final int CHARACTERS_PER_LINE = 0x0010; //
 
 	private final int TAB_WIP = 0;
-	private final int TAB_BINARY_FILE = 1;
+	// private final int TAB_BINARY_FILE = 1;
 	// private final int TAB_ASM = 2;
 
 	private final int ATTR_ADDRESS = 0;
@@ -1227,7 +1360,7 @@ public class ManualDisassembler {
 	private JButton btnCombineFragments;
 	private JButton btnBuildSource;
 	private JToggleButton btn8080Z80;
-	private JTextArea txtSource;
+	private JTextPane txtSource;
 	private JLabel lblSourceHeader;
 	private JMenuItem mnuFileSaveWIP;
 	private JMenuItem mnuFileLoadWIP;
@@ -1596,7 +1729,7 @@ public class ManualDisassembler {
 		JScrollPane panelScrollASM = new JScrollPane();
 		tabPaneDisplays.addTab("Source Code", null, panelScrollASM, null);
 
-		txtSource = new JTextArea();
+		txtSource = new JTextPane();
 		txtSource.setFont(new Font("Courier New", Font.PLAIN, 15));
 		panelScrollASM.setViewportView(txtSource);
 

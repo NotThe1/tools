@@ -29,47 +29,47 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("DD29", new OperationStructure("DD29", InstrucionType.I02, 2, "ADD", "IX", "IX", "IX<-IX + IX"));
 		codeMap.put("DD39", new OperationStructure("DD39", InstrucionType.I02, 2, "ADD", "IX", "SP", "IX<-IX + SP"));
 
-		codeMap.put("DD21", new OperationStructure("DD21", InstrucionType.I22, 4, "LD", "IX", "addr", "IX<- D16"));
-		codeMap.put("DD22", new OperationStructure("DD22", InstrucionType.I23, 4, "LD", "D16", "IX", "(D16)<-IX"));
+		codeMap.put("DD21", new OperationStructure("DD21", InstrucionType.Z21, 4, "LD", "IX", "addr", "IX<- D16"));
+		codeMap.put("DD22", new OperationStructure("DD22", InstrucionType.Z24, 4, "LD", "D16", "IX", "(D16)<-IX"));
 		codeMap.put("DD23", new OperationStructure("DD23", InstrucionType.I01, 2, "INC", "IX", "", "IX<-IX +1"));
-		codeMap.put("DD2A", new OperationStructure("DD2A", InstrucionType.I25, 4, "LD", "IX", "addr", "IX<-(D16)"));
+		codeMap.put("DD2A", new OperationStructure("DD2A", InstrucionType.Z26, 4, "LD", "IX", "addr", "IX<-(D16)"));
 		codeMap.put("DD2B", new OperationStructure("DD2B", InstrucionType.I01, 2, "DEC", "IX", "", "IX<-IX -1"));
 
 		codeMap.put("DD34",
-				new OperationStructure("DD34", InstrucionType.I13, 3, "INC", "IX", "D8", "(IX+d)<-(IX+d)+1"));
+				new OperationStructure("DD34", InstrucionType.Z13, 3, "INC", "IX", "D8", "(IX+d)<-(IX+d)+1"));
 		codeMap.put("DD35",
-				new OperationStructure("DD35", InstrucionType.I13, 3, "DEC", "IX", "D8", "(IX+d)<-(IX+d)-1"));
-		codeMap.put("DD36", new OperationStructure("DD36", InstrucionType.I27, 4, "LD", "IX", "D8", "(IX+d)<-D8"));
+				new OperationStructure("DD35", InstrucionType.Z13, 3, "DEC", "IX", "D8", "(IX+d)<-(IX+d)-1"));
+		codeMap.put("DD36", new OperationStructure("DD36", InstrucionType.Z14, 4, "LD", "IX", "D8", "(IX+d)<-D8"));
 
-		codeMap.put("DD46", new OperationStructure("DD46", InstrucionType.I15, 3, "LD", "IX", "B", "B<-(IX+d)"));
-		codeMap.put("DD4E", new OperationStructure("DD4E", InstrucionType.I15, 3, "LD", "IX", "C", "C<-(IX+d)"));
-		codeMap.put("DD56", new OperationStructure("DD56", InstrucionType.I15, 3, "LD", "IX", "D", "D<-(IX+d)"));
-		codeMap.put("DD5E", new OperationStructure("DD5E", InstrucionType.I15, 3, "LD", "IX", "E", "E<-(IX+d)"));
-		codeMap.put("DD66", new OperationStructure("DD66", InstrucionType.I15, 3, "LD", "IX", "H", "H<-(IX+d)"));
-		codeMap.put("DD6E", new OperationStructure("DD6E", InstrucionType.I15, 3, "LD", "IX", "L", "L<-(IX+d)"));
-		codeMap.put("DD7E", new OperationStructure("DD7E", InstrucionType.I15, 3, "LD", "IX", "A", "A<-(IX+d)"));
+		codeMap.put("DD46", new OperationStructure("DD46", InstrucionType.Z15, 3, "LD", "IX", "B", "B<-(IX+d)"));
+		codeMap.put("DD4E", new OperationStructure("DD4E", InstrucionType.Z15, 3, "LD", "IX", "C", "C<-(IX+d)"));
+		codeMap.put("DD56", new OperationStructure("DD56", InstrucionType.Z15, 3, "LD", "IX", "D", "D<-(IX+d)"));
+		codeMap.put("DD5E", new OperationStructure("DD5E", InstrucionType.Z15, 3, "LD", "IX", "E", "E<-(IX+d)"));
+		codeMap.put("DD66", new OperationStructure("DD66", InstrucionType.Z15, 3, "LD", "IX", "H", "H<-(IX+d)"));
+		codeMap.put("DD6E", new OperationStructure("DD6E", InstrucionType.Z15, 3, "LD", "IX", "L", "L<-(IX+d)"));
+		codeMap.put("DD7E", new OperationStructure("DD7E", InstrucionType.Z15, 3, "LD", "IX", "A", "A<-(IX+d)"));
 
-		codeMap.put("DD70", new OperationStructure("DD70", InstrucionType.I14, 3, "LD", "B", "IX", "(IX+d)<-B"));
-		codeMap.put("DD71", new OperationStructure("DD71", InstrucionType.I14, 3, "LD", "C", "IX", "(IX+d)<-C"));
-		codeMap.put("DD72", new OperationStructure("DD72", InstrucionType.I14, 3, "LD", "D", "IX", "(IX+d)<-D"));
-		codeMap.put("DD73", new OperationStructure("DD73", InstrucionType.I14, 3, "LD", "E", "IX", "(IX+d)<-E"));
-		codeMap.put("DD74", new OperationStructure("DD74", InstrucionType.I14, 3, "LD", "H", "IX", "(IX+d)<-H"));
-		codeMap.put("DD75", new OperationStructure("DD75", InstrucionType.I14, 3, "LD", "L", "IX", "(IX+d)<-L"));
-		codeMap.put("DD77", new OperationStructure("DD77", InstrucionType.I14, 3, "LD", "A", "IX", "(IX+d)<A"));
+		codeMap.put("DD70", new OperationStructure("DD70", InstrucionType.Z17, 3, "LD", "B", "IX", "(IX+d)<-B"));
+		codeMap.put("DD71", new OperationStructure("DD71", InstrucionType.Z17, 3, "LD", "C", "IX", "(IX+d)<-C"));
+		codeMap.put("DD72", new OperationStructure("DD72", InstrucionType.Z17, 3, "LD", "D", "IX", "(IX+d)<-D"));
+		codeMap.put("DD73", new OperationStructure("DD73", InstrucionType.Z17, 3, "LD", "E", "IX", "(IX+d)<-E"));
+		codeMap.put("DD74", new OperationStructure("DD74", InstrucionType.Z17, 3, "LD", "H", "IX", "(IX+d)<-H"));
+		codeMap.put("DD75", new OperationStructure("DD75", InstrucionType.Z17, 3, "LD", "L", "IX", "(IX+d)<-L"));
+		codeMap.put("DD77", new OperationStructure("DD77", InstrucionType.Z17, 3, "LD", "A", "IX", "(IX+d)<A"));
 
-		codeMap.put("DD86", new OperationStructure("DD86", InstrucionType.I15, 3, "ADD", "IX", "A", "A<-A+(IX+d)"));
+		codeMap.put("DD86", new OperationStructure("DD86", InstrucionType.Z15, 3, "ADD", "IX", "A", "A<-A+(IX+d)"));
 		codeMap.put("DD8E",
-				new OperationStructure("DD8E", InstrucionType.I15, 3, "ADC", "IX", "A", "A<-A+(IX+d)+cy"));
-		codeMap.put("DD96", new OperationStructure("DD96", InstrucionType.I13, 3, "SUB", "IX", "D8", "A<-A-(IX+d)"));
+				new OperationStructure("DD8E", InstrucionType.Z15, 3, "ADC", "IX", "A", "A<-A+(IX+d)+cy"));
+		codeMap.put("DD96", new OperationStructure("DD96", InstrucionType.Z13, 3, "SUB", "IX", "D8", "A<-A-(IX+d)"));
 		codeMap.put("DD9E",
-				new OperationStructure("DD9E", InstrucionType.I15, 3, "SBC", "IX", "A", "A<-A-(IX+d)-cy"));
+				new OperationStructure("DD9E", InstrucionType.Z15, 3, "SBC", "IX", "A", "A<-A-(IX+d)-cy"));
 		codeMap.put("DDA6",
-				new OperationStructure("DDA6", InstrucionType.I13, 3, "AND", "IX", "D8", "A<-A and (IX+d)"));
+				new OperationStructure("DDA6", InstrucionType.Z13, 3, "AND", "IX", "D8", "A<-A and (IX+d)"));
 		codeMap.put("DDAE",
-				new OperationStructure("DDAE", InstrucionType.I13, 3, "XOR", "IX", "D8", "A<-A xor (IX+d)"));
+				new OperationStructure("DDAE", InstrucionType.Z13, 3, "XOR", "IX", "D8", "A<-A xor (IX+d)"));
 		codeMap.put("DDB6",
-				new OperationStructure("DDB6", InstrucionType.I13, 3, "OR", "IX", "D8", "A<-A or(IX+d)"));
-		codeMap.put("DDBE", new OperationStructure("DDBE", InstrucionType.I13, 3, "CP", "IX", "D8", "A<-A -(IX+d)"));
+				new OperationStructure("DDB6", InstrucionType.Z13, 3, "OR", "IX", "D8", "A<-A or(IX+d)"));
+		codeMap.put("DDBE", new OperationStructure("DDBE", InstrucionType.Z13, 3, "CP", "IX", "D8", "A<-A -(IX+d)"));
 
 		codeMap.put("DDE1", new OperationStructure("DDE1", InstrucionType.I01, 2, "POP", "IX", "", "IX<-(SP)"));
 		codeMap.put("DDE3", new OperationStructure("DDE3", InstrucionType.I02, 2, "EX", "(SP)", "IX", "IX<->(SP)"));
@@ -80,70 +80,70 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		/* INDEXED BIT INSTRUCTIONS IX DDXXYY */
 
 		codeMap.put("DDCB06",
-				new OperationStructure("DDCB06", InstrucionType.I13, 4, "RLC", "IX", "D8", "IX+d:cy<-[b7<-b0]<-b7"));
+				new OperationStructure("DDCB06", InstrucionType.Z13, 4, "RLC", "IX", "D8", "IX+d:cy<-[b7<-b0]<-b7"));
 		codeMap.put("DDCB0E",
-				new OperationStructure("DDCB0E", InstrucionType.I13, 4, "RRC", "IX", "D8", "IX+d:b0->[b7->b0]->cy"));
+				new OperationStructure("DDCB0E", InstrucionType.Z13, 4, "RRC", "IX", "D8", "IX+d:b0->[b7->b0]->cy"));
 		codeMap.put("DDCB16",
-				new OperationStructure("DDCB16", InstrucionType.I13, 4, "RL", "IX", "D8", "IX+d:cy<-[b7<-b0]<-cy"));
+				new OperationStructure("DDCB16", InstrucionType.Z13, 4, "RL", "IX", "D8", "IX+d:cy<-[b7<-b0]<-cy"));
 		codeMap.put("DDCB1E",
-				new OperationStructure("DDCB1E", InstrucionType.I13, 4, "RR", "IX", "D8", "IX+d:cy->[b7->b0]->cy"));
+				new OperationStructure("DDCB1E", InstrucionType.Z13, 4, "RR", "IX", "D8", "IX+d:cy->[b7->b0]->cy"));
 		codeMap.put("DDCB26",
-				new OperationStructure("DDCB26", InstrucionType.I13, 4, "SLA", "IX", "D8", "IX+d:cy<-[b7<-b0]<-0"));
+				new OperationStructure("DDCB26", InstrucionType.Z13, 4, "SLA", "IX", "D8", "IX+d:cy<-[b7<-b0]<-0"));
 		codeMap.put("DDCB2E",
-				new OperationStructure("DDCB2E", InstrucionType.I13, 4, "SRA", "IX", "D8", "IX+d:b7->[b7->b0]->cy"));
+				new OperationStructure("DDCB2E", InstrucionType.Z13, 4, "SRA", "IX", "D8", "IX+d:b7->[b7->b0]->cy"));
 		codeMap.put("DDCB3E",
-				new OperationStructure("DDCB3E", InstrucionType.I13, 4, "SRL", "IX", "D8", "IX+d:0->[b7->b0]->cy"));
+				new OperationStructure("DDCB3E", InstrucionType.Z13, 4, "SRL", "IX", "D8", "IX+d:0->[b7->b0]->cy"));
 
 		codeMap.put("DDCB46",
-				new OperationStructure("DDCB46", InstrucionType.I15, 4, "BIT", "IX", "0", " b0 & IX+d"));
+				new OperationStructure("DDCB46", InstrucionType.Z18, 4, "BIT", "IX", "0", " b0 & IX+d"));
 		codeMap.put("DDCB4E",
-				new OperationStructure("DDCB4E", InstrucionType.I15, 4, "BIT", "IX", "1", " b1 & IX+d"));
+				new OperationStructure("DDCB4E", InstrucionType.Z18, 4, "BIT", "IX", "1", " b1 & IX+d"));
 		codeMap.put("DDCB56",
-				new OperationStructure("DDCB56", InstrucionType.I15, 4, "BIT", "IX", "2", " b2 & IX+d"));
+				new OperationStructure("DDCB56", InstrucionType.Z18, 4, "BIT", "IX", "2", " b2 & IX+d"));
 		codeMap.put("DDCB5E",
-				new OperationStructure("DDCB5E", InstrucionType.I15, 4, "BIT", "IX", "3", " b3 & IX+d"));
+				new OperationStructure("DDCB5E", InstrucionType.Z18, 4, "BIT", "IX", "3", " b3 & IX+d"));
 		codeMap.put("DDCB66",
-				new OperationStructure("DDCB66", InstrucionType.I15, 4, "BIT", "IX", "4", " b4 & IX+d"));
+				new OperationStructure("DDCB66", InstrucionType.Z18, 4, "BIT", "IX", "4", " b4 & IX+d"));
 		codeMap.put("DDCB6E",
-				new OperationStructure("DDCB6E", InstrucionType.I15, 4, "BIT", "IX", "5", " b5 & IX+d"));
+				new OperationStructure("DDCB6E", InstrucionType.Z18, 4, "BIT", "IX", "5", " b5 & IX+d"));
 		codeMap.put("DDCB76",
-				new OperationStructure("DDCB76", InstrucionType.I15, 4, "BIT", "IX", "6", " b6 & IX+d"));
+				new OperationStructure("DDCB76", InstrucionType.Z18, 4, "BIT", "IX", "6", " b6 & IX+d"));
 		codeMap.put("DDCB7E",
-				new OperationStructure("DDCB7E", InstrucionType.I15, 4, "BIT", "IX", "7", " b7 & IX+d"));
+				new OperationStructure("DDCB7E", InstrucionType.Z18, 4, "BIT", "IX", "7", " b7 & IX+d"));
 
 		codeMap.put("DDCB86",
-				new OperationStructure("DDCB86", InstrucionType.I15, 4, "RES", "IX", "0", "0-> b0 in IX+d"));
+				new OperationStructure("DDCB86", InstrucionType.Z18, 4, "RES", "IX", "0", "0-> b0 in IX+d"));
 		codeMap.put("DDCB8E",
-				new OperationStructure("DDCB8E", InstrucionType.I15, 4, "RES", "IX", "1", "0-> b1 in IX+d"));
+				new OperationStructure("DDCB8E", InstrucionType.Z18, 4, "RES", "IX", "1", "0-> b1 in IX+d"));
 		codeMap.put("DDCB96",
-				new OperationStructure("DDCB96", InstrucionType.I15, 4, "RES", "IX", "2", "0-> b2 in IX+d"));
+				new OperationStructure("DDCB96", InstrucionType.Z18, 4, "RES", "IX", "2", "0-> b2 in IX+d"));
 		codeMap.put("DDCB9E",
-				new OperationStructure("DDCB9E", InstrucionType.I15, 4, "RES", "IX", "3", "0-> b3 in IX+d"));
+				new OperationStructure("DDCB9E", InstrucionType.Z18, 4, "RES", "IX", "3", "0-> b3 in IX+d"));
 		codeMap.put("DDCBA6",
-				new OperationStructure("DDCBA6", InstrucionType.I15, 4, "RES", "IX", "4", "0-> b4 in IX+d"));
+				new OperationStructure("DDCBA6", InstrucionType.Z18, 4, "RES", "IX", "4", "0-> b4 in IX+d"));
 		codeMap.put("DDCBAE",
-				new OperationStructure("DDCBAE", InstrucionType.I15, 4, "RES", "IX", "5", "0-> b5 in IX+d"));
+				new OperationStructure("DDCBAE", InstrucionType.Z18, 4, "RES", "IX", "5", "0-> b5 in IX+d"));
 		codeMap.put("DDCBB6",
-				new OperationStructure("DDCBB6", InstrucionType.I15, 4, "RES", "IX", "6", "0-> b6 in IX+d"));
+				new OperationStructure("DDCBB6", InstrucionType.Z18, 4, "RES", "IX", "6", "0-> b6 in IX+d"));
 		codeMap.put("DDCBBE",
-				new OperationStructure("DDCBBE", InstrucionType.I15, 4, "RES", "IX", "7", "0-> b7 in IX+d"));
+				new OperationStructure("DDCBBE", InstrucionType.Z18, 4, "RES", "IX", "7", "0-> b7 in IX+d"));
 
 		codeMap.put("DDCBC6",
-				new OperationStructure("DDCBC6", InstrucionType.I15, 4, "SET", "IX", "0", "1-> b0 in IX+d"));
+				new OperationStructure("DDCBC6", InstrucionType.Z18, 4, "SET", "IX", "0", "1-> b0 in IX+d"));
 		codeMap.put("DDCBCE",
-				new OperationStructure("DDCBCE", InstrucionType.I15, 4, "SET", "IX", "1", "1-> b1 in IX+d"));
+				new OperationStructure("DDCBCE", InstrucionType.Z18, 4, "SET", "IX", "1", "1-> b1 in IX+d"));
 		codeMap.put("DDCBD6",
-				new OperationStructure("DDCBD6", InstrucionType.I15, 4, "SET", "IX", "2", "1-> b2 in IX+d"));
+				new OperationStructure("DDCBD6", InstrucionType.Z18, 4, "SET", "IX", "2", "1-> b2 in IX+d"));
 		codeMap.put("DDCBDE",
-				new OperationStructure("DDCBDE", InstrucionType.I15, 4, "SET", "IX", "3", "1-> b3 in IX+d"));
+				new OperationStructure("DDCBDE", InstrucionType.Z18, 4, "SET", "IX", "3", "1-> b3 in IX+d"));
 		codeMap.put("DDCBE6",
-				new OperationStructure("DDCBE6", InstrucionType.I15, 4, "SET", "IX", "4", "1-> b4 in IX+d"));
+				new OperationStructure("DDCBE6", InstrucionType.Z18, 4, "SET", "IX", "4", "1-> b4 in IX+d"));
 		codeMap.put("DDCBEE",
-				new OperationStructure("DDCBEE", InstrucionType.I15, 4, "SET", "IX", "5", "1-> b5 in IX+d"));
+				new OperationStructure("DDCBEE", InstrucionType.Z18, 4, "SET", "IX", "5", "1-> b5 in IX+d"));
 		codeMap.put("DDCBF6",
-				new OperationStructure("DDCBF6", InstrucionType.I15, 4, "SET", "IX", "6", "1-> b6 in IX+d"));
+				new OperationStructure("DDCBF6", InstrucionType.Z18, 4, "SET", "IX", "6", "1-> b6 in IX+d"));
 		codeMap.put("DDCBFE",
-				new OperationStructure("DDCBFE", InstrucionType.I15, 4, "SET", "IX", "7", "1-> b7 in IX+d"));
+				new OperationStructure("DDCBFE", InstrucionType.Z18, 4, "SET", "IX", "7", "1-> b7 in IX+d"));
 
 
 		/* IY FDXX */
@@ -152,47 +152,47 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("FD29", new OperationStructure("FD29", InstrucionType.I02, 2, "ADD", "IY", "IY", "IY<-IY + IY"));
 		codeMap.put("FD39", new OperationStructure("FD39", InstrucionType.I02, 2, "ADD", "IY", "SP", "IY<-IY + SP"));
 
-		codeMap.put("FD21", new OperationStructure("FD21", InstrucionType.I22, 4, "LD", "IY", "D16", "IY<- D16"));
-		codeMap.put("FD22", new OperationStructure("FD22", InstrucionType.I23, 4, "LD", "D16", "IY", "(D16)<-IY"));
+		codeMap.put("FD21", new OperationStructure("FD21", InstrucionType.Z21, 4, "LD", "IY", "D16", "IY<- D16"));
+		codeMap.put("FD22", new OperationStructure("FD22", InstrucionType.Z24, 4, "LD", "D16", "IY", "(D16)<-IY"));
 		codeMap.put("FD23", new OperationStructure("FD23", InstrucionType.I01, 2, "INC", "IY", "", "IY<-IY +1"));
-		codeMap.put("FD2A", new OperationStructure("FD2A", InstrucionType.I25, 4, "LD", "IY", "addr", "IY<-(D16)"));
+		codeMap.put("FD2A", new OperationStructure("FD2A", InstrucionType.Z26, 4, "LD", "IY", "addr", "IY<-(D16)"));
 		codeMap.put("FD2B", new OperationStructure("FD2B", InstrucionType.I01, 2, "DEC", "IY", "", "IY<-IY -1"));
 
 		codeMap.put("FD34",
-				new OperationStructure("FD34", InstrucionType.I13, 3, "INC", "IY", "D8", "(IY+d)<-(IY+d)+1"));
+				new OperationStructure("FD34", InstrucionType.Z13, 3, "INC", "IY", "D8", "(IY+d)<-(IY+d)+1"));
 		codeMap.put("FD35",
-				new OperationStructure("FD35", InstrucionType.I13, 3, "DEC", "IY", "D8", "(IY+d)<-(IY+d)-1"));
-		codeMap.put("FD36", new OperationStructure("FD36", InstrucionType.I27, 4, "LD", "IY", "D8", "(IY+d)<-D8"));
+				new OperationStructure("FD35", InstrucionType.Z13, 3, "DEC", "IY", "D8", "(IY+d)<-(IY+d)-1"));
+		codeMap.put("FD36", new OperationStructure("FD36", InstrucionType.Z14, 4, "LD", "IY", "D8", "(IY+d)<-D8"));
 
-		codeMap.put("FD46", new OperationStructure("FD46", InstrucionType.I15, 3, "LD", "IY", "B", "B<-(IY+d)"));
-		codeMap.put("FD4E", new OperationStructure("FD4E", InstrucionType.I15, 3, "LD", "IY", "C", "C<-(IY+d)"));
-		codeMap.put("FD56", new OperationStructure("FD56", InstrucionType.I15, 3, "LD", "IY", "D", "D<-(IY+d)"));
-		codeMap.put("FD5E", new OperationStructure("FD5E", InstrucionType.I15, 3, "LD", "IY", "E", "E<-(IY+d)"));
-		codeMap.put("FD66", new OperationStructure("FD66", InstrucionType.I15, 3, "LD", "IY", "H", "H<-(IY+d)"));
-		codeMap.put("FD6E", new OperationStructure("FD6E", InstrucionType.I15, 3, "LD", "IY", "L", "L<-(IY+d)"));
-		codeMap.put("FD7E", new OperationStructure("FD7E", InstrucionType.I15, 3, "LD", "IY", "A", "A<-(IY+d)"));
+		codeMap.put("FD46", new OperationStructure("FD46", InstrucionType.Z15, 3, "LD", "IY", "B", "B<-(IY+d)"));
+		codeMap.put("FD4E", new OperationStructure("FD4E", InstrucionType.Z15, 3, "LD", "IY", "C", "C<-(IY+d)"));
+		codeMap.put("FD56", new OperationStructure("FD56", InstrucionType.Z15, 3, "LD", "IY", "D", "D<-(IY+d)"));
+		codeMap.put("FD5E", new OperationStructure("FD5E", InstrucionType.Z15, 3, "LD", "IY", "E", "E<-(IY+d)"));
+		codeMap.put("FD66", new OperationStructure("FD66", InstrucionType.Z15, 3, "LD", "IY", "H", "H<-(IY+d)"));
+		codeMap.put("FD6E", new OperationStructure("FD6E", InstrucionType.Z15, 3, "LD", "IY", "L", "L<-(IY+d)"));
+		codeMap.put("FD7E", new OperationStructure("FD7E", InstrucionType.Z15, 3, "LD", "IY", "A", "A<-(IY+d)"));
 
-		codeMap.put("FD70", new OperationStructure("FD70", InstrucionType.I14, 3, "LD", "B", "IY", "(IY+d)<-B"));
-		codeMap.put("FD71", new OperationStructure("FD71", InstrucionType.I14, 3, "LD", "C", "IY", "(IY+d)<-C"));
-		codeMap.put("FD72", new OperationStructure("FD72", InstrucionType.I14, 3, "LD", "D", "IY", "(IY+d)<-D"));
-		codeMap.put("FD73", new OperationStructure("FD73", InstrucionType.I14, 3, "LD", "E", "IY", "(IY+d)<-E"));
-		codeMap.put("FD74", new OperationStructure("FD74", InstrucionType.I14, 3, "LD", "H", "IY", "(IY+d)<-H"));
-		codeMap.put("FD75", new OperationStructure("FD75", InstrucionType.I14, 3, "LD", "L", "IY", "(IY+d)<-L"));
-		codeMap.put("FD77", new OperationStructure("FD77", InstrucionType.I14, 3, "LD", "A", "IY", "(IY+d)<A"));
+		codeMap.put("FD70", new OperationStructure("FD70", InstrucionType.Z17, 3, "LD", "B", "IY", "(IY+d)<-B"));
+		codeMap.put("FD71", new OperationStructure("FD71", InstrucionType.Z17, 3, "LD", "C", "IY", "(IY+d)<-C"));
+		codeMap.put("FD72", new OperationStructure("FD72", InstrucionType.Z17, 3, "LD", "D", "IY", "(IY+d)<-D"));
+		codeMap.put("FD73", new OperationStructure("FD73", InstrucionType.Z17, 3, "LD", "E", "IY", "(IY+d)<-E"));
+		codeMap.put("FD74", new OperationStructure("FD74", InstrucionType.Z17, 3, "LD", "H", "IY", "(IY+d)<-H"));
+		codeMap.put("FD75", new OperationStructure("FD75", InstrucionType.Z17, 3, "LD", "L", "IY", "(IY+d)<-L"));
+		codeMap.put("FD77", new OperationStructure("FD77", InstrucionType.Z17, 3, "LD", "A", "IY", "(IY+d)<A"));
 
-		codeMap.put("FD86", new OperationStructure("FD86", InstrucionType.I15, 3, "ADD", "IY", "A", "A<-A+(IY+d)"));
+		codeMap.put("FD86", new OperationStructure("FD86", InstrucionType.Z15, 3, "ADD", "IY", "A", "A<-A+(IY+d)"));
 		codeMap.put("FD8E",
-				new OperationStructure("FD8E", InstrucionType.I15, 3, "ADC", "IY", "A", "A<-A+(IY+d)+cy"));
-		codeMap.put("FD96", new OperationStructure("FD96", InstrucionType.I13, 3, "SUB", "IY", "D8", "A<-A-(IY+d)"));
+				new OperationStructure("FD8E", InstrucionType.Z15, 3, "ADC", "IY", "A", "A<-A+(IY+d)+cy"));
+		codeMap.put("FD96", new OperationStructure("FD96", InstrucionType.Z13, 3, "SUB", "IY", "D8", "A<-A-(IY+d)"));
 		codeMap.put("FD9E",
-				new OperationStructure("FD9E", InstrucionType.I15, 3, "SBC", "IY", "A", "A<-A-(IY+d)-cy"));
+				new OperationStructure("FD9E", InstrucionType.Z15, 3, "SBC", "IY", "A", "A<-A-(IY+d)-cy"));
 		codeMap.put("FDA6",
-				new OperationStructure("FDA6", InstrucionType.I13, 3, "AND", "IY", "D8", "A<-A and (IY+d)"));
+				new OperationStructure("FDA6", InstrucionType.Z13, 3, "AND", "IY", "D8", "A<-A and (IY+d)"));
 		codeMap.put("FDAE",
-				new OperationStructure("FDAE", InstrucionType.I13, 3, "XOR", "IY", "D8", "A<-A xor (IY+d)"));
+				new OperationStructure("FDAE", InstrucionType.Z13, 3, "XOR", "IY", "D8", "A<-A xor (IY+d)"));
 		codeMap.put("FDB6",
-				new OperationStructure("FDB6", InstrucionType.I13, 3, "OR", "IY", "D8", "A<-A or(IY+d)"));
-		codeMap.put("FDBE", new OperationStructure("FDBE", InstrucionType.I13, 3, "CP", "IY", "D8", "A<-A -(IY+d)"));
+				new OperationStructure("FDB6", InstrucionType.Z13, 3, "OR", "IY", "D8", "A<-A or(IY+d)"));
+		codeMap.put("FDBE", new OperationStructure("FDBE", InstrucionType.Z13, 3, "CP", "IY", "D8", "A<-A -(IY+d)"));
 
 		codeMap.put("FDE1", new OperationStructure("FDE1", InstrucionType.I01, 2, "POP", "IY", "", "IY<-(SP)"));
 		codeMap.put("FDE3", new OperationStructure("FDE3", InstrucionType.I02, 2, "EX", "(SP)", "IY", "IY<->(SP)"));
@@ -203,77 +203,77 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		/* INDEXED BIT INSTRUCTIONS IY FDXXYY */
 
 		codeMap.put("FDCB06",
-				new OperationStructure("FDCB06", InstrucionType.I13, 4, "RLC", "IY", "D8", "IY+d:cy<-[b7<-b0]<-b7"));
+				new OperationStructure("FDCB06", InstrucionType.Z13, 4, "RLC", "IY", "D8", "IY+d:cy<-[b7<-b0]<-b7"));
 		codeMap.put("FDCB0E",
-				new OperationStructure("FDCB0E", InstrucionType.I13, 4, "RRC", "IY", "D8", "IY+d:b0->[b7->b0]->cy"));
+				new OperationStructure("FDCB0E", InstrucionType.Z13, 4, "RRC", "IY", "D8", "IY+d:b0->[b7->b0]->cy"));
 		codeMap.put("FDCB16",
-				new OperationStructure("FDCB16", InstrucionType.I13, 4, "RL", "IY", "D8", "IY+d:cy<-[b7<-b0]<-cy"));
+				new OperationStructure("FDCB16", InstrucionType.Z13, 4, "RL", "IY", "D8", "IY+d:cy<-[b7<-b0]<-cy"));
 		codeMap.put("FDCB1E",
-				new OperationStructure("FDCB1E", InstrucionType.I13, 4, "RR", "IY", "D8", "IY+d:cy->[b7->b0]->cy"));
+				new OperationStructure("FDCB1E", InstrucionType.Z13, 4, "RR", "IY", "D8", "IY+d:cy->[b7->b0]->cy"));
 		codeMap.put("FDCB26",
-				new OperationStructure("FDCB26", InstrucionType.I13, 4, "SLA", "IY", "D8", "IY+d:cy<-[b7<-b0]<-0"));
+				new OperationStructure("FDCB26", InstrucionType.Z13, 4, "SLA", "IY", "D8", "IY+d:cy<-[b7<-b0]<-0"));
 		codeMap.put("FDCB2E",
-				new OperationStructure("FDCB2E", InstrucionType.I13, 4, "SRA", "IY", "D8", "IY+d:b7->[b7->b0]->cy"));
+				new OperationStructure("FDCB2E", InstrucionType.Z13, 4, "SRA", "IY", "D8", "IY+d:b7->[b7->b0]->cy"));
 		codeMap.put("FDCB3E",
-				new OperationStructure("FDCB3E", InstrucionType.I13, 4, "SRL", "IY", "D8", "IY+d:0->[b7->b0]->cy"));
+				new OperationStructure("FDCB3E", InstrucionType.Z13, 4, "SRL", "IY", "D8", "IY+d:0->[b7->b0]->cy"));
 
 		codeMap.put("FDCB46",
-				new OperationStructure("FDCB46", InstrucionType.I15, 4, "BIT", "IY", "0", " b0 & IY+d"));
+				new OperationStructure("FDCB46", InstrucionType.Z18, 4, "BIT", "IY", "0", " b0 & IY+d"));
 		codeMap.put("FDCB4E",
-				new OperationStructure("FDCB4E", InstrucionType.I15, 4, "BIT", "IY", "1", " b1 & IY+d"));
+				new OperationStructure("FDCB4E", InstrucionType.Z18, 4, "BIT", "IY", "1", " b1 & IY+d"));
 		codeMap.put("FDCB56",
-				new OperationStructure("FDCB56", InstrucionType.I15, 4, "BIT", "IY", "2", " b2 & IY+d"));
+				new OperationStructure("FDCB56", InstrucionType.Z18, 4, "BIT", "IY", "2", " b2 & IY+d"));
 		codeMap.put("FDCB5E",
-				new OperationStructure("FDCB5E", InstrucionType.I15, 4, "BIT", "IY", "3", " b3 & IY+d"));
+				new OperationStructure("FDCB5E", InstrucionType.Z18, 4, "BIT", "IY", "3", " b3 & IY+d"));
 		codeMap.put("FDCB66",
-				new OperationStructure("FDCB66", InstrucionType.I15, 4, "BIT", "IY", "4", " b4 & IY+d"));
+				new OperationStructure("FDCB66", InstrucionType.Z18, 4, "BIT", "IY", "4", " b4 & IY+d"));
 		codeMap.put("FDCB6E",
-				new OperationStructure("FDCB6E", InstrucionType.I15, 4, "BIT", "IY", "5", " b5 & IY+d"));
+				new OperationStructure("FDCB6E", InstrucionType.Z18, 4, "BIT", "IY", "5", " b5 & IY+d"));
 		codeMap.put("FDCB76",
-				new OperationStructure("FDCB76", InstrucionType.I15, 4, "BIT", "IY", "6", " b6 & IY+d"));
+				new OperationStructure("FDCB76", InstrucionType.Z18, 4, "BIT", "IY", "6", " b6 & IY+d"));
 		codeMap.put("FDCB7E",
-				new OperationStructure("FDCB7E", InstrucionType.I15, 4, "BIT", "IY", "7", " b7 & IY+d"));
+				new OperationStructure("FDCB7E", InstrucionType.Z18, 4, "BIT", "IY", "7", " b7 & IY+d"));
 
 		codeMap.put("FDCB86",
-				new OperationStructure("FDCB86", InstrucionType.I15, 4, "RES", "IY", "0", "0-> b0 in IY+d"));
+				new OperationStructure("FDCB86", InstrucionType.Z18, 4, "RES", "IY", "0", "0-> b0 in IY+d"));
 		codeMap.put("FDCB8E",
-				new OperationStructure("FDCB8E", InstrucionType.I15, 4, "RES", "IY", "1", "0-> b1 in IY+d"));
+				new OperationStructure("FDCB8E", InstrucionType.Z18, 4, "RES", "IY", "1", "0-> b1 in IY+d"));
 		codeMap.put("FDCB96",
-				new OperationStructure("FDCB96", InstrucionType.I15, 4, "RES", "IY", "2", "0-> b2 in IY+d"));
+				new OperationStructure("FDCB96", InstrucionType.Z18, 4, "RES", "IY", "2", "0-> b2 in IY+d"));
 		codeMap.put("FDCB9E",
-				new OperationStructure("FDCB9E", InstrucionType.I15, 4, "RES", "IY", "3", "0-> b3 in IY+d"));
+				new OperationStructure("FDCB9E", InstrucionType.Z18, 4, "RES", "IY", "3", "0-> b3 in IY+d"));
 		codeMap.put("FDCBA6",
-				new OperationStructure("FDCBA6", InstrucionType.I15, 4, "RES", "IY", "4", "0-> b4 in IY+d"));
+				new OperationStructure("FDCBA6", InstrucionType.Z18, 4, "RES", "IY", "4", "0-> b4 in IY+d"));
 		codeMap.put("FDCBAE",
-				new OperationStructure("FDCBAE", InstrucionType.I15, 4, "RES", "IY", "5", "0-> b5 in IY+d"));
+				new OperationStructure("FDCBAE", InstrucionType.Z18, 4, "RES", "IY", "5", "0-> b5 in IY+d"));
 		codeMap.put("FDCBB6",
-				new OperationStructure("FDCBB6", InstrucionType.I15, 4, "RES", "IY", "6", "0-> b6 in IY+d"));
+				new OperationStructure("FDCBB6", InstrucionType.Z18, 4, "RES", "IY", "6", "0-> b6 in IY+d"));
 		codeMap.put("FDCBBE",
-				new OperationStructure("FDCBBE", InstrucionType.I15, 4, "RES", "IY", "7", "0-> b7 in IY+d"));
+				new OperationStructure("FDCBBE", InstrucionType.Z18, 4, "RES", "IY", "7", "0-> b7 in IY+d"));
 
 		codeMap.put("FDCBC6",
-				new OperationStructure("FDCBC6", InstrucionType.I15, 4, "SET", "IY", "0", "1-> b0 in IY+d"));
+				new OperationStructure("FDCBC6", InstrucionType.Z18, 4, "SET", "IY", "0", "1-> b0 in IY+d"));
 		codeMap.put("FDCBCE",
-				new OperationStructure("FDCBCE", InstrucionType.I15, 4, "SET", "IY", "1", "1-> b1 in IY+d"));
+				new OperationStructure("FDCBCE", InstrucionType.Z18, 4, "SET", "IY", "1", "1-> b1 in IY+d"));
 		codeMap.put("FDCBD6",
-				new OperationStructure("FDCBD6", InstrucionType.I15, 4, "SET", "IY", "2", "1-> b2 in IY+d"));
+				new OperationStructure("FDCBD6", InstrucionType.Z18, 4, "SET", "IY", "2", "1-> b2 in IY+d"));
 		codeMap.put("FDCBDE",
-				new OperationStructure("FDCBDE", InstrucionType.I15, 4, "SET", "IY", "3", "1-> b3 in IY+d"));
+				new OperationStructure("FDCBDE", InstrucionType.Z18, 4, "SET", "IY", "3", "1-> b3 in IY+d"));
 		codeMap.put("FDCBE6",
-				new OperationStructure("FDCBE6", InstrucionType.I15, 4, "SET", "IY", "4", "1-> b4 in IY+d"));
+				new OperationStructure("FDCBE6", InstrucionType.Z18, 4, "SET", "IY", "4", "1-> b4 in IY+d"));
 		codeMap.put("FDCBEE",
-				new OperationStructure("FDCBEE", InstrucionType.I15, 4, "SET", "IY", "5", "1-> b5 in IY+d"));
+				new OperationStructure("FDCBEE", InstrucionType.Z18, 4, "SET", "IY", "5", "1-> b5 in IY+d"));
 		codeMap.put("FDCBF6",
-				new OperationStructure("FDCBF6", InstrucionType.I15, 4, "SET", "IY", "6", "1-> b6 in IY+d"));
+				new OperationStructure("FDCBF6", InstrucionType.Z18, 4, "SET", "IY", "6", "1-> b6 in IY+d"));
 		codeMap.put("FDCBFE",
-				new OperationStructure("FDCBFE", InstrucionType.I15, 4, "SET", "IY", "7", "1-> b7 in IY+d"));
+				new OperationStructure("FDCBFE", InstrucionType.Z18, 4, "SET", "IY", "7", "1-> b7 in IY+d"));
 
 		/*  makeExtendedTypes() */  /* EDxx */
 		codeMap.put("ED40", new OperationStructure("ED40", InstrucionType.I02, 2, "IN", "B", "(C)", "B<-(C)"));
 		codeMap.put("ED41", new OperationStructure("ED41", InstrucionType.I02, 2, "OUT", "(C)", "B", "(C)<-B"));
 		codeMap.put("ED42",
 				new OperationStructure("ED42", InstrucionType.I02, 2, "SBC", "HL", "BC", "HL<-HL-BC-cy"));
-		codeMap.put("ED43", new OperationStructure("ED43", InstrucionType.I23, 4, "LD", "addr", "BC", "(mm)<-BC"));
+		codeMap.put("ED43", new OperationStructure("ED43", InstrucionType.Z24, 4, "LD", "addr", "BC", "(mm)<-BC"));
 		codeMap.put("ED44", new OperationStructure("ED44", InstrucionType.I00, 2, "NEG", "", "", "A<- 0-A"));
 		codeMap.put("ED45", new OperationStructure("ED45", InstrucionType.I00, 2, "RETN", "", "", "PC <- (SP)"));
 		codeMap.put("ED46", new OperationStructure("ED46", InstrucionType.I01, 2, "IM", "0", "", "Set mode 0"));
@@ -282,7 +282,7 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("ED49", new OperationStructure("ED49", InstrucionType.I02, 2, "OUT", "(C)", "C", "(C)<-C"));
 		codeMap.put("ED4A",
 				new OperationStructure("ED4A", InstrucionType.I02, 2, "ADC", "HL", "BC", "HL<-HL+BC+cy"));
-		codeMap.put("ED4B", new OperationStructure("ED4B", InstrucionType.I25, 4, "LD", "BC", "addr", "BC<-(HL)"));
+		codeMap.put("ED4B", new OperationStructure("ED4B", InstrucionType.Z26, 4, "LD", "BC", "addr", "BC<-(HL)"));
 		codeMap.put("ED4C", new OperationStructure("ED4C", InstrucionType.I00, 2, "NEG", "", "", "A<- 0-A *UD"));
 		codeMap.put("ED4D", new OperationStructure("ED4D", InstrucionType.I00, 2, "RETI", "", "", "PC <- (SP)"));
 		codeMap.put("ED4E",
@@ -291,8 +291,8 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("ED50", new OperationStructure("ED50", InstrucionType.I02, 2, "IN", "D", "(C)", "D<-(C)"));
 		codeMap.put("ED51", new OperationStructure("ED51", InstrucionType.I02, 2, "OUT", "(C)", "D", "(c)<-D)"));
 		codeMap.put("ED52",
-				new OperationStructure("ED52", InstrucionType.I02, 2, "SBC", "HL", "DE", "HL<-HL-DE-cy"));
-		codeMap.put("ED53", new OperationStructure("ED53", InstrucionType.I23, 4, "LD", "addr", "DE", "(mm)<-DE"));
+				new OperationStructure("ED52", InstrucionType.Z02, 2, "SBC", "HL", "DE", "HL<-HL-DE-cy"));
+		codeMap.put("ED53", new OperationStructure("ED53", InstrucionType.Z24, 4, "LD", "addr", "DE", "(mm)<-DE"));
 		codeMap.put("ED54", new OperationStructure("ED54", InstrucionType.I00, 2, "NEG", "", "", "A<- 0-A"));
 		codeMap.put("ED55", new OperationStructure("ED55", InstrucionType.I00, 2, "RETN", "", "", "PC <- (SP)"));
 		codeMap.put("ED56", new OperationStructure("ED56", InstrucionType.I01, 2, "IM", "1", "", "Set mode 1"));
@@ -301,7 +301,7 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("ED59", new OperationStructure("ED59", InstrucionType.I02, 2, "OUT", "(C)", "E", "(C)<-E"));
 		codeMap.put("ED5A",
 				new OperationStructure("ED5A", InstrucionType.I02, 2, "ADC", "HL", "DE", "HL,-HL+DE+cy"));
-		codeMap.put("ED5B", new OperationStructure("ED5B", InstrucionType.I25, 4, "LD", "DE", "addr", "DE<-(HL)"));
+		codeMap.put("ED5B", new OperationStructure("ED5B", InstrucionType.Z26, 4, "LD", "DE", "addr", "DE<-(HL)"));
 		codeMap.put("ED5C", new OperationStructure("ED5C", InstrucionType.I00, 2, "NEG", "", "", "A<- 0-A "));
 		codeMap.put("ED5D", new OperationStructure("ED5D", InstrucionType.I00, 2, "RETN", "", "", "PC <- (SP)"));
 		codeMap.put("ED5E", new OperationStructure("ED5E", InstrucionType.I01, 2, "IM", "2", "", "Set mode 2"));
@@ -329,7 +329,7 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 				"undocumented/unsupported"));
 		codeMap.put("ED72",
 				new OperationStructure("ED72", InstrucionType.I02, 2, "SBC", "HL", "SP", "HL<-HL-SP-cy"));
-		codeMap.put("ED73", new OperationStructure("ED73", InstrucionType.I23, 4, "LD", "addr", "SP", "(mm)<-SP"));
+		codeMap.put("ED73", new OperationStructure("ED73", InstrucionType.Z24, 4, "LD", "addr", "SP", "(mm)<-SP"));
 		codeMap.put("ED74", new OperationStructure("ED74", InstrucionType.I00, 2, "NEG", "", "", "A<- 0-A"));
 		codeMap.put("ED75", new OperationStructure("ED75", InstrucionType.I00, 2, "RETN", "", "", "PC <- (SP)"));
 		codeMap.put("ED76", new OperationStructure("ED76", InstrucionType.I01, 2, "IM", "1", "", "Set mode 1"));
@@ -337,7 +337,7 @@ public class OpCodeMapZ80 extends AbstractOpCodeMap{
 		codeMap.put("ED79", new OperationStructure("ED79", InstrucionType.I02, 2, "OUT", "(C)", "A", "(C)<-A"));
 		codeMap.put("ED7A",
 				new OperationStructure("ED7A", InstrucionType.I02, 2, "ADC", "HL", "SP", "HL,-HL+SP+cy"));
-		codeMap.put("ED7B", new OperationStructure("ED7B", InstrucionType.I25, 4, "LD", "SP", "addr", "SP<-(HL)"));
+		codeMap.put("ED7B", new OperationStructure("ED7B", InstrucionType.Z26, 4, "LD", "SP", "addr", "SP<-(HL)"));
 		codeMap.put("ED7C", new OperationStructure("ED7C", InstrucionType.I00, 2, "NEG", "", "", "A<- 0-A *UD"));
 		codeMap.put("ED7D", new OperationStructure("ED7D", InstrucionType.I00, 2, "RETN", "", "", "PC <- (SP)"));
 		codeMap.put("ED7E", new OperationStructure("ED7E", InstrucionType.I01, 2, "IM", "2", "", "Set mode 2"));
