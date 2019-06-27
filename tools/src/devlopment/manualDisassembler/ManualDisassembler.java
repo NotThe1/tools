@@ -15,6 +15,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -39,6 +41,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.Stack;
 import java.util.prefs.Preferences;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -592,57 +596,6 @@ public class ManualDisassembler {
 
 	}// showFragementCode
 
-	private void showFragmentCode1(Document doc, CodeFragment codeFragment) {
-		int currentLocation = codeFragment.startLoc;
-		int endLocation = codeFragment.endLoc;
-		clearDocument(doc);
-		buildFragmentHeader(doc, codeFragment);
-
-		OperationStructure currentOpCode = null;
-		// SimpleAttributeSet[] attributeSets = makeAttributes();
-
-		int opCodeSize;
-		byte currentValue0, currentValue1, currentValue2;
-		String part1 = "", part2 = "", part3 = "", part4 = "";
-		while (currentLocation <= endLocation) {
-			String mapKey = String.format("%02X", binaryData.get(currentLocation));
-			currentOpCode = opCodeMap.get(mapKey);
-			currentValue0 = binaryData.get(currentLocation);
-			opCodeSize = currentOpCode.getSize();
-
-			currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
-			currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
-			// currentValue3 = opCodeSize > 3 ? binaryData.get(currentLocation + 2) : 0;
-			try {
-				// part1 = makePart1(currentLocation);
-				// switch (opCodeSize) {
-				// case 1:
-				// part2 = makePart2(currentValue0);
-				// break;
-				// case 2:
-				// part2 = makePart2(currentValue0, currentValue1);
-				// break;
-				// case 3:
-				// part2 = makePart2(currentValue0, currentValue1, currentValue2);
-				// break;
-				// default:
-				// log.errorf("Bad opCode size : %d at Location: %04X%n%n", opCodeSize, currentLocation);
-				// }// switch
-				part3 = makePart3(mapKey, currentOpCode, currentLocation);
-				part4 = String.format("%s%n", currentOpCode.getFunction());
-
-				doc.insertString(doc.getLength(), part1, attributeSets[ATTR_ADDRESS]);
-				doc.insertString(doc.getLength(), part2, attributeSets[ATTR_BINARY_CODE]);
-				doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
-				doc.insertString(doc.getLength(), part4, attributeSets[ATTR_FUNCTION]);
-
-			} catch (BadLocationException badLocationException) {
-				badLocationException.printStackTrace();
-			} // try
-			currentLocation += opCodeSize;
-		} // while opcodeMap
-	}// showFragmentCode1
-
 	private void buildSourceHeader(Document doc) {
 		String fileType = btn8080Z80.getText().equals("Z80") ? ".Z80" : ".asm";
 		String fileName = binaryFileName.replaceAll("\\.COM", fileType);
@@ -925,9 +878,18 @@ public class ManualDisassembler {
 	private String makePart2(int currentLocation, int opCodeSize) {
 		String ans = "";
 		byte currentValue0 = binaryData.get(currentLocation);
-		byte currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
-		byte currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
-		byte currentValue3 = opCodeSize > 3 ? binaryData.get(currentLocation + 3) : 0;
+		byte currentValue1 = 0,currentValue2 = 0,currentValue3 = 0;
+		try {
+			 currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
+			 currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
+			 currentValue3 = binaryData.get(currentLocation + 3);	
+	} catch (Exception e) {
+		log.warnf("Index out of bounds at current location %04X%n", currentLocation);
+	} //try
+		
+		// byte currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
+		// byte currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
+		// byte currentValue3 = opCodeSize > 3 ? binaryData.get(currentLocation + 3) : 0;
 		switch (opCodeSize) {
 		case 1:
 			// ans = String.format("%02X%8s", currentValue0, "");
@@ -1203,7 +1165,43 @@ try {
 
 		return ans;
 	}// getStructureKey
+private void addSelectedLabel() {
+	Pattern p1 = Pattern.compile("[0-9,A-F,a-f]{4}",Pattern.CASE_INSENSITIVE);
+	Pattern p2 = Pattern.compile("[0-9,A-F,a-f]{5}H",Pattern.CASE_INSENSITIVE); 
+	Pattern p3 = Pattern.compile("L[0-9,A-F,a-f]{4}",Pattern.CASE_INSENSITIVE); 
+	String selectedText = txtWIPsource.getSelectedText();
+	Matcher m1 = p1.matcher(selectedText);
+	Matcher m2 = p2.matcher(selectedText);
+	Matcher m3 = p3.matcher(selectedText);
+	
+	String  selectedLocation = null;
+	int location =0;
+	
+	if (m1.matches()) {
+		location = Integer.valueOf(selectedText, 16);
+	}else	if (m2.matches()) {
+		location = Integer.valueOf(selectedText.substring(1,5),16);
+	}else	if (m3.matches()) {
+		location = Integer.valueOf(selectedText.substring(1),16);
+	}else {
+		return;
+	}//if
+	
+//	System.out.printf("[ManualDisassembler.ApplicationAdapter.mouseClicked] Selected Text:%s, %04X%n",
+//			selectedText,location);
+	
+	String message = String.format("Do you want to set a label for Location: %04X", location);	
+	if(JOptionPane.showConfirmDialog(frame, message,"Label Insertion Option",JOptionPane.YES_NO_OPTION )==JOptionPane.YES_OPTION){
+		System.out.printf("[ManualDisassembler.addSelectedLabel] %s%n", "Answer is Yes");
+		if(labels.add(location)){
+			log.infof("Added label : %04X%n",location);
+		}else {
+			log.infof("Label : %04X already in Label table %n",location);
+		}//inner if
+	}// outer if
 
+	
+}//addSelectedLabel
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	private void appClose() {
 		Preferences myPrefs = Preferences.userNodeForPackage(ManualDisassembler.class)
@@ -1696,6 +1694,7 @@ try {
 
 		txtWIPsource = new JTextPane();
 		txtWIPsource.setFont(new Font("Courier New", Font.PLAIN, 16));
+		txtWIPsource.addMouseListener(applicationAdapter);
 		scrollPaneWIPsource.setViewportView(txtWIPsource);
 		splitPane.setDividerLocation(300);
 
@@ -1814,7 +1813,7 @@ try {
 
 	// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-	class ApplicationAdapter implements ActionListener, ListSelectionListener {
+	class ApplicationAdapter implements ActionListener, ListSelectionListener,MouseListener {
 
 		@Override // ActionListener
 		public void actionPerformed(ActionEvent actionEvent) {
@@ -1890,6 +1889,8 @@ try {
 			} // if
 
 		}// actionPerformed
+		
+		/*            ListSelectionListener                 */
 
 		@Override // ListSelectionListener
 		public void valueChanged(ListSelectionEvent lse) {
@@ -1908,6 +1909,32 @@ try {
 			displayFragmenBinary(txtWIPbinary, codeFragment.startLoc - OFFSET, codeFragment.endLoc - OFFSET);
 			displayFragmentSource(txtWIPsource, codeFragment);
 		}// valueChanged
+
+		
+		/*                  MouseListener                   */        
+		@Override
+		public void mouseClicked(MouseEvent mouseEvent) {
+			if(mouseEvent.getClickCount() > 1) {
+				addSelectedLabel();
+			}//if
+			
+		}//mouseClicked
+
+		@Override
+		public void mouseEntered(MouseEvent arg0) {
+		}// Not Used
+
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+		}// Not Used
+
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+		}// Not Used
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
+		}// Not Used
 
 	}// class ApplicationAdapter
 
