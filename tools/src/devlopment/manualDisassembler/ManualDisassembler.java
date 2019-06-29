@@ -88,7 +88,7 @@ public class ManualDisassembler {
 	private String hostDirectory;
 	// private String currentFileName;
 	private JFrame frame;
-	private static String version = "Version 2.0.";
+	private static String version = "Version 2.5.0";
 	private SimpleAttributeSet[] attributeSets;
 
 	/**
@@ -172,16 +172,18 @@ public class ManualDisassembler {
 		SimpleAttributeSet baseAttributes = new SimpleAttributeSet();
 		StyleConstants.setFontFamily(baseAttributes, "Courier New");
 
-		SimpleAttributeSet[] workingSets = new SimpleAttributeSet[4];
+		SimpleAttributeSet[] workingSets = new SimpleAttributeSet[5];
 		workingSets[ATTR_ADDRESS] = new SimpleAttributeSet(baseAttributes);
 		workingSets[ATTR_BINARY_CODE] = new SimpleAttributeSet(baseAttributes);
 		workingSets[ATTR_ASM_CODE] = new SimpleAttributeSet(baseAttributes);
 		workingSets[ATTR_FUNCTION] = new SimpleAttributeSet(baseAttributes);
+		workingSets[ATTR_TEXT] = new SimpleAttributeSet(baseAttributes);
 
 		StyleConstants.setForeground(workingSets[ATTR_ADDRESS], Color.GRAY);
 		StyleConstants.setForeground(workingSets[ATTR_BINARY_CODE], Color.BLUE);
 		StyleConstants.setForeground(workingSets[ATTR_ASM_CODE], Color.RED);
 		StyleConstants.setForeground(workingSets[ATTR_FUNCTION], Color.GRAY);
+		StyleConstants.setForeground(workingSets[ATTR_TEXT], Color.GREEN);
 		return workingSets;
 	}// makeAttributes
 
@@ -541,16 +543,19 @@ public class ManualDisassembler {
 	private void displayFragmentSource(JTextPane txtArea, CodeFragment codeFragment) {
 		String type = codeFragment.type;
 		Document doc = txtArea.getDocument();
+		labels.add(codeFragment.startLoc);
 		switch (type) {
 		case CodeFragment.CODE:
 			// showFragmentCode(doc, codeFragment);
 			buildCodeFragement(doc, codeFragment, false);
 			break;
 		case CodeFragment.CONSTANT:
+			clearDocument(doc);
+			buildConstantFragment(doc, codeFragment);
 			break;
 		case CodeFragment.LITERAL:
 			clearDocument(doc);
-			appendToDoc(doc, String.format(";%17s  %05XH%n", "ORG", codeFragment.startLoc));
+			// appendToDoc(doc, String.format(";%17s %05XH%n", "ORG", codeFragment.startLoc));
 			buildLiteralFragment(doc, codeFragment);
 			break;
 		case CodeFragment.RESERVED:
@@ -581,16 +586,12 @@ public class ManualDisassembler {
 			mapKey = getStructureKey(currentLocation);
 			currentOpCode = opCodeMap.get(mapKey);
 			opCodeSize = currentOpCode.getSize();
-			try {
-				if (labels.contains(currentLocation)) {
-					appendToDoc(doc, String.format("L%04X:%n", currentLocation));
-				} // if - its a label
-				part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
-				doc.insertString(doc.getLength(), part3, null);
-				doc.insertString(doc.getLength(), System.lineSeparator(), null);
-			} catch (BadLocationException badLocationException) {
-				badLocationException.printStackTrace();
-			} // try
+			if (labels.contains(currentLocation)) {
+				appendToDoc(doc, String.format("L%04X:%n", currentLocation, ATTR_BINARY_CODE));
+			} // if - its a label
+			part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
+			appendToDoc(doc, part3);
+			appendToDoc(doc, System.lineSeparator());
 			currentLocation += opCodeSize;
 		} // while opcodeMap
 
@@ -644,6 +645,7 @@ public class ManualDisassembler {
 		try {
 			doc.insertString(doc.getLength(), textToAppend, attributeSet);
 		} catch (BadLocationException e) {
+			log.errorf("Failed to append text: %s %n" , textToAppend);
 			e.printStackTrace();
 		} // try
 	}// appendToDocASM
@@ -673,23 +675,29 @@ public class ManualDisassembler {
 
 		for (int i = 0; i < codeFragmentModel.getSize(); i++) {
 			codeFragment = codeFragmentModel.getElementAt(i);
+			int currentLocation = codeFragment.startLoc;
+			// int endLocation = codeFragment.endLoc;
+			labels.add(currentLocation);
+
 			switch (codeFragment.type) {
 			case CodeFragment.CODE:
-				buildCodeFragement(txtSource.getDocument(), codeFragment);
+				buildCodeFragement(docASM, codeFragment);
+				// buildCodeFragement(txtSource.getDocument(), codeFragment);
 				break;
 			case CodeFragment.CONSTANT:
-				buildConstantFragment(txtSource.getDocument(), codeFragment);
+				buildConstantFragment(docASM, codeFragment);
 				break;
 			case CodeFragment.LITERAL:
-				buildFragmentHeader(txtSource.getDocument(), codeFragment);
-				buildLiteralFragment(txtSource.getDocument(), codeFragment);
+				buildFragmentHeader(docASM, codeFragment);
+				buildLiteralFragment(docASM, codeFragment);
 				break;
 			case CodeFragment.RESERVED:
-				buildFragmentHeader(txtSource.getDocument(), codeFragment);
-				buildReservedFragment(txtSource.getDocument(), codeFragment);
+				buildFragmentHeader(docASM, codeFragment);
+				buildReservedFragment(docASM, codeFragment);
 				break;
 			case CodeFragment.UNKNOWN:
-				buildUnknownFragment(txtSource.getDocument(), codeFragment);
+				buildFragmentHeader(docASM, codeFragment);
+				buildUnknownFragment(docASM, codeFragment);
 				break;
 			default:
 			}// switch
@@ -697,7 +705,7 @@ public class ManualDisassembler {
 		} // for
 		txtSource.setCaretPosition(0);
 		haveSourceFile(true);
-	}// buildASM
+	}// buildSource
 
 	private void buildLiteralFragment(Document doc, CodeFragment codeFragment) {
 		HashMap<Byte, String> literals = new HashMap<Byte, String>();
@@ -712,12 +720,18 @@ public class ManualDisassembler {
 
 		// buildFragmentHeader(doc, codeFragment);
 		byte[] literalValues = new byte[codeFragment.size()];
-		binaryData.position(codeFragment.startLoc);
+		int startLoc = codeFragment.startLoc;
+		binaryData.position(startLoc);
 		binaryData.get(literalValues, 0, codeFragment.size());
 		String literalData = null;
 		int subFragmentStart = 0;
 		int subLength = 0;
-		appendToDoc(doc, String.format("L%04X:%n", codeFragment.startLoc));
+		if (labels.contains(startLoc)) {
+			appendToDoc(doc, String.format("L%04X:%n", startLoc), attributeSets[ATTR_BINARY_CODE]);
+		} // if - its a label
+
+		// appendToDoc(doc, String.format("L%04X:%n", codeFragment.startLoc),attributeSets[ATTR_TEXT]);
+		// appendToDoc(doc, String.format("L%04X:%n", codeFragment.startLoc));
 		for (int i = 0; i < codeFragment.size(); i++) {
 			switch (literalValues[i]) {
 			case 0x00: // NULL
@@ -735,10 +749,10 @@ public class ManualDisassembler {
 					} // for
 					literalData = new String(subFragmentString);
 					String displayText = String.format("%17s  '%s'%n", "DB", literalData);
-					appendToDoc(doc, displayText);
+					appendToDoc(doc, displayText, attributeSets[ATTR_TEXT]);
 				} // if
 				String displayText = String.format("%17s  %s%n", "DB", literals.get(literalValues[i]));
-				appendToDoc(doc, displayText);
+				appendToDoc(doc, displayText, attributeSets[ATTR_TEXT]);
 				subFragmentStart = i + 1;
 				break;
 			default:
@@ -752,7 +766,7 @@ public class ManualDisassembler {
 			} // for
 			literalData = new String(subFragmentString);
 			String displayText = String.format("%17s  '%s'%n", "DB", literalData);
-			appendToDoc(doc, displayText);
+			appendToDoc(doc, displayText, attributeSets[ATTR_TEXT]);
 		} // if - remaing data
 
 	}// buildLiteralFragment
@@ -760,12 +774,17 @@ public class ManualDisassembler {
 	private void buildConstantFragment(Document doc, CodeFragment codeFragment) {
 		int dbPerLine = 5;
 		int locBase = codeFragment.startLoc;
-		buildFragmentHeader(doc, codeFragment);
+		// buildFragmentHeader(doc, codeFragment);
 		String displayText = null;
 		for (int i = codeFragment.size(); i > 0;) {
 			if (i == 0) {
 				break;
 			} // if
+
+			if (labels.contains(locBase)) {
+				appendToDoc(doc, String.format("L%04X:%n", locBase), attributeSets[ATTR_ASM_CODE]);
+			} // if - its a label
+
 			switch (i % dbPerLine) {
 			case 0:
 				displayText = String.format("%17s  %03XH,%03XH,%03XH,%03XH,%03XH%n", "DB", binaryData.get(locBase),
@@ -805,7 +824,10 @@ public class ManualDisassembler {
 	}// buildConstantFragment
 
 	private void buildUnknownFragment(Document doc, CodeFragment codeFragment) {
-		buildFragmentHeader(doc, codeFragment);
+		if (labels.contains(codeFragment.startLoc)) {
+			appendToDoc(doc, String.format("L%04X:%n", codeFragment.startLoc), attributeSets[ATTR_BINARY_CODE]);
+		} // if - its a label
+
 		String displayText = String.format("%17s  %05XH%n", "DS", codeFragment.size());
 		appendToDoc(doc, displayText);
 	}// buildUnknownFragent
@@ -813,6 +835,10 @@ public class ManualDisassembler {
 	private void buildReservedFragment(Document doc, CodeFragment codeFragment) {
 		// buildFragmentHeader(doc, codeFragment);
 		String displayText = String.format("%17s  %05XH%n", "DS", codeFragment.size());
+		if (labels.contains(codeFragment.startLoc)) {
+			appendToDoc(doc, String.format("L%04X:%n", codeFragment.startLoc), attributeSets[ATTR_BINARY_CODE]);
+		} // if - its a label
+
 		appendToDoc(doc, displayText);
 		// buildReservedFragment(doc, codeFragment);
 	}// buildUnknownFragent
@@ -824,7 +850,7 @@ public class ManualDisassembler {
 	private void buildCodeFragement(Document doc, CodeFragment codeFragment, boolean sourceCode) {
 		int currentLocation = codeFragment.startLoc;
 		int endLocation = codeFragment.endLoc;
-		labels.add(currentLocation);
+		// labels.add(currentLocation);
 
 		if (!sourceCode) {
 			clearDocument(doc);
@@ -841,31 +867,36 @@ public class ManualDisassembler {
 			mapKey = getStructureKey(currentLocation);
 			currentOpCode = opCodeMap.get(mapKey);
 			opCodeSize = currentOpCode.getSize();
-			try {
+//			try {
 				if (labels.contains(currentLocation)) {
-					doc.insertString(doc.getLength(), String.format("L%04X:%n", currentLocation),
-							attributeSets[ATTR_ASM_CODE]);
+					appendToDoc(doc,String.format("L%04X:%n", currentLocation),attributeSets[ATTR_BINARY_CODE]);
 				} // if - its a label
 
 				if (sourceCode) {
 					part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
-					doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
+					appendToDoc(doc, part3, attributeSets[ATTR_ASM_CODE]);
+//					doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
 				} else {
 					part1 = makePart1(currentLocation);
 					part2 = makePart2(currentLocation, opCodeSize);
 					part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
 					part4 = currentOpCode.getFunction();
-					doc.insertString(doc.getLength(), part1, attributeSets[ATTR_ADDRESS]);
-					doc.insertString(doc.getLength(), part2, attributeSets[ATTR_BINARY_CODE]);
-					doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
-					doc.insertString(doc.getLength(), part4, attributeSets[ATTR_FUNCTION]);
+					appendToDoc(doc, part1, attributeSets[ATTR_ADDRESS]);
+					appendToDoc(doc, part2, attributeSets[ATTR_BINARY_CODE]);
+					appendToDoc(doc, part3, attributeSets[ATTR_ASM_CODE]);
+					appendToDoc(doc, part4, attributeSets[ATTR_FUNCTION]);
+//					doc.insertString(doc.getLength(), part1, attributeSets[ATTR_ADDRESS]);
+//					doc.insertString(doc.getLength(), part2, attributeSets[ATTR_BINARY_CODE]);
+//					doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
+//					doc.insertString(doc.getLength(), part4, attributeSets[ATTR_FUNCTION]);
 
 				} // if
-				doc.insertString(doc.getLength(), System.lineSeparator(), null);
+				appendToDoc(doc, System.lineSeparator(), null);
+//				doc.insertString(doc.getLength(), System.lineSeparator(), null);
 
-			} catch (BadLocationException badLocationException) {
-				badLocationException.printStackTrace();
-			} // try
+//			} catch (BadLocationException badLocationException) {
+//				badLocationException.printStackTrace();
+//			} // try
 			currentLocation += opCodeSize;
 		} // while opcodeMap
 
@@ -878,15 +909,15 @@ public class ManualDisassembler {
 	private String makePart2(int currentLocation, int opCodeSize) {
 		String ans = "";
 		byte currentValue0 = binaryData.get(currentLocation);
-		byte currentValue1 = 0,currentValue2 = 0,currentValue3 = 0;
+		byte currentValue1 = 0, currentValue2 = 0, currentValue3 = 0;
 		try {
-			 currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
-			 currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
-			 currentValue3 = binaryData.get(currentLocation + 3);	
-	} catch (Exception e) {
-		log.warnf("Index out of bounds at current location %04X%n", currentLocation);
-	} //try
-		
+			currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
+			currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
+			currentValue3 = binaryData.get(currentLocation + 3);
+		} catch (Exception e) {
+			log.warnf("Index out of bounds at current location %04X%n", currentLocation);
+		} // try
+
 		// byte currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
 		// byte currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
 		// byte currentValue3 = opCodeSize > 3 ? binaryData.get(currentLocation + 3) : 0;
@@ -935,15 +966,15 @@ public class ManualDisassembler {
 		String instruction = currentOpCode.getInstruction();
 		String destination = currentOpCode.getDestination();
 		String source = currentOpCode.getSource();
-		byte currentValue1 = 0,currentValue2 = 0,currentValue3=0;
-try {
-		 currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
-		 currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
-		 currentValue3 = binaryData.get(currentLocation + 3);	
-} catch (Exception e) {
-	log.warnf("Index out of bounds at current location %04X%n", currentLocation);
-} //try
-		// byte currentValue4 = binaryData.get(currentLocation + 4);
+		byte currentValue1 = 0, currentValue2 = 0, currentValue3 = 0;
+		try {
+			currentValue1 = opCodeSize > 1 ? binaryData.get(currentLocation + 1) : 0;
+			currentValue2 = opCodeSize > 2 ? binaryData.get(currentLocation + 2) : 0;
+			currentValue3 = binaryData.get(currentLocation + 3);
+		} catch (Exception e) {
+			log.warnf("Index out of bounds at current location %04X%n", currentLocation);
+		} // try
+			// byte currentValue4 = binaryData.get(currentLocation + 4);
 		String fmt00, part3A = "";
 		switch (currentOpCode.getType()) {
 		case I00:
@@ -1025,15 +1056,15 @@ try {
 			break;
 		case Z15:
 			fmt00 = "%-5s%s,(%s + 0%02XH)";
-			part3A = String.format(fmt00, instruction, source, destination,currentValue2);
+			part3A = String.format(fmt00, instruction, source, destination, currentValue2);
 			break;
 		case Z17:
 			fmt00 = "%-5s(%s + 0%02XH),%s";
-			part3A = String.format(fmt00, instruction, source,currentValue2, destination);
+			part3A = String.format(fmt00, instruction, source, currentValue2, destination);
 			break;
 		case Z18:
 			fmt00 = "%-5s%s,(%s + %02XH)";
-			part3A = String.format(fmt00, instruction, source,destination, currentValue2);
+			part3A = String.format(fmt00, instruction, source, destination, currentValue2);
 			break;
 		case Z21:
 			fmt00 = "%-5s%s,0%02X%02XH";
@@ -1165,44 +1196,46 @@ try {
 
 		return ans;
 	}// getStructureKey
-private void addSelectedLabel() {
-	Pattern p1 = Pattern.compile("[0-9,A-F,a-f]{4}",Pattern.CASE_INSENSITIVE);
-	Pattern p2 = Pattern.compile("[0-9,A-F,a-f]{5}H",Pattern.CASE_INSENSITIVE); 
-	Pattern p3 = Pattern.compile("L[0-9,A-F,a-f]{4}",Pattern.CASE_INSENSITIVE); 
-	String selectedText = txtWIPsource.getSelectedText();
-	Matcher m1 = p1.matcher(selectedText);
-	Matcher m2 = p2.matcher(selectedText);
-	Matcher m3 = p3.matcher(selectedText);
-	
-	String  selectedLocation = null;
-	int location =0;
-	
-	if (m1.matches()) {
-		location = Integer.valueOf(selectedText, 16);
-	}else	if (m2.matches()) {
-		location = Integer.valueOf(selectedText.substring(1,5),16);
-	}else	if (m3.matches()) {
-		location = Integer.valueOf(selectedText.substring(1),16);
-	}else {
-		return;
-	}//if
-	
-//	System.out.printf("[ManualDisassembler.ApplicationAdapter.mouseClicked] Selected Text:%s, %04X%n",
-//			selectedText,location);
-	
-	String message = String.format("Do you want to set a label for Location: %04X", location);	
-	if(JOptionPane.showConfirmDialog(frame, message,"Label Insertion Option",JOptionPane.YES_NO_OPTION )==JOptionPane.YES_OPTION){
-		System.out.printf("[ManualDisassembler.addSelectedLabel] %s%n", "Answer is Yes");
-		if(labels.add(location)){
-			log.infof("Added label : %04X%n",location);
-		}else {
-			log.infof("Label : %04X already in Label table %n",location);
-		}//inner if
-	}// outer if
 
-	
-}//addSelectedLabel
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	private void addSelectedLabel() {
+		Pattern p1 = Pattern.compile("[0-9,A-F,a-f]{4}", Pattern.CASE_INSENSITIVE);
+		Pattern p2 = Pattern.compile("[0-9,A-F,a-f]{5}H", Pattern.CASE_INSENSITIVE);
+		Pattern p3 = Pattern.compile("L[0-9,A-F,a-f]{4}", Pattern.CASE_INSENSITIVE);
+		String selectedText = txtWIPsource.getSelectedText();
+		Matcher m1 = p1.matcher(selectedText);
+		Matcher m2 = p2.matcher(selectedText);
+		Matcher m3 = p3.matcher(selectedText);
+
+		String selectedLocation = null;
+		int location = 0;
+
+		if (m1.matches()) {
+			location = Integer.valueOf(selectedText, 16);
+		} else if (m2.matches()) {
+			location = Integer.valueOf(selectedText.substring(1, 5), 16);
+		} else if (m3.matches()) {
+			location = Integer.valueOf(selectedText.substring(1), 16);
+		} else {
+			return;
+		} // if
+
+		// System.out.printf("[ManualDisassembler.ApplicationAdapter.mouseClicked] Selected Text:%s, %04X%n",
+		// selectedText,location);
+
+		String message = String.format("Do you want to set a label for Location: %04X", location);
+		if (JOptionPane.showConfirmDialog(frame, message, "Label Insertion Option",
+				JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+			System.out.printf("[ManualDisassembler.addSelectedLabel] %s%n", "Answer is Yes");
+			if (labels.add(location)) {
+				log.infof("Added label : %04X%n", location);
+			} else {
+				log.infof("Label : %04X already in Label table %n", location);
+			} // inner if
+		} // outer if
+
+	}// addSelectedLabel
+		// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 	private void appClose() {
 		Preferences myPrefs = Preferences.userNodeForPackage(ManualDisassembler.class)
 				.node(this.getClass().getSimpleName());
@@ -1302,6 +1335,7 @@ private void addSelectedLabel() {
 	private final int ATTR_BINARY_CODE = 1;
 	private final int ATTR_ASM_CODE = 2;
 	private final int ATTR_FUNCTION = 3;
+	private final int ATTR_TEXT = 4;
 
 	private final String EMPTY_STRING = "";
 
@@ -1680,6 +1714,7 @@ private void addSelectedLabel() {
 		splitPane.setLeftComponent(scrollPaneWIPbinary);
 
 		txtWIPbinary = new JTextArea();
+		txtWIPbinary.setName("txtWIPbinary");
 		txtWIPbinary.setEditable(false);
 		txtWIPbinary.setFont(new Font("Courier New", Font.PLAIN, 15));
 		scrollPaneWIPbinary.setViewportView(txtWIPbinary);
@@ -1693,6 +1728,7 @@ private void addSelectedLabel() {
 		splitPane.setRightComponent(scrollPaneWIPsource);
 
 		txtWIPsource = new JTextPane();
+		txtWIPsource.setName("txtWIPsource");
 		txtWIPsource.setFont(new Font("Courier New", Font.PLAIN, 16));
 		txtWIPsource.addMouseListener(applicationAdapter);
 		scrollPaneWIPsource.setViewportView(txtWIPsource);
@@ -1729,6 +1765,7 @@ private void addSelectedLabel() {
 		tabPaneDisplays.addTab("Source Code", null, panelScrollASM, null);
 
 		txtSource = new JTextPane();
+		txtSource.setName("txtSource");
 		txtSource.setFont(new Font("Courier New", Font.PLAIN, 15));
 		panelScrollASM.setViewportView(txtSource);
 
@@ -1813,7 +1850,7 @@ private void addSelectedLabel() {
 
 	// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-	class ApplicationAdapter implements ActionListener, ListSelectionListener,MouseListener {
+	class ApplicationAdapter implements ActionListener, ListSelectionListener, MouseListener {
 
 		@Override // ActionListener
 		public void actionPerformed(ActionEvent actionEvent) {
@@ -1889,8 +1926,8 @@ private void addSelectedLabel() {
 			} // if
 
 		}// actionPerformed
-		
-		/*            ListSelectionListener                 */
+
+		/* ListSelectionListener */
 
 		@Override // ListSelectionListener
 		public void valueChanged(ListSelectionEvent lse) {
@@ -1910,15 +1947,14 @@ private void addSelectedLabel() {
 			displayFragmentSource(txtWIPsource, codeFragment);
 		}// valueChanged
 
-		
-		/*                  MouseListener                   */        
+		/* MouseListener */
 		@Override
 		public void mouseClicked(MouseEvent mouseEvent) {
-			if(mouseEvent.getClickCount() > 1) {
+			if (mouseEvent.getClickCount() > 1) {
 				addSelectedLabel();
-			}//if
-			
-		}//mouseClicked
+			} // if
+
+		}// mouseClicked
 
 		@Override
 		public void mouseEntered(MouseEvent arg0) {
