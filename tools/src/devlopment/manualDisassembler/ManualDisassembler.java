@@ -1,6 +1,7 @@
 package devlopment.manualDisassembler;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 
 //package codeSupport;
@@ -15,10 +16,12 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.print.PrinterException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,6 +36,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,6 +59,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -85,6 +90,8 @@ public class ManualDisassembler {
 
 	private ApplicationAdapter applicationAdapter = new ApplicationAdapter();
 	private myComponents.AppLogger log = myComponents.AppLogger.getInstance();
+	private AdapterText adapterText = new AdapterText();
+
 	private String hostDirectory;
 	// private String currentFileName;
 	private JFrame frame;
@@ -645,7 +652,7 @@ public class ManualDisassembler {
 		try {
 			doc.insertString(doc.getLength(), textToAppend, attributeSet);
 		} catch (BadLocationException e) {
-			log.errorf("Failed to append text: %s %n" , textToAppend);
+			log.errorf("Failed to append text: %s %n", textToAppend);
 			e.printStackTrace();
 		} // try
 	}// appendToDocASM
@@ -867,36 +874,36 @@ public class ManualDisassembler {
 			mapKey = getStructureKey(currentLocation);
 			currentOpCode = opCodeMap.get(mapKey);
 			opCodeSize = currentOpCode.getSize();
-//			try {
-				if (labels.contains(currentLocation)) {
-					appendToDoc(doc,String.format("L%04X:%n", currentLocation),attributeSets[ATTR_BINARY_CODE]);
-				} // if - its a label
+			// try {
+			if (labels.contains(currentLocation)) {
+				appendToDoc(doc, String.format("L%04X:%n", currentLocation), attributeSets[ATTR_BINARY_CODE]);
+			} // if - its a label
 
-				if (sourceCode) {
-					part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
-					appendToDoc(doc, part3, attributeSets[ATTR_ASM_CODE]);
-//					doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
-				} else {
-					part1 = makePart1(currentLocation);
-					part2 = makePart2(currentLocation, opCodeSize);
-					part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
-					part4 = currentOpCode.getFunction();
-					appendToDoc(doc, part1, attributeSets[ATTR_ADDRESS]);
-					appendToDoc(doc, part2, attributeSets[ATTR_BINARY_CODE]);
-					appendToDoc(doc, part3, attributeSets[ATTR_ASM_CODE]);
-					appendToDoc(doc, part4, attributeSets[ATTR_FUNCTION]);
-//					doc.insertString(doc.getLength(), part1, attributeSets[ATTR_ADDRESS]);
-//					doc.insertString(doc.getLength(), part2, attributeSets[ATTR_BINARY_CODE]);
-//					doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
-//					doc.insertString(doc.getLength(), part4, attributeSets[ATTR_FUNCTION]);
+			if (sourceCode) {
+				part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
+				appendToDoc(doc, part3, attributeSets[ATTR_ASM_CODE]);
+				// doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
+			} else {
+				part1 = makePart1(currentLocation);
+				part2 = makePart2(currentLocation, opCodeSize);
+				part3 = "      " + makePart3(mapKey, currentOpCode, currentLocation);
+				part4 = currentOpCode.getFunction();
+				appendToDoc(doc, part1, attributeSets[ATTR_ADDRESS]);
+				appendToDoc(doc, part2, attributeSets[ATTR_BINARY_CODE]);
+				appendToDoc(doc, part3, attributeSets[ATTR_ASM_CODE]);
+				appendToDoc(doc, part4, attributeSets[ATTR_FUNCTION]);
+				// doc.insertString(doc.getLength(), part1, attributeSets[ATTR_ADDRESS]);
+				// doc.insertString(doc.getLength(), part2, attributeSets[ATTR_BINARY_CODE]);
+				// doc.insertString(doc.getLength(), part3, attributeSets[ATTR_ASM_CODE]);
+				// doc.insertString(doc.getLength(), part4, attributeSets[ATTR_FUNCTION]);
 
-				} // if
-				appendToDoc(doc, System.lineSeparator(), null);
-//				doc.insertString(doc.getLength(), System.lineSeparator(), null);
+			} // if
+			appendToDoc(doc, System.lineSeparator(), null);
+			// doc.insertString(doc.getLength(), System.lineSeparator(), null);
 
-//			} catch (BadLocationException badLocationException) {
-//				badLocationException.printStackTrace();
-//			} // try
+			// } catch (BadLocationException badLocationException) {
+			// badLocationException.printStackTrace();
+			// } // try
 			currentLocation += opCodeSize;
 		} // while opcodeMap
 
@@ -1206,7 +1213,7 @@ public class ManualDisassembler {
 		Matcher m2 = p2.matcher(selectedText);
 		Matcher m3 = p3.matcher(selectedText);
 
-		String selectedLocation = null;
+		// String selectedLocation = null;
 		int location = 0;
 
 		if (m1.matches()) {
@@ -1731,7 +1738,9 @@ public class ManualDisassembler {
 		txtWIPsource.setName("txtWIPsource");
 		txtWIPsource.setFont(new Font("Courier New", Font.PLAIN, 16));
 		txtWIPsource.addMouseListener(applicationAdapter);
+
 		scrollPaneWIPsource.setViewportView(txtWIPsource);
+
 		splitPane.setDividerLocation(300);
 
 		JPanel panelBinanryFile = new JPanel();
@@ -1804,8 +1813,8 @@ public class ManualDisassembler {
 		mnuFileLoadWIP.setActionCommand(AC_MNU_FILE_LOAD_WIP);
 		mnuFileLoadWIP.addActionListener(applicationAdapter);
 
-		JSeparator separator = new JSeparator();
-		mnuFile.add(separator);
+		JSeparator separator1 = new JSeparator();
+		mnuFile.add(separator1);
 		mnuFile.add(mnuFileLoadWIP);
 
 		JMenuItem mnuFileExit = new JMenuItem("Exit");
@@ -1846,9 +1855,76 @@ public class ManualDisassembler {
 		JSeparator separator_1 = new JSeparator();
 		mnuFile.add(separator_1);
 		mnuFile.add(mnuFileExit);
+
+		/*------------------------------------*/
+		JPopupMenu popupSource = new JPopupMenu();
+		addPopup(txtWIPsource, popupSource);
+
+		JMenuItem popupLogClear = new JMenuItem("Print");
+		popupLogClear.setName("PUM_PRINT");
+		popupLogClear.addActionListener(adapterText);
+		popupSource.add(popupLogClear);
+
 	}// initialize
 
 	// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+	/*------------------------------------*/
+
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent mouseEvent) {
+				if (mouseEvent.isPopupTrigger()) {
+					showMenu(mouseEvent);
+				} // if popup Trigger
+			}// mousePressed
+
+			public void mouseReleased(MouseEvent mouseEvent) {
+				if (mouseEvent.isPopupTrigger()) {
+					showMenu(mouseEvent);
+				} // if
+			}// mouseReleased
+
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}// showMenu
+		});
+	}// addPopup
+	/*------------------------------------*/
+
+	private void doWipSourcePrint() {
+		Font originalFont = txtWIPsource.getFont();
+		try {
+			// textPane.setFont(new Font("Courier New", Font.PLAIN, 8));
+			txtWIPsource.setFont(originalFont.deriveFont(8.0f));
+			MessageFormat headerMessage = new MessageFormat(binaryFileName);
+			MessageFormat footerMessage = new MessageFormat(new Date().toString() + "           Page - {0}");
+			txtWIPsource.print(headerMessage, footerMessage);
+			// textPane.setFont(new Font("Courier New", Font.PLAIN, 14));
+			txtWIPsource.setFont(originalFont);
+		} catch (PrinterException e) {
+			txtWIPsource.setFont(originalFont);
+			log.error("java.awt.print.PrinterAbortException");
+			e.printStackTrace();
+		} // try
+	}// doLogPrint
+
+	class AdapterText implements ActionListener { // logAdapter
+		@Override
+		public void actionPerformed(ActionEvent actionEvent) {
+			String name = ((Component) actionEvent.getSource()).getName();
+			switch (name) {
+			case "PUM_PRINT":
+				doWipSourcePrint();
+				break;
+			default:
+				log.warn("bad popUp menu");
+				break;
+			}// switch
+		}// actionPerformed
+	}// class AdapterLog
+
+	/*------------------------------------*/
+	/*------------------------------------*/
 
 	class ApplicationAdapter implements ActionListener, ListSelectionListener, MouseListener {
 
