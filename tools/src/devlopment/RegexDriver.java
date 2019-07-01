@@ -264,7 +264,7 @@ public class RegexDriver {
 			fw.write(txtLog.getText());
 			fw.close();
 		} catch (IOException e) {
-			System.err.printf("unable to save the Log %s.%n");
+			System.err.printf("unable to save the Log.%n");
 			e.printStackTrace();
 		}
 	}// saveLog

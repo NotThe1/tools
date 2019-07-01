@@ -26,7 +26,7 @@ public abstract class AbstractOpCodeMap  {
 
 	// ----------------------------------------------------------
 
-	protected static HashMap<String, OperationStructure> codeMap;// = new HashMap<String, OperationStructure>();
+	 static HashMap<String, OperationStructure> codeMap;// = new HashMap<String, OperationStructure>();
 
 
 }//abstract class AbstractOpCodeMap
