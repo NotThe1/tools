@@ -89,7 +89,6 @@ import myComponents.AppLogger;
 import myComponents.Hex64KSpinner;
 
 public class ManualDisassembler {
-
 	private ApplicationAdapter applicationAdapter = new ApplicationAdapter();
 	private myComponents.AppLogger log = myComponents.AppLogger.getInstance();
 	private AdapterText adapterText = new AdapterText();
