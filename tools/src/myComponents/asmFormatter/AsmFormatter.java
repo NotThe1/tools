@@ -11,8 +11,6 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -29,13 +27,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
-import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
@@ -43,7 +38,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.StyledDocument;
 
 //import assembler.SourceLineParts;
 
@@ -56,15 +50,11 @@ public class AsmFormatter {
 	private File asmSourceFile = null;
 	private String sourceFileBase;
 	private String sourceFileFullName;
+	private String fmtString;
 
-	private StyledDocument docSource;
-	// private StyledDocument docResult;
-
-	private JScrollBar sbarSource;
-	private JScrollBar sbarResult;
-	
-	private int commentStart;
 	private int statementStart;
+	private int argumentStart;
+	private int commentStart;
 
 	/**
 	 * Launch the application.
@@ -88,6 +78,13 @@ public class AsmFormatter {
 		if (asmSourceFile == null) {
 			return; // do nothing
 		} // if
+		
+		int symbolWide = statementStart - 0;
+		int cmdWide = argumentStart - statementStart;
+		int argWide = commentStart - argumentStart;
+		fmtString = "%-" + symbolWide +"s%-" + cmdWide + "s%-" + argWide + "s%s";
+
+		
 		txtSource.setText(EMPTY_STRING);
 		try {
 			String sourceLine = EMPTY_STRING;
@@ -96,17 +93,17 @@ public class AsmFormatter {
 			while (scanner.hasNextLine()) {
 				sourceLine = scanner.nextLine();
 				formattedLine = processLine(sourceLine);
-				
-				/*     remove trailing spaces    */	
-				int firstTrailingSpace = formattedLine.length()-1;
+
+				/* remove trailing spaces */
+				int firstTrailingSpace = formattedLine.length() - 1;
 				while (true) {
 					if (!formattedLine.endsWith(" ")) {
 						break;
-					}//  done
-					formattedLine = formattedLine.substring(0,firstTrailingSpace);
-					firstTrailingSpace--;	
-				}//while
-				/*     remove trailing spaces    */	
+					} // done
+					formattedLine = formattedLine.substring(0, firstTrailingSpace);
+					firstTrailingSpace--;
+				} // while
+				/* remove trailing spaces */
 
 				txtSource.append(formattedLine + LINE_SEPARATOR);
 			} // while
@@ -115,27 +112,33 @@ public class AsmFormatter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} // try
+		btnSaveFile.setEnabled(false);
 		txtSource.setCaretPosition(0);
 	}// start
 
 	private String processLine(String originalLine) {
 
-		String com = "";
 		String symbol = "";
 		String cmd = "";
+		String arg = "";
+		String com = "";
 
+		/* remove tabs */
 		String line = originalLine.replaceAll("\\t", " ");
-//		String line = originalLine.replace("\\s*$?", EMPTY_STRING);
-		if (line.startsWith(";")) {
+
+		/* if - whole line is comment leave alone */
+		if (line.startsWith(SEMICOLON)) {
 			return line;
-		}
+		} // if
 
-		if (line.contains(";")) {
-			String[] lineParts = line.split(";");
-			com = lineParts.length == 2 ? "; " + lineParts[1] : "";
-			line = lineParts[0];
-		} // comments
+		/* does it have a comment */
+		if (line.contains(SEMICOLON)) {
+			int scPosition = line.indexOf(SEMICOLON);
+			com = line.substring(scPosition);
+			line = line.substring(0, scPosition);
+		} // if
 
+		/* Do we have a symbol/label ? */
 		if (line.startsWith(" ")) {
 			symbol = "";
 		} else {
@@ -144,21 +147,20 @@ public class AsmFormatter {
 			line = symbolEnd == -1 ? "" : line.substring(symbolEnd);
 		} // if symbol
 
+		/* handle statement and arguments */
 		line = line.trim();
 		if (!(line.length() == 0)) {
 			int cmdEnd = line.indexOf(" ");
-			cmd = cmdEnd==-1?line:line.substring(0, cmdEnd);
-			cmd = cmdEnd==-1?cmd:cmd + "  " + line.substring(cmdEnd);
-
+			if (cmdEnd == -1) {
+				cmd = line;
+			}else {
+				cmd = line.substring(0, cmdEnd);
+				arg = line.substring(cmdEnd);
+			}//if
 		} // inner if
-
-//		int cmdPos = 12;
-//		int comPos = 45;
-		int adjPos = commentStart - statementStart;
-		String fmtString = "%-" + statementStart + "s%-" + adjPos + "s%s";
-
-		String target = String.format(fmtString, symbol, cmd, com);
 		
+
+		String target = String.format(fmtString, symbol.trim(), cmd.trim(), arg.trim(), com);
 
 		return target;
 	}// DoIt
@@ -183,7 +185,7 @@ public class AsmFormatter {
 	private void doOpenFile() {
 		JFileChooser fileChooser = new JFileChooser(defaultDirectory);
 		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Assembler Source Code", "Z80", "z80"));
+		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Assembler Source Code", "Z80", "LIB"));
 		fileChooser.setAcceptAllFileFilterUsed(false);
 
 		if (fileChooser.showOpenDialog(frmAsmFormatter) != JFileChooser.APPROVE_OPTION) {
@@ -199,80 +201,30 @@ public class AsmFormatter {
 
 	}// doSaveFile
 
-	// private int loadSourceFile(File sourceFile, int lineNumber,
-	// SimpleAttributeSet attr) {
-	// try {
-	// FileReader source = new FileReader(sourceFile);
-	// BufferedReader reader = new BufferedReader(source);
-	// String line = null;
-	// String rawLine = null;
-	// String outputLine;
-	// Matcher matcherInclude;
-	//// Pattern patternForInclude = Pattern.compile("\\$INCLUDE ",
-	// Pattern.CASE_INSENSITIVE);
-	// while ((rawLine = reader.readLine()) != null) {
-	//
-	// line = rawLine;
-	// // outputLine = String.format("%04d %s%n", lineNumber++, line);
-	// outputLine = String.format("%04d %s\n", lineNumber++, line);
-	//
-	//// insertSource(outputLine, attr);
-	// // txtSource.append(outputLine);
-	//// matcherInclude = patternForInclude.matcher(line);
-	////
-	//// if (matcherInclude.find()) {
-	//// String fileReference = line.substring(matcherInclude.end(),
-	// line.length()).trim();
-	//// lineNumber = doInclude(fileReference,
-	// sourceFile.getParentFile().getAbsolutePath(), lineNumber);
-	//// } // if
-	// } // while
-	// reader.close();
-	// mnuFilePrintSource.setEnabled(true);
-	// mnuFilePrintResult.setEnabled(false);
-	// } catch (IOException e) {
-	// // e.printStackTrace();
-	// String error = String.format("File Not Found!! - %s",
-	// sourceFile.getAbsolutePath());
-	// reportError(error);
-	// } // TRY
-	// // return lineNumber;
-	// return lineNumber;
-	// }// loadSourceFile
-
-	// private void insertResult(String str, SimpleAttributeSet attr) {
-	// try {
-	// // docListing.
-	// docResult.insertString(docResult.getLength(), str, attr);
-	// } catch (BadLocationException e) {
-	// e.printStackTrace();
-	// } // try
-	// }// insertSource
 
 	private void doLoadLastFile() {
 		asmSourceFile = new File(sourceFileFullName);
 		prepareSourceFile(asmSourceFile);
 	}// doLoadLastFile
 
-	// private void clearDoc(StyledDocument doc) {
-	// try {
-	// doc.remove(0, doc.getLength());
-	// } catch (BadLocationException e) {
-	// // Auto-generated catch block
-	// e.printStackTrace();
-	// } // try
-	// }// clearDoc
+	private void doSpinnerChanged(String name, int value) {
+		// SPINNER_ARGUMENT
+		switch (name) {
+		case SPINNER_STATEMENT:
+			statementStart = value;
+			break;
+		case SPINNER_ARGUMENT:
+			argumentStart = value;
+			break;
+		case SPINNER_COMMENT:
+			commentStart = value;
+			break;
+		default:
+			System.err.printf("[doSpinnerChanged] name: %s, value: %d%n", name, value);
+		}// switch
 
-	private void doSpinnerChanged(String name) {
-		if (name == SPINNER_STATEMENT) {
-			statementStart = (int) spinnerStatement.getValue();
-		}//if
-		else if (name == SPINNER_COMMENT) {
-			commentStart = (int) spinnerComment.getValue();
-		}//if
-		
-	}//doSpinnerChanged
-	
+	}// doSpinnerChanged
+
 	private void doFileExit() {
 		appClose();
 		System.exit(0);
@@ -286,12 +238,13 @@ public class AsmFormatter {
 		Point point = frmAsmFormatter.getLocation();
 		myPrefs.putInt("LocX", point.x);
 		myPrefs.putInt("LocY", point.y);
-		myPrefs.putInt("Divider", splitPane.getDividerLocation());
+		// myPrefs.putInt("Divider", mainPain.getDividerLocation());
 
 		myPrefs.put("defaultDirectory", defaultDirectory);
 		myPrefs.put("LastFile", sourceFileFullName);
-		myPrefs.putInt("spinnerStatement", (int) spinnerStatement.getValue());
-		myPrefs.putInt("spinnerComment", (int) spinnerComment.getValue());
+		myPrefs.putInt(SPINNER_STATEMENT, (int) spinnerStatement.getValue());
+		myPrefs.putInt(SPINNER_ARGUMENT, (int) spinnerArgument.getValue());
+		myPrefs.putInt(SPINNER_COMMENT, (int) spinnerComment.getValue());
 
 		myPrefs = null;
 		System.exit(0);
@@ -301,17 +254,16 @@ public class AsmFormatter {
 		Preferences myPrefs = Preferences.userNodeForPackage(AsmFormatter.class).node(this.getClass().getSimpleName());
 		frmAsmFormatter.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 		frmAsmFormatter.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
-		splitPane.setDividerLocation(myPrefs.getInt("Divider", 200));
 		defaultDirectory = myPrefs.get("defaultDirectory", DEFAULT_DIRECTORY);
 		sourceFileFullName = myPrefs.get("LastFile", "");
-		sbarSource = spSource.getVerticalScrollBar();
-		sbarSource.setName(SBAR_SOURCE);
-		sbarSource.addAdjustmentListener(adapterForFMT);
 
-		spinnerStatement.setValue(myPrefs.getInt("spinnerStatement", 17));
-		statementStart =  (int) spinnerStatement.getValue();
+		spinnerStatement.setValue(myPrefs.getInt(SPINNER_STATEMENT, 17));
+		statementStart = (int) spinnerStatement.getValue();
 
-		spinnerComment.setValue(myPrefs.getInt("spinnerComment", 45));
+		spinnerArgument.setValue(myPrefs.getInt(SPINNER_ARGUMENT, 23));
+		argumentStart = (int) spinnerArgument.getValue();
+
+		spinnerComment.setValue(myPrefs.getInt(SPINNER_COMMENT, 45));
 		commentStart = (int) spinnerComment.getValue();
 
 		myPrefs = null;
@@ -389,9 +341,10 @@ public class AsmFormatter {
 		panelMain.add(panelLeft, gbc_panelLeft);
 		GridBagLayout gbl_panelLeft = new GridBagLayout();
 		gbl_panelLeft.columnWidths = new int[] { 0, 0, 0 };
-		gbl_panelLeft.rowHeights = new int[] { 0, 50, 0, 0, 0, 150, 0, 50, 50, 50, 0 };
+		gbl_panelLeft.rowHeights = new int[] { 0, 50, 0, 0, 0, 150, 0, 50, 50, 0, 50, 50, 0 };
 		gbl_panelLeft.columnWeights = new double[] { 1.0, 1.0, Double.MIN_VALUE };
-		gbl_panelLeft.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_panelLeft.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				Double.MIN_VALUE };
 		panelLeft.setLayout(gbl_panelLeft);
 
 		btnStart = new JButton("Start");
@@ -464,6 +417,31 @@ public class AsmFormatter {
 		gbc_spinnerStatement.gridy = 0;
 		panel.add(spinnerStatement, gbc_spinnerStatement);
 
+		panel_2 = new JPanel();
+		panel_2.setBorder(new CompoundBorder(new TitledBorder(new LineBorder(new Color(0, 0, 0), 1, true),
+				"Argument(s)", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), null));
+		GridBagConstraints gbc_panel_2 = new GridBagConstraints();
+		gbc_panel_2.insets = new Insets(0, 0, 5, 5);
+		gbc_panel_2.fill = GridBagConstraints.BOTH;
+		gbc_panel_2.gridx = 0;
+		gbc_panel_2.gridy = 9;
+		panelLeft.add(panel_2, gbc_panel_2);
+		GridBagLayout gbl_panel_2 = new GridBagLayout();
+		gbl_panel_2.columnWidths = new int[] { 0, 0 };
+		gbl_panel_2.rowHeights = new int[] { 0, 0 };
+		gbl_panel_2.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+		gbl_panel_2.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+		panel_2.setLayout(gbl_panel_2);
+
+		spinnerArgument = new JSpinner();
+		spinnerArgument.setName(SPINNER_ARGUMENT);
+		spinnerArgument.addChangeListener(adapterForFMT);
+		GridBagConstraints gbc_spinnerArgument = new GridBagConstraints();
+		gbc_spinnerArgument.fill = GridBagConstraints.HORIZONTAL;
+		gbc_spinnerArgument.gridx = 0;
+		gbc_spinnerArgument.gridy = 0;
+		panel_2.add(spinnerArgument, gbc_spinnerArgument);
+
 		panel_1 = new JPanel();
 		panel_1.setBorder(new TitledBorder(new LineBorder(new Color(0, 0, 0), 1, true), "Comment", TitledBorder.CENTER,
 				TitledBorder.TOP, null, null));
@@ -471,7 +449,7 @@ public class AsmFormatter {
 		gbc_panel_1.insets = new Insets(0, 0, 0, 5);
 		gbc_panel_1.fill = GridBagConstraints.BOTH;
 		gbc_panel_1.gridx = 0;
-		gbc_panel_1.gridy = 9;
+		gbc_panel_1.gridy = 11;
 		panelLeft.add(panel_1, gbc_panel_1);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[] { 0, 0 };
@@ -489,18 +467,30 @@ public class AsmFormatter {
 		gbc_spinnerComment.gridy = 0;
 		panel_1.add(spinnerComment, gbc_spinnerComment);
 
-		splitPane = new JSplitPane();
-		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		splitPane.setOneTouchExpandable(true);
-		splitPane.setDividerSize(8);
+		mainPanel = new JPanel();
+		// mainPain.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		// mainPain.setOneTouchExpandable(true);
+		// mainPain.setDividerSize(0);
 		GridBagConstraints gbc_splitPane = new GridBagConstraints();
 		gbc_splitPane.fill = GridBagConstraints.BOTH;
 		gbc_splitPane.gridx = 1;
 		gbc_splitPane.gridy = 0;
-		panelMain.add(splitPane, gbc_splitPane);
+		panelMain.add(mainPanel, gbc_splitPane);
+		GridBagLayout gbl_mainPanel = new GridBagLayout();
+		gbl_mainPanel.columnWidths = new int[] { 6, 0 };
+		gbl_mainPanel.rowHeights = new int[] { 42, 0 };
+		gbl_mainPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+		gbl_mainPanel.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
+		mainPanel.setLayout(gbl_mainPanel);
 
 		spSource = new JScrollPane();
-		splitPane.setLeftComponent(spSource);
+		GridBagConstraints gbc_spSource = new GridBagConstraints();
+		gbc_spSource.fill = GridBagConstraints.BOTH;
+		gbc_spSource.anchor = GridBagConstraints.NORTHWEST;
+		gbc_spSource.gridx = 0;
+		gbc_spSource.gridy = 0;
+		mainPanel.add(spSource, gbc_spSource);
+		// mainPain.setLeftComponent(spSource);
 
 		lblSourceFileName = new JLabel("<No File Selected>");
 		lblSourceFileName.setHorizontalAlignment(SwingConstants.CENTER);
@@ -511,19 +501,7 @@ public class AsmFormatter {
 		txtSource = new JTextArea();
 		txtSource.setFont(new Font("Courier New", Font.PLAIN, 14));
 		spSource.setViewportView(txtSource);
-
-		spResult = new JScrollPane();
-		splitPane.setRightComponent(spResult);
-
-		lblResultFileName = new JLabel("<No File Selected>");
-		lblResultFileName.setHorizontalAlignment(SwingConstants.CENTER);
-		lblResultFileName.setForeground(Color.BLUE);
-		lblResultFileName.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		spResult.setColumnHeaderView(lblResultFileName);
-
-		tpResult = new JTextPane();
-		spResult.setViewportView(tpResult);
-		splitPane.setDividerLocation(345);
+		// mainPain.setDividerLocation(345);
 
 		JPanel panelStatus = new JPanel();
 		GridBagConstraints gbc_panelStatus = new GridBagConstraints();
@@ -591,12 +569,14 @@ public class AsmFormatter {
 	private static final String MNU_FILE_PRINT_RESULT = "mnuFilePrintResult";
 	private static final String MNU_FILE_EXIT = "mnuFileExit";
 	private static final String SBAR_SOURCE = "sbarSource";
-	
+
 	private static final String SPINNER_STATEMENT = "spinnerStatement";
+	private static final String SPINNER_ARGUMENT = "spinnerArgument";
 	private static final String SPINNER_COMMENT = "spinnerComment";
 
-	static final String EMPTY_STRING = "";
-	static final String SPACE = " ";
+	private static final String EMPTY_STRING = "";
+	private static final String SPACE = " ";
+	private static final String SEMICOLON = ";";
 	private static final String LINE_SEPARATOR = System.lineSeparator();
 	private static final String FILE_SEPARATOR = File.separator;
 
@@ -605,15 +585,12 @@ public class AsmFormatter {
 	//////////////////////////////////////////////////////////////////////////
 
 	// private static final String LINE_SEPARATOR = System.lineSeparator();
-	private JSplitPane splitPane;
+	private JPanel mainPanel;
 	private JLabel lblSourceFilePath;
 	private JLabel lblSourceFileName;
-	private JLabel lblResultFileName;
 	private JButton btnStart;
 	private JTextArea txtSource;
-	private JTextPane tpResult;
 	private JScrollPane spSource;
-	private JScrollPane spResult;
 	private JMenuItem mnuFilePrintSource;
 	private JMenuItem mnuFilePrintResult;
 	private JLabel lblStatus;
@@ -624,13 +601,15 @@ public class AsmFormatter {
 	private JSpinner spinnerComment;
 	private Component verticalStrut_1;
 	private JButton btnSaveFile;
+	private JPanel panel_2;
+	private JSpinner spinnerArgument;
 
 	// private void reportError(String messsage) {
 	// // String asterisks = "*************";
 	// System.err.print("************* " + messsage + " *************");
 	// }// reportError
 
-	class AdapterForFMT implements ActionListener, AdjustmentListener,ChangeListener {
+	class AdapterForFMT implements ActionListener, ChangeListener {// AdjustmentListener,
 
 		/* ActionListener */
 		@Override
@@ -671,24 +650,24 @@ public class AsmFormatter {
 
 		/* AdjustmentListener */
 
-		@Override
-		public void adjustmentValueChanged(AdjustmentEvent adjustmentEvent) {
-			if (adjustmentEvent.getSource() instanceof JScrollBar) {
-				int value = ((JScrollBar) adjustmentEvent.getSource()).getValue();
-				sbarSource.setValue(value);
-				// sbarResult.setValue(value);
-			} // if scroll bar
-
-		}// adjustmentValueChanged
-
+		// @Override
+		// public void adjustmentValueChanged(AdjustmentEvent adjustmentEvent) {
+		// if (adjustmentEvent.getSource() instanceof JScrollBar) {
+		// int value = ((JScrollBar) adjustmentEvent.getSource()).getValue();
+		// sbarSource.setValue(value);
+		// // sbarResult.setValue(value);
+		// } // if scroll bar
+		//
+		// }// adjustmentValueChanged
 
 		/* Change Listener */
 
 		@Override
 		public void stateChanged(ChangeEvent changeEvent) {
 			String name = ((Component) changeEvent.getSource()).getName();
-			doSpinnerChanged(name);
-		}//stateChanged
+			int value = (int) ((JSpinner) changeEvent.getSource()).getValue();
+			doSpinnerChanged(name, value);
+		}// stateChanged
 
 	}// class AdapterForASM
 
