@@ -15,6 +15,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.prefs.Preferences;
 
@@ -43,12 +45,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class AsmFormatter {
 	private AdapterForFMT adapterForFMT = new AdapterForFMT();
-	private JFrame frmAsmFormatter;
 
 	private String defaultDirectory;
-	private String outputPathAndBase;
 	private File asmSourceFile = null;
-	private String sourceFileBase;
 	private String sourceFileFullName;
 	private String fmtString;
 
@@ -78,13 +77,12 @@ public class AsmFormatter {
 		if (asmSourceFile == null) {
 			return; // do nothing
 		} // if
-		
+
 		int symbolWide = statementStart - 0;
 		int cmdWide = argumentStart - statementStart;
 		int argWide = commentStart - argumentStart;
-		fmtString = "%-" + symbolWide +"s%-" + cmdWide + "s%-" + argWide + "s%s";
+		fmtString = "%-" + symbolWide + "s%-" + cmdWide + "s%-" + argWide + "s%s";
 
-		
 		txtSource.setText(EMPTY_STRING);
 		try {
 			String sourceLine = EMPTY_STRING;
@@ -109,10 +107,10 @@ public class AsmFormatter {
 			} // while
 			scanner.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} // try
-		btnSaveFile.setEnabled(false);
+		btnStart.setEnabled(false);
+		btnSaveFile.setEnabled(true);
 		txtSource.setCaretPosition(0);
 	}// start
 
@@ -153,12 +151,11 @@ public class AsmFormatter {
 			int cmdEnd = line.indexOf(" ");
 			if (cmdEnd == -1) {
 				cmd = line;
-			}else {
+			} else {
 				cmd = line.substring(0, cmdEnd);
 				arg = line.substring(cmdEnd);
-			}//if
+			} // if
 		} // inner if
-		
 
 		String target = String.format(fmtString, symbol.trim(), cmd.trim(), arg.trim(), com);
 
@@ -166,20 +163,15 @@ public class AsmFormatter {
 	}// DoIt
 
 	private void prepareSourceFile(File asmSourceFile) {
-		String asmSourceFileName = asmSourceFile.getName();
-		// String asmSourceDirectory = asmSourceFile.getPath();
-		String[] nameParts = (asmSourceFileName.split("\\."));
-		sourceFileBase = nameParts[0];
 		lblSourceFilePath.setText(asmSourceFile.getAbsolutePath());
 		sourceFileFullName = asmSourceFile.getAbsolutePath();
 		lblSourceFileName.setText(asmSourceFile.getName());
-		// lblListingFileName.setText(sourceFileBase + "." + SUFFIX_LISTING);
 		defaultDirectory = asmSourceFile.getParent();
-		outputPathAndBase = defaultDirectory + FILE_SEPARATOR + sourceFileBase;
 
 		txtSource.setText(EMPTY_STRING);
 		txtSource.setCaretPosition(0);
 		btnStart.setEnabled(true);
+		btnSaveFile.setEnabled(false);
 	}// prepareSourceFile
 
 	private void doOpenFile() {
@@ -193,14 +185,32 @@ public class AsmFormatter {
 		} else {
 			asmSourceFile = fileChooser.getSelectedFile();
 			prepareSourceFile(asmSourceFile);
-			outputPathAndBase = defaultDirectory + FILE_SEPARATOR + sourceFileBase;
 		} // if
 	}// openFile
 
 	private void doSaveFile() {
+		String backupName = sourceFileFullName + ".BAK";
+		File backupFile = new File(backupName);
+		if (backupFile.exists()) {
+			boolean statusDelete = backupFile.delete();
+			System.out.printf("[doSaveFile] delete status = %s%n", statusDelete);
+		} // if
+		boolean statusRename = asmSourceFile.renameTo(new File(backupName));
+		System.out.printf("[doSaveFile] delete status = %s%n", statusRename);
 
+		try {
+			asmSourceFile.createNewFile();
+			PrintWriter printWriter = new PrintWriter(asmSourceFile);
+			Scanner scanner = new Scanner(txtSource.getText());
+			while (scanner.hasNext()) {
+				printWriter.println(scanner.nextLine());
+			} // while
+			scanner.close();
+			printWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} // try
 	}// doSaveFile
-
 
 	private void doLoadLastFile() {
 		asmSourceFile = new File(sourceFileFullName);
@@ -222,7 +232,6 @@ public class AsmFormatter {
 		default:
 			System.err.printf("[doSpinnerChanged] name: %s, value: %d%n", name, value);
 		}// switch
-
 	}// doSpinnerChanged
 
 	private void doFileExit() {
@@ -238,7 +247,6 @@ public class AsmFormatter {
 		Point point = frmAsmFormatter.getLocation();
 		myPrefs.putInt("LocX", point.x);
 		myPrefs.putInt("LocY", point.y);
-		// myPrefs.putInt("Divider", mainPain.getDividerLocation());
 
 		myPrefs.put("defaultDirectory", defaultDirectory);
 		myPrefs.put("LastFile", sourceFileFullName);
@@ -281,7 +289,7 @@ public class AsmFormatter {
 	 */
 	private void initialize() {
 		frmAsmFormatter = new JFrame();
-		frmAsmFormatter.setTitle("Z80 Assembler Formatter    0.0");
+		frmAsmFormatter.setTitle("Z80 Assembler Formatter    1.0");
 		frmAsmFormatter.setBounds(100, 100, 450, 300);
 		frmAsmFormatter.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmAsmFormatter.addWindowListener(new WindowAdapter() {
@@ -490,7 +498,6 @@ public class AsmFormatter {
 		gbc_spSource.gridx = 0;
 		gbc_spSource.gridy = 0;
 		mainPanel.add(spSource, gbc_spSource);
-		// mainPain.setLeftComponent(spSource);
 
 		lblSourceFileName = new JLabel("<No File Selected>");
 		lblSourceFileName.setHorizontalAlignment(SwingConstants.CENTER);
@@ -501,7 +508,6 @@ public class AsmFormatter {
 		txtSource = new JTextArea();
 		txtSource.setFont(new Font("Courier New", Font.PLAIN, 14));
 		spSource.setViewportView(txtSource);
-		// mainPain.setDividerLocation(345);
 
 		JPanel panelStatus = new JPanel();
 		GridBagConstraints gbc_panelStatus = new GridBagConstraints();
@@ -535,19 +541,6 @@ public class AsmFormatter {
 		mnuFileOpen.addActionListener(adapterForFMT);
 		mnuFile.add(mnuFileOpen);
 
-		JSeparator separator_2 = new JSeparator();
-		mnuFile.add(separator_2);
-
-		mnuFilePrintSource = new JMenuItem("Print Source");
-		mnuFilePrintSource.setName(MNU_FILE_PRINT_SOURCE);
-		mnuFilePrintSource.addActionListener(adapterForFMT);
-		mnuFile.add(mnuFilePrintSource);
-
-		mnuFilePrintResult = new JMenuItem("Print Result");
-		mnuFilePrintResult.setName(MNU_FILE_PRINT_RESULT);
-		mnuFilePrintResult.addActionListener(adapterForFMT);
-		mnuFile.add(mnuFilePrintResult);
-
 		JSeparator separator_1 = new JSeparator();
 		mnuFile.add(separator_1);
 
@@ -563,19 +556,18 @@ public class AsmFormatter {
 	private static final String BTN_START = "btnStart";
 	private static final String BTN_LOAD_LAST_FILE = "btnLoadLastFile";
 	private static final String BTN_SAVE_FILE = "btnSaveFile";
-	private static final String NO_FILE = "<No File Selected>";
+//	private static final String NO_FILE = "<No File Selected>";
 	private static final String MNU_FILE_OPEN = "mnuFileOpen";
 	private static final String MNU_FILE_PRINT_SOURCE = "mnuFilePrintSource";
 	private static final String MNU_FILE_PRINT_RESULT = "mnuFilePrintResult";
 	private static final String MNU_FILE_EXIT = "mnuFileExit";
-	private static final String SBAR_SOURCE = "sbarSource";
 
 	private static final String SPINNER_STATEMENT = "spinnerStatement";
 	private static final String SPINNER_ARGUMENT = "spinnerArgument";
 	private static final String SPINNER_COMMENT = "spinnerComment";
 
 	private static final String EMPTY_STRING = "";
-	private static final String SPACE = " ";
+//	private static final String SPACE = " ";
 	private static final String SEMICOLON = ";";
 	private static final String LINE_SEPARATOR = System.lineSeparator();
 	private static final String FILE_SEPARATOR = File.separator;
@@ -585,14 +577,13 @@ public class AsmFormatter {
 	//////////////////////////////////////////////////////////////////////////
 
 	// private static final String LINE_SEPARATOR = System.lineSeparator();
+	private JFrame frmAsmFormatter;
 	private JPanel mainPanel;
 	private JLabel lblSourceFilePath;
 	private JLabel lblSourceFileName;
 	private JButton btnStart;
 	private JTextArea txtSource;
 	private JScrollPane spSource;
-	private JMenuItem mnuFilePrintSource;
-	private JMenuItem mnuFilePrintResult;
 	private JLabel lblStatus;
 	private Component verticalStrut;
 	private JPanel panel;
@@ -603,12 +594,9 @@ public class AsmFormatter {
 	private JButton btnSaveFile;
 	private JPanel panel_2;
 	private JSpinner spinnerArgument;
-
-	// private void reportError(String messsage) {
-	// // String asterisks = "*************";
-	// System.err.print("************* " + messsage + " *************");
-	// }// reportError
-
+	
+///////////////////////////////////////////////////////////////
+	
 	class AdapterForFMT implements ActionListener, ChangeListener {// AdjustmentListener,
 
 		/* ActionListener */
