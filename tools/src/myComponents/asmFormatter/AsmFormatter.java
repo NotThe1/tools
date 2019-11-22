@@ -17,6 +17,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Scanner;
 import java.util.prefs.Preferences;
 
@@ -189,14 +193,33 @@ public class AsmFormatter {
 	}// openFile
 
 	private void doSaveFile() {
-		String backupName = sourceFileFullName + ".BAK";
+		String backupDir = asmSourceFile.getParent() + FILE_SEPARATOR + "BAK";
+		String backupName = backupDir + FILE_SEPARATOR + asmSourceFile.getName();
+
+		if (!Files.exists(Paths.get(backupDir))){
+			try {
+				Files.createDirectory(Paths.get(backupDir));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}//try		
+		}//if
+				
+
 		File backupFile = new File(backupName);
 		if (backupFile.exists()) {
 			boolean statusDelete = backupFile.delete();
 			System.out.printf("[doSaveFile] delete status = %s%n", statusDelete);
 		} // if
-		boolean statusRename = asmSourceFile.renameTo(new File(backupName));
-		System.out.printf("[doSaveFile] delete status = %s%n", statusRename);
+		
+		Path original = asmSourceFile.toPath();
+		Path backup = Paths.get(backupName);
+		try {
+			Files.move(original, backup, StandardCopyOption.ATOMIC_MOVE);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+
 
 		try {
 			asmSourceFile.createNewFile();
