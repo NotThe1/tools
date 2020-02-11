@@ -217,7 +217,7 @@ public class AsmFormatter {
 			Files.move(original, backup, StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException e1) {
 			e1.printStackTrace();
-		}
+		}//try
 		
 
 
