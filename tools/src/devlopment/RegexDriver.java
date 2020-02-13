@@ -2,6 +2,7 @@ package devlopment;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -9,6 +10,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -79,31 +81,31 @@ public class RegexDriver {
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++
 	/* placeholder for trying things out */
-	private void actOnResult() {
-		// private String findComment1(String workingLine){
-		String netLine = (String) cbSourceString.getSelectedItem();
-		if (!netLine.contains(";")) {
-			postLogMessage("NO COMMENTs");
-			return;
-		} // if
-		String comment = null;
-		Pattern patternForComment = Pattern.compile("('[^']*')|(;)");
-		Matcher matcherForComment = patternForComment.matcher(netLine);
-		// int startCommentLoc = 0;
-		int startFindLoc = 0;
-		while (!matcherForComment.hitEnd()) {
-			if (matcherForComment.find(startFindLoc)) {
-				if ((matcherForComment.group(1) == null) && (matcherForComment.group(2) != null)) {
-					comment = netLine.substring(matcherForComment.end(2) - 1);
-					netLine = netLine.substring(0, matcherForComment.end(2) - 1);
-					break; // found the comment
-				} // if this is it
-				startFindLoc = Math.max(matcherForComment.end(1), matcherForComment.end(2));
-			} // if any match
-		} // while
-		postLogMessage("COMMENT: <" + comment + ">");
-		postLogMessage("netLine: <" + netLine + ">");
-	}// actOnResult
+//	private void actOnResult() {
+//		// private String findComment1(String workingLine){
+//		String netLine = (String) cbSourceString.getSelectedItem();
+//		if (!netLine.contains(";")) {
+//			postLogMessage("NO COMMENTs");
+//			return;
+//		} // if
+//		String comment = null;
+//		Pattern patternForComment = Pattern.compile("('[^']*')|(;)");
+//		Matcher matcherForComment = patternForComment.matcher(netLine);
+//		// int startCommentLoc = 0;
+//		int startFindLoc = 0;
+//		while (!matcherForComment.hitEnd()) {
+//			if (matcherForComment.find(startFindLoc)) {
+//				if ((matcherForComment.group(1) == null) && (matcherForComment.group(2) != null)) {
+//					comment = netLine.substring(matcherForComment.end(2) - 1);
+//					netLine = netLine.substring(0, matcherForComment.end(2) - 1);
+//					break; // found the comment
+//				} // if this is it
+//				startFindLoc = Math.max(matcherForComment.end(1), matcherForComment.end(2));
+//			} // if any match
+//		} // while
+//		postLogMessage("COMMENT: <" + comment + ">");
+//		postLogMessage("netLine: <" + netLine + ">");
+//	}// actOnResult
 		// ---------------------------------------------------------
 
 	private void clearResult() {
@@ -258,11 +260,13 @@ public class RegexDriver {
 
 	// ......................................................
 	private void saveLog() {
+		String tempDir = System.getProperty("java.io.tmpdir");
 		try {
-			File logFile = new File("c://tmp//logFile.txt");
+			File logFile = new File(tempDir,"logFile.txt");
 			FileWriter fw = new FileWriter(logFile);
 			fw.write(txtLog.getText());
 			fw.close();
+			btnSaveLog.setToolTipText(logFile.toString());
 		} catch (IOException e) {
 			System.err.printf("unable to save the Log.%n");
 			e.printStackTrace();
@@ -308,9 +312,6 @@ public class RegexDriver {
 		String beforeGroup = originalString.substring(0, matcher.start());
 		String group = matcher.group();
 		String afterGroup = originalString.substring(matcher.end(), originalString.length());
-		// System.out.printf("[showGroup] beforeGroup: %s%n", beforeGroup);
-		// System.out.printf("[showGroup] group: %s%n", group);
-		// System.out.printf("[showGroup] afterGroup: %s%n", afterGroup);
 		try {
 			doc.remove(0, doc.getLength());
 			doc.insertString(doc.getLength(), beforeGroup, attrBlack);
@@ -318,7 +319,7 @@ public class RegexDriver {
 			doc.insertString(doc.getLength(), afterGroup, attrBlack);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
-		}
+		}//try
 
 	}// showGroup
 
@@ -371,15 +372,15 @@ public class RegexDriver {
 			myPrefs.put("sourceString_" + i, (String) sourceStringModel.getElementAt(i));
 		} // for
 
-//		myPrefs.put("RegexCode", (String) cbRegexCode.getSelectedItem());
 		myPrefs = null;
 		System.exit(0);
 	}// appClose
 
 	private void appInit() {
 		Preferences myPrefs = Preferences.userNodeForPackage(RegexDriver.class).node(this.getClass().getSimpleName());
-		//frmRegexDriver.setSize(myPrefs.getInt("Width", 1203), myPrefs.getInt("Height", 724));
-		frmRegexDriver.setSize(myPrefs.getInt("Width", 800), myPrefs.getInt("Height", 700));
+
+		frmRegexDriver.setSize(myPrefs.getInt("Width", 1287),myPrefs.getInt("Height", 477));
+//		frmRegexDriver.setSize(myPrefs.getInt("Width", 1287),myPrefs.getInt("Height", 477));
 
 		
 		frmRegexDriver.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
@@ -417,7 +418,7 @@ public class RegexDriver {
 	 */
 	private void initialize() {
 		frmRegexDriver = new JFrame();
-		//frmRegexDriver.setIconImage(Toolkit.getDefaultToolkit().getImage(RegexDriver.class.getResource("/Regex.jpg")));
+		frmRegexDriver.setIconImage(Toolkit.getDefaultToolkit().getImage(RegexDriver.class.getResource("/Regex.jpg")));
 
 		frmRegexDriver.setTitle("Regex Driver");
 		//frmRegexDriver.setBounds(100, 100, 450, 300);
@@ -430,6 +431,8 @@ public class RegexDriver {
 		frmRegexDriver.getContentPane().setLayout(gridBagLayout);
 
 		splitPane1 = new JSplitPane();
+		splitPane1.setPreferredSize(new Dimension(0, 0));
+		splitPane1.setMinimumSize(new Dimension(0, 0));
 		GridBagConstraints gbc_splitPane1 = new GridBagConstraints();
 		gbc_splitPane1.insets = new Insets(0, 0, 5, 0);
 		gbc_splitPane1.fill = GridBagConstraints.BOTH;
@@ -438,11 +441,13 @@ public class RegexDriver {
 		frmRegexDriver.getContentPane().add(splitPane1, gbc_splitPane1);
 
 		JPanel panelLeft = new JPanel();
+		panelLeft.setPreferredSize(new Dimension(0, 0));
+		panelLeft.setMinimumSize(new Dimension(0, 0));
 		splitPane1.setLeftComponent(panelLeft);
 		GridBagLayout gbl_panelLeft = new GridBagLayout();
-		gbl_panelLeft.columnWidths = new int[] { 0, 0, 0 };
+		gbl_panelLeft.columnWidths = new int[] { 0, 0, 0, 0 };
 		gbl_panelLeft.rowHeights = new int[] { 0, 0, 0, 0, 0, 10, 0, 0, 0, 25, 0, 30, 0 };
-		gbl_panelLeft.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gbl_panelLeft.columnWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		gbl_panelLeft.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		panelLeft.setLayout(gbl_panelLeft);
 
@@ -461,12 +466,12 @@ public class RegexDriver {
 		GridBagConstraints gbc_cbRegexCode = new GridBagConstraints();
 		gbc_cbRegexCode.fill = GridBagConstraints.HORIZONTAL;
 		gbc_cbRegexCode.anchor = GridBagConstraints.NORTH;
-		gbc_cbRegexCode.insets = new Insets(0, 0, 5, 0);
+		gbc_cbRegexCode.insets = new Insets(0, 0, 5, 5);
 		gbc_cbRegexCode.gridx = 1;
 		gbc_cbRegexCode.gridy = 1;
 		panelLeft.add(cbRegexCode, gbc_cbRegexCode);
 
-		JLabel lblSourceString = new JLabel("Source String");
+		JLabel lblSourceString = new JLabel("  Source String");
 		GridBagConstraints gbc_lblSourceString = new GridBagConstraints();
 		gbc_lblSourceString.insets = new Insets(0, 0, 5, 5);
 		gbc_lblSourceString.gridx = 0;
@@ -474,22 +479,31 @@ public class RegexDriver {
 		panelLeft.add(lblSourceString, gbc_lblSourceString);
 
 		cbSourceString = new JComboBox<String>();
+		cbSourceString.setCursor(Cursor.getPredefinedCursor(Cursor.NE_RESIZE_CURSOR));
 		cbSourceString.addItemListener(adapterForRegexDriver);
 		cbSourceString.setName(CB_SOURCE_STRING);
 		cbSourceString.setEditable(true);
 		cbSourceString.setFont(new Font("Courier New", Font.PLAIN, 18));
 		GridBagConstraints gbc_cbSourceString = new GridBagConstraints();
 		gbc_cbSourceString.fill = GridBagConstraints.HORIZONTAL;
-		gbc_cbSourceString.insets = new Insets(0, 0, 5, 0);
+		gbc_cbSourceString.insets = new Insets(0, 0, 5, 5);
 		gbc_cbSourceString.gridx = 1;
 		gbc_cbSourceString.gridy = 3;
 		panelLeft.add(cbSourceString, gbc_cbSourceString);
+		
+		JLabel lblResult = new JLabel("  Result");
+		GridBagConstraints gbc_lblResult = new GridBagConstraints();
+		gbc_lblResult.anchor = GridBagConstraints.WEST;
+		gbc_lblResult.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResult.gridx = 0;
+		gbc_lblResult.gridy = 4;
+		panelLeft.add(lblResult, gbc_lblResult);
 
 		tpResult = new JTextPane();
 		tpResult.setEditable(false);
 		tpResult.setFont(new Font("Courier New", Font.BOLD, 18));
 		GridBagConstraints gbc_tpResult = new GridBagConstraints();
-		gbc_tpResult.insets = new Insets(0, 0, 5, 0);
+		gbc_tpResult.insets = new Insets(0, 0, 5, 5);
 		gbc_tpResult.fill = GridBagConstraints.BOTH;
 		gbc_tpResult.gridx = 1;
 		gbc_tpResult.gridy = 4;
@@ -497,7 +511,7 @@ public class RegexDriver {
 
 		JPanel panel_2 = new JPanel();
 		GridBagConstraints gbc_panel_2 = new GridBagConstraints();
-		gbc_panel_2.insets = new Insets(0, 0, 5, 0);
+		gbc_panel_2.insets = new Insets(0, 0, 5, 5);
 		gbc_panel_2.fill = GridBagConstraints.BOTH;
 		gbc_panel_2.gridx = 1;
 		gbc_panel_2.gridy = 6;
@@ -527,7 +541,7 @@ public class RegexDriver {
 
 		JPanel panel = new JPanel();
 		GridBagConstraints gbc_panel = new GridBagConstraints();
-		gbc_panel.insets = new Insets(0, 0, 5, 0);
+		gbc_panel.insets = new Insets(0, 0, 5, 5);
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 1;
 		gbc_panel.gridy = 7;
@@ -595,7 +609,7 @@ public class RegexDriver {
 
 		JPanel panel_3 = new JPanel();
 		GridBagConstraints gbc_panel_3 = new GridBagConstraints();
-		gbc_panel_3.insets = new Insets(0, 0, 5, 0);
+		gbc_panel_3.insets = new Insets(0, 0, 5, 5);
 		gbc_panel_3.fill = GridBagConstraints.BOTH;
 		gbc_panel_3.gridx = 1;
 		gbc_panel_3.gridy = 10;
@@ -637,53 +651,29 @@ public class RegexDriver {
 		panel_3.add(txtReplacement, gbc_txtReplacement);
 		txtReplacement.setFont(new Font("Courier New", Font.PLAIN, 18));
 		txtReplacement.setColumns(10);
-
-		JPanel panel_1 = new JPanel();
-		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.anchor = GridBagConstraints.NORTHWEST;
-		gbc_panel_1.insets = new Insets(0, 0, 5, 0);
-		gbc_panel_1.gridx = 1;
-		gbc_panel_1.gridy = 12;
-		panelLeft.add(panel_1, gbc_panel_1);
-		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[] { 0, 0, 0, 0 };
-		gbl_panel_1.rowHeights = new int[] { 0, 0, 0, 0 };
-		gbl_panel_1.columnWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		gbl_panel_1.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		panel_1.setLayout(gbl_panel_1);
-
-		JButton btnActOnResult = new JButton("Act On Result");
-		GridBagConstraints gbc_btnActOnResult = new GridBagConstraints();
-		gbc_btnActOnResult.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnActOnResult.insets = new Insets(0, 0, 5, 5);
-		gbc_btnActOnResult.gridx = 0;
-		gbc_btnActOnResult.gridy = 1;
-		panel_1.add(btnActOnResult, gbc_btnActOnResult);
-		btnActOnResult.addActionListener(adapterForRegexDriver);
-		btnActOnResult.setActionCommand("btnActOnResult");
-
-		JButton btnSaveLog = new JButton("Save Log");
-		GridBagConstraints gbc_btnSaveLog = new GridBagConstraints();
-		gbc_btnSaveLog.insets = new Insets(0, 0, 5, 5);
-		gbc_btnSaveLog.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnSaveLog.gridx = 1;
-		gbc_btnSaveLog.gridy = 1;
-		panel_1.add(btnSaveLog, gbc_btnSaveLog);
-		btnSaveLog.setToolTipText("c:/tmp/logFile.txt");
-		btnSaveLog.addActionListener(adapterForRegexDriver);
-		btnSaveLog.setActionCommand("btnSaveLog");
+		
+//				JButton btnActOnResult = new JButton("Act On Result");
+//				GridBagConstraints gbc_btnActOnResult = new GridBagConstraints();
+//				gbc_btnActOnResult.insets = new Insets(0, 0, 5, 5);
+//				gbc_btnActOnResult.gridx = 1;
+//				gbc_btnActOnResult.gridy = 0;
+//				panel_1.add(btnActOnResult, gbc_btnActOnResult);
+//				btnActOnResult.addActionListener(adapterForRegexDriver);
+//				btnActOnResult.setActionCommand("btnActOnResult");
 
 		JPanel panelRight = new JPanel();
+		panelRight.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		splitPane1.setRightComponent(panelRight);
 		GridBagLayout gbl_panelRight = new GridBagLayout();
 		gbl_panelRight.columnWidths = new int[] { 0, 0 };
-		gbl_panelRight.rowHeights = new int[] { 0, 0 };
+		gbl_panelRight.rowHeights = new int[] { 0, 0, 0 };
 		gbl_panelRight.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gbl_panelRight.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
+		gbl_panelRight.rowWeights = new double[] { 1.0, 0.0, Double.MIN_VALUE };
 		panelRight.setLayout(gbl_panelRight);
 
 		JScrollPane scrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 0;
 		gbc_scrollPane.gridy = 0;
@@ -702,6 +692,16 @@ public class RegexDriver {
 		});
 		txtLog.setName("txtLog");
 		scrollPane.setViewportView(txtLog);
+		
+				btnSaveLog = new JButton("Save Log");
+				GridBagConstraints gbc_btnSaveLog = new GridBagConstraints();
+				gbc_btnSaveLog.fill = GridBagConstraints.HORIZONTAL;
+				gbc_btnSaveLog.gridx = 0;
+				gbc_btnSaveLog.gridy = 1;
+				panelRight.add(btnSaveLog, gbc_btnSaveLog);
+				btnSaveLog.setToolTipText("Not yet created");
+				btnSaveLog.addActionListener(adapterForRegexDriver);
+				btnSaveLog.setActionCommand("btnSaveLog");
 		splitPane1.setDividerLocation(150);
 
 		JPanel panelStatus = new JPanel();
@@ -752,9 +752,6 @@ public class RegexDriver {
 			case BTN_SAVE_LOG:
 				saveLog();
 				break;
-			case BTN_ACT_ON_RESULT:
-				actOnResult();
-				break;
 			case BTN_REPLACE_FIRST:
 				doReplace(false);
 				break;
@@ -799,7 +796,6 @@ public class RegexDriver {
 	private static final String BTN_FIND_NEXT = "btnFindNext";
 	private static final String BTN_LOOKING_AT = "btnLookingAt";
 	private static final String BTN_SAVE_LOG = "btnSaveLog";
-	private static final String BTN_ACT_ON_RESULT = "btnActOnResult";
 	private static final String BTN_REPLACE_FIRST = "btnReplaceFirst";
 	private static final String BTN_REPLACE_ALL = "btnReplaceAll";
 
@@ -807,5 +803,6 @@ public class RegexDriver {
 	private JTextPane tpResult;
 	private JLabel lblGroupBoundary;
 	private JButton btnFindNext;
+	private JButton btnSaveLog;
 
 }// class GUItemplate

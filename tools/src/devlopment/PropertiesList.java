@@ -1,7 +1,9 @@
 package devlopment;
 
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -21,6 +23,7 @@ public class PropertiesList extends JList<String> {
 	Properties tipProps;
 
 	public PropertiesList(Properties props) {
+		setFont(new Font("Courier New", Font.BOLD, 16));
 		model = new SortedListModel();
 		setModel(model);
 		ToolTipManager.sharedInstance().registerComponent(this);
@@ -49,15 +52,18 @@ public class PropertiesList extends JList<String> {
 	public static void main(String[] args) {
 		Runnable runner = new Runnable() {
 			public void run() {
-				JFrame frame = new JFrame("Properties List ");
+				JFrame frame = new JFrame("Properties List 1.0");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.setIconImage(Toolkit.getDefaultToolkit().getImage(RegexDriver.class.getResource("/view-media-equalizer.png")));
+//				frame.setIconImage(Toolkit.getDefaultToolkit().getImage(PropertiesList.class.getResource("/view-media-equalizer.png")));
+
 				Properties props = System.getProperties();
 				PropertiesList list = new PropertiesList(props);
 				JScrollPane scrollPane = new JScrollPane(list);
 
 				frame.add(scrollPane);
 
-				frame.setSize(300, 600);
+				frame.setSize(400, 600);
 				frame.setLocationRelativeTo(null);
 				frame.setVisible(true);
 			}// run
