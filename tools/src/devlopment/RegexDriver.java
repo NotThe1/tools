@@ -19,9 +19,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.print.PrinterException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Date;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,13 +40,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.border.BevelBorder;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.JTextComponent;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -347,6 +350,24 @@ public class RegexDriver {
 		removeItem2.addActionListener(adapterForRegexDriver);
 		popupMenu2.add(removeItem2);
 		cbSourceString.setComponentPopupMenu(popupMenu2);
+		
+		JPopupMenu popupLog = new JPopupMenu();
+		addPopup(txtLog, popupLog);
+
+		JMenuItem popupLogClear = new JMenuItem("Clear Log");
+		popupLogClear.setActionCommand(PUM_LOG_CLEAR);
+		popupLogClear.addActionListener(adapterForRegexDriver);
+		popupLog.add(popupLogClear);
+
+		JSeparator separator = new JSeparator();
+		popupLog.add(separator);
+
+		JMenuItem popupLogPrint = new JMenuItem("Print Log");
+		popupLogPrint.setActionCommand(PUM_LOG_PRINT);
+		popupLogPrint.addActionListener(adapterForRegexDriver);
+		popupLog.add(popupLogPrint);
+		
+//		addPopup(txtLog,  popupLog);
 	}// setupPopupMenus
 	
 	private void appClose() {
@@ -405,7 +426,7 @@ public class RegexDriver {
 		cbSourceString.setModel(sourceStringModel);
 
 		setupPopupMenus();
-		txtLog.setText("Double click on this log pane to clear contents.\r\n\r\nRight Click on either Regex Code\r\nor Source String to bring up option \r\nto delete the currently displayed value\r\n");
+		txtLog.setText("Right click on this log pane to print or clear contents.\r\n\r\nRight Click on either Regex Code\r\nor Source String to bring up option \r\nto delete the currently displayed value\r\n");
 	}// appInit
 
 	public RegexDriver() {
@@ -420,7 +441,7 @@ public class RegexDriver {
 		frmRegexDriver = new JFrame();
 		frmRegexDriver.setIconImage(Toolkit.getDefaultToolkit().getImage(RegexDriver.class.getResource("/Regex.jpg")));
 
-		frmRegexDriver.setTitle("Regex Driver");
+		frmRegexDriver.setTitle("Regex Driver  Ver 2.0");
 		//frmRegexDriver.setBounds(100, 100, 450, 300);
 		frmRegexDriver.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -680,16 +701,16 @@ public class RegexDriver {
 		panelRight.add(scrollPane, gbc_scrollPane);
 
 		txtLog = new JTextArea();
-		txtLog.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent me) {
-				if (me.getClickCount() >= 2) {
-					if (me.getComponent().getName() == "txtLog") {
-						((JTextComponent) me.getComponent()).setText("");
-					} // inner if
-				} // outer if
-			}
-		});
+//		txtLog.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseClicked(MouseEvent me) {
+//				if (me.getClickCount() >= 2) {
+//					if (me.getComponent().getName() == "txtLog") {
+//						((JTextComponent) me.getComponent()).setText("");
+//					} // inner if
+//				} // outer if
+//			}
+//		});
 		txtLog.setName("txtLog");
 		scrollPane.setViewportView(txtLog);
 		
@@ -699,7 +720,7 @@ public class RegexDriver {
 				gbc_btnSaveLog.gridx = 0;
 				gbc_btnSaveLog.gridy = 1;
 				panelRight.add(btnSaveLog, gbc_btnSaveLog);
-				btnSaveLog.setToolTipText("Not yet created");
+				btnSaveLog.setToolTipText("Nothing saved yet");
 				btnSaveLog.addActionListener(adapterForRegexDriver);
 				btnSaveLog.setActionCommand("btnSaveLog");
 		splitPane1.setDividerLocation(150);
@@ -729,6 +750,51 @@ public class RegexDriver {
 	private JComboBox<String> cbRegexCode;
 	private JComboBox<String> cbSourceString;
 	private JTextField txtReplacement;
+	
+	/*          POP UP MENU                 */
+	
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent mouseEvent) {
+				if (mouseEvent.isPopupTrigger()) {
+					showMenu(mouseEvent);
+				} // if popup Trigger
+			}// mousePressed
+
+			public void mouseReleased(MouseEvent mouseEvent) {
+				if (mouseEvent.isPopupTrigger()) {
+					showMenu(mouseEvent);
+				} // if
+			}// mouseReleased
+
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}// showMenu
+		});
+	}// addPopup
+	private void doLogClear() {
+			txtLog.setText("");
+	}// doLogClear
+
+	private void doLogPrint() {
+		Font originalFont = txtLog.getFont();
+		try {
+			String header = "RegexDriver Log";
+			txtLog.setFont(originalFont.deriveFont(8.0f));
+			MessageFormat headerMessage = new MessageFormat(header);
+			MessageFormat footerMessage = new MessageFormat(new Date().toString() + "           Page - {0}");
+			txtLog.print(headerMessage, footerMessage);
+			// textPane.setFont(new Font("Courier New", Font.PLAIN, 14));
+			txtLog.setFont(originalFont);
+		} catch (PrinterException e) {
+			txtLog.setFont(originalFont);
+			postLogMessage("java.awt.print.PrinterAbortException");
+			System.err.println("java.awt.print.PrinterAbortException");
+			e.printStackTrace();
+		} // try
+	}// doLogPrint
+	/*          POP UP MENU                 */
+
 
 	public class AdapterForRegexDriver implements ActionListener, ItemListener {
 
@@ -763,6 +829,14 @@ public class RegexDriver {
 			case MNU_POP_REMOVE_REGEX:
 				doRemoveFromList(actionEvent);
 				break;
+				
+			case PUM_LOG_PRINT:
+				doLogPrint();
+				break;
+			case PUM_LOG_CLEAR:
+				doLogClear();
+				break;
+
 			default:
 				System.err.printf("Unknown Action Command %s.%n", actionCommand);
 				break;
@@ -798,6 +872,10 @@ public class RegexDriver {
 	private static final String BTN_SAVE_LOG = "btnSaveLog";
 	private static final String BTN_REPLACE_FIRST = "btnReplaceFirst";
 	private static final String BTN_REPLACE_ALL = "btnReplaceAll";
+	
+	private static final String PUM_LOG_PRINT = "popupLogPrint";
+	private static final String PUM_LOG_CLEAR = "popupLogClear";
+
 
 	// private static final String EMPTY_STRING = "";
 	private JTextPane tpResult;
