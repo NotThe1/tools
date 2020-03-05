@@ -54,8 +54,8 @@ public class PropertiesList extends JList<String> {
 			public void run() {
 				JFrame frame = new JFrame("Properties List 1.0");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frame.setIconImage(Toolkit.getDefaultToolkit().getImage(RegexDriver.class.getResource("/view-media-equalizer.png")));
-//				frame.setIconImage(Toolkit.getDefaultToolkit().getImage(PropertiesList.class.getResource("/view-media-equalizer.png")));
+//				frame.setIconImage(Toolkit.getDefaultToolkit().getImage(RegexDriver.class.getResource("/view-media-equalizer.png")));
+				frame.setIconImage(Toolkit.getDefaultToolkit().getImage(PropertiesList.class.getResource("/view-media-equalizer.png")));
 
 				Properties props = System.getProperties();
 				PropertiesList list = new PropertiesList(props);
