@@ -1,4 +1,4 @@
-package myComponents.asmFormatter;
+package myComponents;
 
 import java.awt.Color;
 import java.awt.Component;
