@@ -35,10 +35,6 @@ public class FontChooser extends JDialog implements ListSelectionListener, Actio
 
 	private static final long serialVersionUID = 1L;
 
-//	private final static Integer DEFAULT_SIZE = 13;
-//	private final static String DEFAULT_STYLE = "Plain";
-//	private final static String DEFAULT_FAMILY = "Tahoma";
-
 	private final static String STYLE_PLAIN = "Plain";
 	private final static String STYLE_BOLD = "Bold";
 	private final static String STYLE_ITALIC = "Italic";
@@ -67,7 +63,7 @@ public class FontChooser extends JDialog implements ListSelectionListener, Actio
 		dispose();
 	}// doBtnCancel
 	
-	public static int getStyleFromText(String textStyle){
+	public static Integer getStyleFromText(String textStyle){
 		int styleFromTextDisplay = Font.PLAIN;
 		switch (textStyle) {
 		case STYLE_PLAIN:
@@ -91,9 +87,9 @@ public class FontChooser extends JDialog implements ListSelectionListener, Actio
 		textFamily.setText((String) listFamily.getSelectedValue());
 		textStyle.setText((String) listStyle.getSelectedValue());
 		textSize.setText(Integer.toString(listSize.getSelectedValue()));
-		int style = getStyleFromText(textStyle.getText());
+		Integer style = getStyleFromText(textStyle.getText());
 
-		selectedFont = new Font(textFamily.getText(), style, Integer.valueOf(textSize.getText()));
+		selectedFont = new Font(textFamily.getText(), style, Integer.parseInt(textSize.getText()));
 		lblSelectedFont.setFont(selectedFont);
 
 		String display = String.format("%s %s %s", textFamily.getText(), textStyle.getText(), textSize.getText());
@@ -133,15 +129,10 @@ public class FontChooser extends JDialog implements ListSelectionListener, Actio
 		doSelection();
 	}// appInit
 
-	// private void appClose() {
-	//
-	// }// appClose
 
 //	public void close() {
 //
 //	}// close
-
-
 
 	public FontChooser(Window w,String fontFamily, String fontStyle, Integer fontSize) {
 		super(w,"Font Chooser",Dialog.DEFAULT_MODALITY_TYPE);
