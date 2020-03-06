@@ -5,7 +5,8 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.prefs.Preferences;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -14,7 +15,8 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 
-import myComponents.AppLogger;
+import appLogger.AppLogger;
+
 
 public class UniversalWindowTest {
 	
@@ -45,11 +47,12 @@ public class UniversalWindowTest {
 	 * Create the application.
 	 */
 	
-	private Preferences getPreferences() {
-		return Preferences.userNodeForPackage(UniversalWindowTest.class).node(this.getClass().getSimpleName());
-	}//getPreferences
+//	private Preferences getPreferences() {
+//		return Preferences.userNodeForPackage(UniversalWindowTest.class).node(this.getClass().getSimpleName());
+//	}//getPreferences
+	
 	private void appClose() {
-//		Preferences myPrefs =  getPreferences;
+//		Preferences myPrefs =  getPreferences();
 //		Dimension dim = frame.getSize();
 //		myPrefs.putInt("Height", dim.height);
 //		myPrefs.putInt("Width", dim.width);
@@ -61,14 +64,14 @@ public class UniversalWindowTest {
 	}//appClose
 
 	private void appInit() {
-//		Preferences myPrefs =  getPreferences;
+		frame.setBounds(100, 100, 736, 488);
+
+//		Preferences myPrefs =  getPreferences();
 //		frame.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
 //		frame.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
 //		splitPane.setDividerLocation(myPrefs.getInt("Divider", 250));
 //		myPrefs = null;
 		
-
-
 		log.setDoc(txtLog.getStyledDocument());
 		log.addTimeStamp("Starting....");
 
@@ -83,6 +86,12 @@ public class UniversalWindowTest {
 	 */
 	private void initialize() {
 		frame = new JFrame();
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				appClose();
+			}//windowClosing
+		});
 		frame.setBounds(100, 100, 736, 488);
 		frame.setTitle(title);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

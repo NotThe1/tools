@@ -45,7 +45,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 
-import myComponents.AppLogger;
+import appLogger.AppLogger;
 import myComponents.hdnComponents.HDNumberBox;
 import myComponents.hdnComponents.HDNumberValueChangeEvent;
 import myComponents.hdnComponents.HDNumberValueChangeListener;

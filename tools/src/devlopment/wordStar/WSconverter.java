@@ -39,7 +39,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
 
-import myComponents.AppLogger;
+import appLogger.AppLogger;
 
 public class WSconverter {
 
@@ -48,9 +48,9 @@ public class WSconverter {
 	private String version = "A.0";
 	private ApplicationAdapter applicationAdapter = new ApplicationAdapter();
 	private String hostDirectory;
-	private AppLogger log = AppLogger.getInstance();
 	private String sourceFileName = NO_SOURCE_FILE;
 	private StyledDocument docResult;
+	AppLogger log = AppLogger.getInstance();
 
 	/**
 	 * Launch the application.
@@ -167,7 +167,7 @@ public class WSconverter {
 		processSourceFile(Paths.get(chooser.getSelectedFile().getAbsolutePath()));
 	}// doFileOpen
 
-	private void doFileSave() {
+//	private void doFileSave() {
 
 		// String fileType = btn8080Z80.getText().equals("Z80") ? ".Z80" : ".asm";
 		// String fileName = binaryFileName.replaceAll("(?i)\\.COM", fileType);
@@ -196,7 +196,7 @@ public class WSconverter {
 		// log.errorf("error message : %s%n%n", e.getMessage());
 		// } // try
 
-	}// doFileSave
+//	}// doFileSave
 
 	private void appClose() {
 		Preferences myPrefs = Preferences.userNodeForPackage(WSconverter.class).node(this.getClass().getSimpleName());
@@ -456,6 +456,7 @@ public class WSconverter {
 				break;
 			default:
 				message = actionCommand;
+				log.error(message);
 			}// switch
 
 		}// actionPerformed
