@@ -22,6 +22,8 @@ public class UniversalWindowTest {
 
 	private JFrame frame;
 	private JTextPane txtLog;
+	private String title = "UniversalWindowTest     0.0";
+	private JSplitPane splitPane;
 
 	/**
 	 * Launch the application.
@@ -47,25 +49,25 @@ public class UniversalWindowTest {
 		return Preferences.userNodeForPackage(UniversalWindowTest.class).node(this.getClass().getSimpleName());
 	}//getPreferences
 	private void appClose() {
-//		Preferences myPrefs =  Preferences.userNodeForPackage(HandTesting.class).node(this.getClass().getSimpleName());
-//		Dimension dim = frmTemplate.getSize();
+//		Preferences myPrefs =  getPreferences;
+//		Dimension dim = frame.getSize();
 //		myPrefs.putInt("Height", dim.height);
 //		myPrefs.putInt("Width", dim.width);
-//		Point point = frmTemplate.getLocation();
+//		Point point = frame.getLocation();
 //		myPrefs.putInt("LocX", point.x);
 //		myPrefs.putInt("LocY", point.y);
-//		myPrefs.putInt("Divider", splitPane1.getDividerLocation());
+//		myPrefs.putInt("Divider", splitPane.getDividerLocation());
 //		myPrefs = null;
 	}//appClose
 
 	private void appInit() {
-//		Preferences myPrefs =  Preferences.userNodeForPackage(HandTesting.class).node(this.getClass().getSimpleName());
-//		frmTemplate.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
-//		frmTemplate.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
-//		splitPane1.setDividerLocation(myPrefs.getInt("Divider", 250));
+//		Preferences myPrefs =  getPreferences;
+//		frame.setSize(myPrefs.getInt("Width", 761), myPrefs.getInt("Height", 693));
+//		frame.setLocation(myPrefs.getInt("LocX", 100), myPrefs.getInt("LocY", 100));
+//		splitPane.setDividerLocation(myPrefs.getInt("Divider", 250));
 //		myPrefs = null;
 		
-//		txtLog.setText(EMPTY_STRING);
+
 
 		log.setDoc(txtLog.getStyledDocument());
 		log.addTimeStamp("Starting....");
@@ -82,6 +84,7 @@ public class UniversalWindowTest {
 	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 736, 488);
+		frame.setTitle(title);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0};
@@ -90,7 +93,7 @@ public class UniversalWindowTest {
 		gridBagLayout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
 		
-		JSplitPane splitPane = new JSplitPane();
+		splitPane = new JSplitPane();
 		GridBagConstraints gbc_splitPane = new GridBagConstraints();
 		gbc_splitPane.fill = GridBagConstraints.BOTH;
 		gbc_splitPane.gridx = 0;
