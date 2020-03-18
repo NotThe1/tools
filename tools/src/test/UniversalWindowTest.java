@@ -36,6 +36,7 @@ public class UniversalWindowTest {
 	private JPanel toolBar;
 	private Component verticalStrut;
 	private Component verticalStrut_1;
+	private JPanel panelLeft;
 
 	/**
 	 * Launch the application.
@@ -153,7 +154,18 @@ public class UniversalWindowTest {
 		scrollPane.setColumnHeaderView(lblNewLabel);
 		
 		txtLog = new JTextPane();
+		txtLog.setFont(new Font("Courier New", Font.PLAIN, 14));
 		scrollPane.setViewportView(txtLog);
+		
+		panelLeft = new JPanel();
+		panelLeft.setPreferredSize(new Dimension(100, 10));
+		splitPane.setLeftComponent(panelLeft);
+		GridBagLayout gbl_panelLeft = new GridBagLayout();
+		gbl_panelLeft.columnWidths = new int[]{0};
+		gbl_panelLeft.rowHeights = new int[]{0};
+		gbl_panelLeft.columnWeights = new double[]{Double.MIN_VALUE};
+		gbl_panelLeft.rowWeights = new double[]{Double.MIN_VALUE};
+		panelLeft.setLayout(gbl_panelLeft);
 		
 		panelStatus = new JPanel();
 		panelStatus.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
